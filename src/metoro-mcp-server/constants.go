@@ -51,15 +51,15 @@ type GetLogsResponse struct {
 
 type GetTracesRequest struct {
 	ServiceNames   []string            `json:"serviceNames"`
-	StartTime     int64               `json:"startTime"`
-	EndTime       int64               `json:"endTime"`
-	Filters       map[string][]string `json:"filters"`
+	StartTime      int64               `json:"startTime"`
+	EndTime        int64               `json:"endTime"`
+	Filters        map[string][]string `json:"filters"`
 	ExcludeFilters map[string][]string `json:"excludeFilters"`
-	PrevEndTime   *int64              `json:"prevEndTime"`
-	Regexes       []string            `json:"regexes"`
-	ExcludeRegexes []string           `json:"excludeRegexes"`
-	Ascending     bool                `json:"ascending"`
-	Environments  []string            `json:"environments"`
+	PrevEndTime    *int64              `json:"prevEndTime"`
+	Regexes        []string            `json:"regexes"`
+	ExcludeRegexes []string            `json:"excludeRegexes"`
+	Ascending      bool                `json:"ascending"`
+	Environments   []string            `json:"environments"`
 }
 
 type GetMetricRequest struct {
@@ -88,4 +88,20 @@ type GetMetricRequest struct {
 	LimitResults bool `json:"limitResults"`
 	// BucketSize is the size of each datapoint bucket in seconds
 	BucketSize int64 `json:"bucketSize"`
+}
+
+type GetProfileRequest struct {
+	// Required: ServiceName to get profiling for
+	ServiceName string `json:"serviceName"`
+
+	// Optional: ContainerNames to get profiling for
+	ContainerNames []string `json:"containerNames"`
+
+	// Required: Timestamp to get profiling after this time
+	// Seconds since epoch
+	StartTime int64 `json:"startTime"`
+
+	// Required: Timestamp to get profiling this time
+	// Seconds since epoch
+	EndTime int64 `json:"endTime"`
 }

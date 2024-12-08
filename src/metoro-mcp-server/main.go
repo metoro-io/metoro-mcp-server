@@ -14,6 +14,7 @@ var handlers = map[string]server.ToolHandlerFunc{
 	"get_logs":         getLogsHandler,
 	"get_traces":       getTracesHandler,
 	"get_metric":       getMetricHandler,
+	"get_profiles":     getProfilesHandler,
 }
 
 var tools = []mcp.Tool{
@@ -104,6 +105,15 @@ var tools = []mcp.Tool{
 		),
 		mcp.WithNumber("bucketSize",
 			mcp.Description("Size of each datapoint bucket in seconds"),
+		),
+	),
+	mcp.NewTool("get_profiles",
+		mcp.WithDescription("Get profiling data from services running in your Kubernetes cluster which will help you understand where your service is spending time"),
+		mcp.WithString("serviceName",
+			mcp.Description("The name of the service to get profiles for"),
+		),
+		mcp.WithString("containerNames",
+			mcp.Description("JSON array of container names to get profiles for"),
 		),
 	),
 }
