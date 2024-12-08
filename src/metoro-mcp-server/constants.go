@@ -48,3 +48,16 @@ type GetLogsResponse struct {
 	// The logs that match the filters
 	Logs []Log `json:"logs"`
 }
+
+type GetTracesRequest struct {
+	ServiceNames   []string            `json:"serviceNames"`
+	StartTime     int64               `json:"startTime"`
+	EndTime       int64               `json:"endTime"`
+	Filters       map[string][]string `json:"filters"`
+	ExcludeFilters map[string][]string `json:"excludeFilters"`
+	PrevEndTime   *int64              `json:"prevEndTime"`
+	Regexes       []string            `json:"regexes"`
+	ExcludeRegexes []string           `json:"excludeRegexes"`
+	Ascending     bool                `json:"ascending"`
+	Environments  []string            `json:"environments"`
+}
