@@ -61,3 +61,31 @@ type GetTracesRequest struct {
 	Ascending     bool                `json:"ascending"`
 	Environments  []string            `json:"environments"`
 }
+
+type GetMetricRequest struct {
+	// MetricName is the name of the metric to get
+	MetricName string `json:"metricName"`
+	// Required: Start time of when to get the logs in seconds since epoch
+	StartTime int64 `json:"startTime"`
+	// Required: End time of when to get the logs in seconds since epoch
+	EndTime int64 `json:"endTime"`
+	// The filters to apply to the logs, so for example, if you want to get logs for a specific service
+	// you can pass in a filter like {"service_name": ["microservice_a"]}
+	Filters map[string][]string `json:"filters"`
+	// The filters to exclude from the logs, so for example, if you want to exclude logs for a specific service
+	// you can pass in a filter like {"service_name": ["microservice_a"]}
+	ExcludeFilters map[string][]string `json:"excludeFilters"`
+	// Splits is a list of attributes to split the metrics by, for example, if you want to split the metrics by service
+	// you can pass in a list like ["service_name"]
+	Splits []string `json:"splits"`
+	// Aggregation is the operation to apply to the metrics, for example, if you want to sum the metrics you can pass in "sum"
+	Aggregation Aggregation `json:"aggregation"`
+	// IsRate is a flag to indicate if the metric is a rate metric
+	IsRate bool `json:"isRate"`
+	// Functions is the list of functions to apply to the metric, in the same order that they appear in this array!!
+	Functions []MetricFunction `json:"functions"`
+	// LimitResults is a flag to indicate if the results should be limited.
+	LimitResults bool `json:"limitResults"`
+	// BucketSize is the size of each datapoint bucket in seconds
+	BucketSize int64 `json:"bucketSize"`
+}
