@@ -7,6 +7,47 @@ import (
 	"os"
 )
 
+var handlers = map[string]server.ToolHandlerFunc{
+	"get_environments": getEnvironmentsHandler,
+	"get_services":     getServicesHandler,
+	"get_namespaces":   getNamespacesHandler,
+	"get_logs":         getLogsHandler,
+}
+
+var tools = []mcp.Tool{
+	mcp.NewTool("get_environments",
+		mcp.WithDescription("Get Kubernetes environments/clusters, monitored by Metoro"),
+	),
+	mcp.NewTool("get_services",
+		mcp.WithDescription("Get services running in your Kubernetes cluster, monitored by Metoro"),
+	),
+	mcp.NewTool("get_namespaces",
+		mcp.WithDescription("Get namespaces in your Kubernetes cluster, monitored by Metoro"),
+	),
+	mcp.NewTool("get_logs",
+		mcp.WithDescription("Get logs from all/any services/hosts/pods running in your Kubernetes cluster in the last 5 minutes, monitored by Metoro"),
+		// TODO: Fix the issue with 5 minutes hardcoded
+		mcp.WithString("filters",
+			mcp.Description("The filters to apply to the logs. It is a stringified map[string]string[], e.g., '{\"service.name\": [\"/k8s/namespaceX/serviceX\"]}' should return logs for serviceX in namespaceX"),
+		),
+		mcp.WithString("excludeFilters",
+			mcp.Description("The filters that should be excluded from the logs. It is a stringified map[string]string[] e.g., '{\"service.name\": [\"/k8s/namespaceX/serviceX\"]}' should return all logs except for serviceX in namespaceX"),
+		),
+		mcp.WithString("regexes",
+			mcp.Description("JSON array of regexes as a string to filter logs based on a regex inclusively"),
+		),
+		mcp.WithString("excludeRegexes",
+			mcp.Description("JSON array of regexes as a string to filter logs based on a regex exclusively"),
+		),
+		mcp.WithBoolean("ascending",
+			mcp.Description("Whether to return logs in ascending order or not"),
+		),
+		mcp.WithString("environments",
+			mcp.Description("JSON array of cluster/environments as a string. If empty, all clusters will be included"),
+		),
+	),
+}
+
 func main() {
 	// Check if the appropriate environment variables are set
 	if err := checkEnvVars(); err != nil {
@@ -19,44 +60,10 @@ func main() {
 		server.WithToolCapabilities(true),
 	)
 
-	metoroGetEnvironments := mcp.NewTool("get_environments",
-		mcp.WithDescription("Get Kubernetes environments/clusters, monitored by Metoro"))
-	s.AddTool(metoroGetEnvironments, getEnvironmentsHandler)
-
-	metoroServices := mcp.NewTool("get_services",
-		mcp.WithDescription("Get services running in your Kubernetes cluster, monitored by Metoro"))
-	s.AddTool(metoroServices, getServicesHandler)
-
-	metoroNamespaces := mcp.NewTool("get_namespaces",
-		mcp.WithDescription("Get namespaces in your Kubernetes cluster, monitored by Metoro"))
-	s.AddTool(metoroNamespaces, getNamespacesHandler)
-
-	metoroGetLogs := mcp.NewTool("get_logs",
-		mcp.WithDescription("Get logs from all/any services/hosts/pods running in your Kubernetes cluster in the last 5 minutes, monitored by Metoro"),
-		//mcp.WithNumber("startTime",
-		//	mcp.Required(),
-		//	mcp.Min(1),
-		//	mcp.Description("Start time of when to get the logs in seconds since epoch")),
-		//mcp.WithNumber("endTime",
-		//	mcp.Required(),
-		//	mcp.Min(1),
-		//	mcp.Description("End time of when to get the logs in seconds since epoch")),
-		mcp.WithString("filters",
-			mcp.Description("The filters to apply to the logs. It is a stringified map[string]string[], e.g., '{\"service.name\": [\"/k8s/namespaceX/serviceX\"]}' should return logs for serviceX in namespaceX")),
-		mcp.WithString("excludeFilters",
-			mcp.Description("The filters that should be excluded from the logs. It is a stringified map[string]string[] e.g., '{\"service.name\": [\"/k8s/namespaceX/serviceX\"]}' should return all logs except for serviceX in namespaceX")),
-		//mcp.WithNumber("prevEndTime",
-		//	mcp.Description("Previous page endTime in nanoseconds for pagination")),
-		mcp.WithString("regexes",
-			mcp.Description("JSON array of regexes as a string to filter logs based on a regex inclusively")),
-		mcp.WithString("excludeRegexes",
-			mcp.Description("JSON array of regexes as a string to filter logs based on a regex exclusively")),
-		mcp.WithBoolean("ascending",
-			mcp.Description("Whether to return logs in ascending order or not")),
-		mcp.WithString("environments",
-			mcp.Description("JSON array of cluster/environments as a string. If empty, all clusters will be included")),
-	)
-	s.AddTool(metoroGetLogs, getLogsHandler)
+	// Register all tools
+	for _, tool := range tools {
+		s.AddTool(tool, handlers[tool.Name])
+	}
 
 	// Start the stdio server
 	if err := server.ServeStdio(s); err != nil {
