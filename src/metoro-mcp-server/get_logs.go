@@ -5,18 +5,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/mark3labs/mcp-go/mcp"
+	"time"
 )
 
 func getLogsHandler(arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+	now := time.Now()
+	fiveMinsAgo := now.Add(-5 * time.Minute)
 	request := GetLogsRequest{
-		StartTime: arguments["startTime"].(int64),
-		EndTime:   arguments["endTime"].(int64),
+		StartTime: fiveMinsAgo.Unix(),
+		EndTime:   now.Unix(),
 	}
 
-	if prevEndTime, ok := arguments["prevEndTime"]; ok && prevEndTime != nil {
-		val := prevEndTime.(int64)
-		request.PrevEndTime = &val
-	}
+	//if prevEndTime, ok := arguments["prevEndTime"]; ok && prevEndTime != nil {
+	//	val := prevEndTime.(int64)
+	//	request.PrevEndTime = &val
+	//}
 
 	if filtersStr, ok := arguments["filters"].(string); ok && filtersStr != "" {
 		var filters map[string][]string
