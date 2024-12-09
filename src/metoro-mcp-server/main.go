@@ -17,6 +17,7 @@ var handlers = map[string]server.ToolHandlerFunc{
 	"get_profiles":         getProfilesHandler,
 	"get_metricAttributes": getMetricAttributesHandler,
 	"get_metric_names":     getMetricNamesHandler,
+	"get_metric_metadata":  getMetricMetadata,
 }
 
 var tools = []mcp.Tool{
@@ -131,12 +132,16 @@ var tools = []mcp.Tool{
 		),
 	),
 	mcp.NewTool("get_metric_names",
-		mcp.WithDescription("Get available metric names that are available to query"),
-		//mcp.WithString("metricFuzzyMatch",
-		//	mcp.Description("Fuzzy match string to filter metric names, if empty all metric names are returned"),
-		//),
+		mcp.WithDescription("Get all available metric names"),
 		mcp.WithString("environments",
 			mcp.Description("JSON array of environments to filter by. If empty, all environments are included"),
+		),
+	),
+	mcp.NewTool("get_metric_metadata",
+		mcp.WithDescription("Get detailed metadata about a specific metric including its type, unit, and description"),
+		mcp.WithString("name",
+			mcp.Description("The name of the metric to get metadata for"),
+			mcp.Required(),
 		),
 	),
 }
