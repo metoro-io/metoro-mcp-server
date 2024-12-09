@@ -50,5 +50,5 @@ func getMetricNamesMetoroCall(request FuzzyMetricsRequest) ([]byte, error) {
 		return nil, err
 	}
 
-	return MakeMetoroAPIRequest("POST", "/fuzzyMetricsNames", bytes.NewBuffer(jsonData))
+	return MakeMetoroAPIRequest("POST", "fuzzyMetricsNames", bytes.NewBuffer(jsonData))
 }
