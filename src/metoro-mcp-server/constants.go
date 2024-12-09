@@ -105,3 +105,47 @@ type GetProfileRequest struct {
 	// Seconds since epoch
 	EndTime int64 `json:"endTime"`
 }
+type GetTraceMetricRequest struct {
+	// Required: Start time of when to get the logs in seconds since epoch
+	StartTime int64 `json:"startTime"`
+	// Required: End time of when to get the logs in seconds since epoch
+	EndTime int64 `json:"endTime"`
+
+	// Optional: The name of the service to get the trace metrics for
+	// Acts as an additional filter
+	ServiceNames []string `json:"serviceNames"`
+
+	// The filters to apply to the logs, so for example, if you want to get logs for a specific service
+	//you can pass in a filter like {"service_name": ["microservice_a"]}
+	Filters map[string][]string `json:"filters"`
+
+	// The exclude filters to apply to the logs, so for example, if you want to exclude logs for a specific service
+	//you can pass in a filter like {"service_name": ["microservice_a"]}
+	ExcludeFilters map[string][]string `json:"excludeFilters"`
+
+	// Regexes are used to filter traces based on a regex inclusively
+	Regexes []string `json:"regexes"`
+	// ExcludeRegexes are used to filter traces based on a regex exclusively
+	ExcludeRegexes []string `json:"excludeRegexes"`
+
+	// Splts is a list of attributes to split the metrics by, for example, if you want to split the metrics by service
+	// you can pass in a list like ["service_name"]
+	Splits []string `json:"splits"`
+
+	// Functions is the array of function to apply to the trace metrics,
+	//for example, if you want to get the monotonic difference between count of traces each minute.
+	// Functions are applied in the same order that they appear in this array
+	Functions []MetricFunction `json:"functions"`
+
+	// Aggregate to apply to trace metrics, for example, if you want to sum the metrics you can pass in "sum"
+	Aggregate Aggregation `json:"aggregate"`
+
+	// Environments is a list of environments to filter the traces by. If empty, all environments will be included
+	Environments []string `json:"environments"`
+
+	// LimitResults is a flag to indicate if the results should be limited.
+	LimitResults bool `json:"limitResults"`
+
+	// BucketSize is the size of each datapoint bucket in seconds
+	BucketSize int64 `json:"bucketSize"`
+}
