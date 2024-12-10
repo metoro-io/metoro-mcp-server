@@ -17,10 +17,14 @@ var handlers = map[string]server.ToolHandlerFunc{
 	"get_trace_metric":     getTraceMetricHandler,     // tool
 	"get_trace_attributes": getTraceAttributesHandler, // resource
 	"get_trace_attribute_values_for_individual_attribute": getTraceAttributeValuesForIndividualAttributeHandler, // tool
-	"get_profiles":         getProfilesHandler,         // tool
-	"get_metricAttributes": getMetricAttributesHandler, //resource
-	"get_metric_names":     getMetricNamesHandler,      // resource
-	"get_metric_metadata":  getMetricMetadata,          // resource
+	"get_profiles":              getProfilesHandler,            // tool
+	"get_metricAttributes":      getMetricAttributesHandler,    //resource
+	"get_metric_names":          getMetricNamesHandler,         // resource
+	"get_metric_metadata":       getMetricMetadata,             // resource
+	"get_k8s_events":            getK8sEventsHandler,           // tool
+	"get_k8s_events_attributes": getK8sEventsAttributesHandler, // resource
+	"get_k8s_event_attribute_values_for_individual_attribute": getK8sEventAttributeValuesForIndividualAttributeHandler, // tool
+	"get_k8s_events_volume":                                   getK8sEventsVolumeHandler,                               // tool
 }
 
 var tools = []mcp.Tool{
@@ -187,6 +191,79 @@ var tools = []mcp.Tool{
 		),
 		mcp.WithString("containerNames",
 			mcp.Description("JSON array of container names to get profiles for"),
+		),
+	),
+	mcp.NewTool("get_k8s_events",
+		mcp.WithDescription("Get Kubernetes events from your clusters with filtering options"),
+		mcp.WithString("filters",
+			mcp.Description("The filters to apply to the k8s events. It is a stringified map[string]string[], e.g., '{\"service.name\": [\"/k8s/namespaceX/serviceX\"]}' should return k8s events for serviceX in namespaceX"),
+		),
+		mcp.WithString("excludeFilters",
+			mcp.Description("The filters that should be excluded from the k8s events. It is a stringified map[string]string[] e.g., '{\"service.name\": [\"/k8s/namespaceX/serviceX\"]}' should return all k8s events except for serviceX in namespaceX"),
+		),
+		mcp.WithString("regexes",
+			mcp.Description("JSON array of regexes as a string to filter k8s events based on a regex inclusively"),
+		),
+		mcp.WithString("excludeRegexes",
+			mcp.Description("JSON array of regexes as a string to filter k8s events based on a regex exclusively"),
+		),
+		mcp.WithBoolean("ascending",
+			mcp.Description("Whether to return k8s events in ascending order or not"),
+		),
+		mcp.WithNumber("prevEndTime",
+			mcp.Description("Previous page endTime in nanoseconds, used for pagination if there are more k8s events than the page size"),
+		),
+		mcp.WithString("environments",
+			mcp.Description("JSON array of environments to filter k8s events by"),
+		),
+	),
+	mcp.NewTool("get_k8s_events_attributes",
+		mcp.WithDescription("Get all available Kubernetes event attributes that can be used for filtering or grouping events"),
+	),
+	mcp.NewTool("get_k8s_event_attribute_values_for_individual_attribute",
+		mcp.WithDescription("Get all possible values for a specific Kubernetes event attribute with optional filtering"),
+		mcp.WithString("attribute",
+			mcp.Description("The attribute to get values for"),
+			mcp.Required(),
+		),
+		mcp.WithString("filters",
+			mcp.Description("The filters to apply to the k8s events. It is a stringified map[string]string[], e.g., '{\"service.name\": [\"/k8s/namespaceX/serviceX\"]}' should return k8s events for serviceX in namespaceX"),
+		),
+		mcp.WithString("excludeFilters",
+			mcp.Description("The filters that should be excluded from the k8s events. It is a stringified map[string]string[] e.g., '{\"service.name\": [\"/k8s/namespaceX/serviceX\"]}' should return all k8s events except for serviceX in namespaceX"),
+		),
+		mcp.WithString("regexes",
+			mcp.Description("JSON array of regexes as a string to filter k8s events based on a regex inclusively"),
+		),
+		mcp.WithString("excludeRegexes",
+			mcp.Description("JSON array of regexes as a string to filter k8s events based on a regex exclusively"),
+		),
+		mcp.WithBoolean("ascending",
+			mcp.Description("Whether to return k8s events in ascending order or not"),
+		),
+		mcp.WithNumber("prevEndTime",
+			mcp.Description("Previous page endTime in nanoseconds, used for pagination if there are more k8s events than the page size"),
+		),
+		mcp.WithString("environments",
+			mcp.Description("JSON array of environments to filter k8s events by"),
+		),
+	),
+	mcp.NewTool("get_k8s_events_volume",
+		mcp.WithDescription("Get the volume of Kubernetes events from your clusters"),
+		mcp.WithString("filters",
+			mcp.Description("The filters to apply to the k8s events. It is a stringified map[string]string[], e.g., '{\"service.name\": [\"/k8s/namespaceX/serviceX\"]}' should return k8s events for serviceX in namespaceX"),
+		),
+		mcp.WithString("excludeFilters",
+			mcp.Description("The filters that should be excluded from the k8s events. It is a stringified map[string]string[] e.g., '{\"service.name\": [\"/k8s/namespaceX/serviceX\"]}' should return all k8s events except for serviceX in namespaceX"),
+		),
+		mcp.WithString("regexes",
+			mcp.Description("JSON array of regexes as a string to filter k8s events messages based on a regex inclusively"),
+		),
+		mcp.WithString("excludeRegexes",
+			mcp.Description("JSON array of regexes as a string to filter k8s events messages based on a regex exclusively"),
+		),
+		mcp.WithString("environments",
+			mcp.Description("JSON array of environments to filter k8s events by"),
 		),
 	),
 	mcp.NewTool("get_metricAttributes",

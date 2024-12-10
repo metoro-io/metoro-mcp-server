@@ -130,3 +130,64 @@ type GetTraceMetricRequest struct {
 	// BucketSize is the size of each datapoint bucket in seconds
 	BucketSize int64 `json:"bucketSize"`
 }
+
+type GetK8sEventsRequest struct {
+	// Required: Start time of when to get the k8s events in seconds since epoch
+	StartTime int64 `json:"startTime"`
+	// Required: End time of when to get the k8s events in seconds since epoch
+	EndTime int64 `json:"endTime"`
+	// The filters to apply to the k8s events, so for example, if you want to get k8s events for a specific service
+	// you can pass in a filter like {"service_name": ["microservice_a"]}
+	Filters map[string][]string `json:"filters"`
+	// ExcludeFilters are filters that should be excluded from the k8s events
+	// For example, if you want to get k8s events for all services except microservice_a you can pass in
+	// {"service_name": ["microservice_a"]}
+	ExcludeFilters map[string][]string `json:"excludeFilters"`
+	// Previous page endTime in nanoseconds, used to get the next page of k8s events if there are more k8s events than the page size
+	// If omitted, the first page of k8s events will be returned
+	PrevEndTime *int64 `json:"prevEndTime"`
+	// Regexes are used to filter k8s events based on a regex inclusively
+	Regexes []string `json:"regexes"`
+	// ExcludeRegexes are used to filter k8s events based on a regex exclusively
+	ExcludeRegexes []string `json:"excludeRegexes"`
+	// Ascending is a flag to determine if the k8s events should be returned in ascending order
+	Ascending bool `json:"ascending"`
+	// Environments is the environments to get the k8s events for
+	Environments []string `json:"environments"`
+}
+
+type GetSingleK8sEventSummaryRequest struct {
+	GetK8sEventsRequest
+	// The attribute to get the summary for
+	Attribute string `json:"attribute"`
+}
+
+type GetK8sEventMetricsRequest struct {
+	// Required: Start time of when to get the logs in seconds since epoch
+	StartTime int64 `json:"startTime"`
+	// Required: End time of when to get the logs in seconds since epoch
+	EndTime int64 `json:"endTime"`
+
+	// The filters to apply to the logs, so for example, if you want to get logs for a specific service
+	//you can pass in a filter like {"service_name": ["microservice_a"]}
+	Filters map[string][]string `json:"filters"`
+
+	// The exclude filters to apply to the logs, so for example, if you want to exclude logs for a specific service
+	//you can pass in a filter like {"service_name": ["microservice_a"]}
+	ExcludeFilters map[string][]string `json:"excludeFilters"`
+
+	// Regexes are used to filter k8s events based on a regex inclusively
+	Regexes []string `json:"regexes"`
+	// ExcludeRegexes are used to filter k8s events based on a regex exclusively
+	ExcludeRegexes []string `json:"excludeRegexes"`
+
+	// Splts is a list of attributes to split the metrics by, for example, if you want to split the metrics by service
+	// you can pass in a list like ["service_name"]
+	Splits []string `json:"splits"`
+
+	// OnlyNumRequests is a flag to only get the number of requests, this is a much faster query
+	OnlyNumRequests bool `json:"onlyNumRequests"`
+
+	// Environments is a list of environments to filter the k8s events by. If empty, all environments will be included
+	Environments []string `json:"environments"`
+}
