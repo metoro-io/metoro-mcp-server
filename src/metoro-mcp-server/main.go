@@ -8,14 +8,15 @@ import (
 )
 
 var handlers = map[string]server.ToolHandlerFunc{
-	"get_environments":     getEnvironmentsHandler,     // resource
-	"get_services":         getServicesHandler,         // resource
-	"get_namespaces":       getNamespacesHandler,       // resource
-	"get_logs":             getLogsHandler,             // tool
-	"get_traces":           getTracesHandler,           // tool
-	"get_metric":           getMetricHandler,           // tool
-	"get_trace_metric":     getTraceMetricHandler,      // tool
-	"get_trace_attributes": getTraceAttributesHandler,  // resource
+	"get_environments":     getEnvironmentsHandler,    // resource
+	"get_services":         getServicesHandler,        // resource
+	"get_namespaces":       getNamespacesHandler,      // resource
+	"get_logs":             getLogsHandler,            // tool
+	"get_traces":           getTracesHandler,          // tool
+	"get_metric":           getMetricHandler,          // tool
+	"get_trace_metric":     getTraceMetricHandler,     // tool
+	"get_trace_attributes": getTraceAttributesHandler, // resource
+	"get_trace_attribute_values_for_individual_attribute": getTraceAttributeValuesForIndividualAttributeHandler, // tool
 	"get_profiles":         getProfilesHandler,         // tool
 	"get_metricAttributes": getMetricAttributesHandler, //resource
 	"get_metric_names":     getMetricNamesHandler,      // resource
@@ -153,6 +154,31 @@ var tools = []mcp.Tool{
 	),
 	mcp.NewTool("get_trace_attributes",
 		mcp.WithDescription("Get all available trace attributes that can be used for filtering or grouping traces"),
+	),
+	mcp.NewTool("get_trace_attribute_values_for_individual_attribute",
+		mcp.WithDescription("Get all possible values for a specific trace attribute with optional filtering"),
+		mcp.WithString("attribute",
+			mcp.Description("The attribute to get values for"),
+			mcp.Required(),
+		),
+		mcp.WithString("serviceNames",
+			mcp.Description("JSON array of service names to filter traces by"),
+		),
+		mcp.WithString("filters",
+			mcp.Description("The filters to apply to the traces. It is a stringified map[string]string[], e.g., '{\"service.name\": [\"/k8s/namespaceX/serviceX\"]}' should return traces for serviceX in namespaceX"),
+		),
+		mcp.WithString("excludeFilters",
+			mcp.Description("The filters that should be excluded from the traces. It is a stringified map[string]string[] e.g., '{\"service.name\": [\"/k8s/namespaceX/serviceX\"]}' should return all traces except for serviceX in namespaceX"),
+		),
+		mcp.WithString("regexes",
+			mcp.Description("JSON array of regexes as a string to filter traces based on a regex inclusively"),
+		),
+		mcp.WithString("excludeRegexes",
+			mcp.Description("JSON array of regexes as a string to filter traces based on a regex exclusively"),
+		),
+		mcp.WithString("environments",
+			mcp.Description("JSON array of environments to filter traces by"),
+		),
 	),
 	mcp.NewTool("get_profiles",
 		mcp.WithDescription("Get profiling data from services running in your Kubernetes cluster which will help you understand where your service is spending time"),
