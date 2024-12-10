@@ -8,17 +8,18 @@ import (
 )
 
 var handlers = map[string]server.ToolHandlerFunc{
-	"get_environments":     getEnvironmentsHandler,
-	"get_services":         getServicesHandler,
-	"get_namespaces":       getNamespacesHandler,
-	"get_logs":             getLogsHandler,
-	"get_traces":           getTracesHandler,
-	"get_metric":           getMetricHandler,
-	"get_trace_metric":     getTraceMetricHandler,
-	"get_profiles":         getProfilesHandler,
-	"get_metricAttributes": getMetricAttributesHandler,
-	"get_metric_names":     getMetricNamesHandler,
-	"get_metric_metadata":  getMetricMetadata,
+	"get_environments":     getEnvironmentsHandler,     // resource
+	"get_services":         getServicesHandler,         // resource
+	"get_namespaces":       getNamespacesHandler,       // resource
+	"get_logs":             getLogsHandler,             // tool
+	"get_traces":           getTracesHandler,           // tool
+	"get_metric":           getMetricHandler,           // tool
+	"get_trace_metric":     getTraceMetricHandler,      // tool
+	"get_trace_attributes": getTraceAttributesHandler,  // resource
+	"get_profiles":         getProfilesHandler,         // tool
+	"get_metricAttributes": getMetricAttributesHandler, //resource
+	"get_metric_names":     getMetricNamesHandler,      // resource
+	"get_metric_metadata":  getMetricMetadata,          // resource
 }
 
 var tools = []mcp.Tool{
@@ -100,7 +101,8 @@ var tools = []mcp.Tool{
 			mcp.Description("JSON array of attributes to split the metrics by, e.g., '[\"service_name\"]' to split metrics by service"),
 		),
 		mcp.WithString("aggregation",
-			mcp.Description("The aggregation to apply to the metrics"),
+			mcp.Description("The aggregation to apply to the metrics,  e.g. sum, avg, max, min"),
+			mcp.Required(),
 		),
 		mcp.WithString("functions",
 			mcp.Description("JSON array of functions to apply to the metrics"),
@@ -109,7 +111,7 @@ var tools = []mcp.Tool{
 			mcp.Description("Whether to limit the results or not"),
 		),
 		mcp.WithNumber("bucketSize",
-			mcp.Description("The size of each datapoint bucket in seconds"),
+			mcp.Description("The size of each datapoint bucket in seconds, if not provided metoro will select the best bucket size for the given duration for performance and clarity"),
 		),
 	),
 	mcp.NewTool("get_trace_metric",
@@ -136,18 +138,21 @@ var tools = []mcp.Tool{
 			mcp.Description("JSON array of functions to apply to the trace metrics"),
 		),
 		mcp.WithString("aggregate",
-			mcp.Description("The aggregation to apply to the trace metrics, e.g. sum, avg, max, min, p50, p90, p99, p95"),
+			mcp.Description("The aggregation to apply to the trace metrics, e.g. count, sum, avg, max, min, p50, p90, p99, p95"),
 			mcp.Required(),
 		),
 		mcp.WithString("environments",
 			mcp.Description("JSON array of environments to filter traces by"),
 		),
-		//mcp.WithBoolean("limitResults",
-		//	mcp.Description("Whether to limit the results or not"),
-		//),
+		mcp.WithBoolean("limitResults",
+			mcp.Description("Whether to limit the results or not"),
+		),
 		mcp.WithNumber("bucketSize",
 			mcp.Description("The size of each datapoint bucket in seconds, if not provided, metoro will select the best bucket size for performance and clarity"),
 		),
+	),
+	mcp.NewTool("get_trace_attributes",
+		mcp.WithDescription("Get all available trace attributes that can be used for filtering or grouping traces"),
 	),
 	mcp.NewTool("get_profiles",
 		mcp.WithDescription("Get profiling data from services running in your Kubernetes cluster which will help you understand where your service is spending time"),
