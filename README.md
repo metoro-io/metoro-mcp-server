@@ -26,7 +26,8 @@ No worries, you can still play around using the [Live Demo Cluster](https://demo
 3. Clone this repository and build the Metoro MCP Server:
 ```bash
 go build 
-3. Create a file in `~/Library/Application Support/Claude/claude_desktop_config.json` with the following contents:
+```
+4. Create a file in `~/Library/Application Support/Claude/claude_desktop_config.json` with the following contents:
 ```json
 {
   "mcpServers": {
