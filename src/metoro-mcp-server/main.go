@@ -26,6 +26,9 @@ var handlers = map[string]server.ToolHandlerFunc{
 	"get_metric_names":                                        getMetricNamesHandler,                                   // resource
 	"get_metric_metadata":                                     getMetricMetadata,                                       // resource
 	"get_pods":                                                getPodsHandler,                                          // tool
+	"get_k8s_service_information":                             getK8sServiceInformationHandler,                         // tool
+	"get_log_attributes":                                      getLogAttributesHandler,                                 // resource
+	"get_log_attribute_values_for_individual_attribute":        getLogAttributeValuesForIndividualAttributeHandler,      // tool
 }
 
 var tools = []mcp.Tool{
@@ -277,6 +280,41 @@ var tools = []mcp.Tool{
 		),
 		mcp.WithString("environments",
 			mcp.Description("JSON array of environments to filter pods by"),
+		),
+	),
+	mcp.NewTool("get_k8s_service_information",
+		mcp.WithDescription("Get detailed information about a Kubernetes service including its type (Deployment, DaemonSet, etc.), YAML configuration, and current running replicas (excluding HPA)"),
+		mcp.WithString("serviceName",
+			mcp.Description("Name of the service to get information for (must be a Deployment, DaemonSet, or StatefulSet)"),
+			mcp.Required(),
+		),
+		mcp.WithString("environments",
+			mcp.Description("JSON array of environments to filter service information by"),
+		),
+	),
+	mcp.NewTool("get_log_attributes",
+		mcp.WithDescription("Get a list of available log attributes that can be used for filtering logs. Note that this returns the default attributes, but logs can be filtered by any additional attributes present in the logs."),
+	),
+	mcp.NewTool("get_log_attribute_values_for_individual_attribute",
+		mcp.WithDescription("Get all possible values for a specific log attribute with comprehensive filtering options"),
+		mcp.WithString("attribute",
+			mcp.Description("The log attribute to get values for"),
+			mcp.Required(),
+		),
+		mcp.WithString("filters",
+			mcp.Description("JSON object of filters to apply. Format: {\"attribute_name\": [\"value1\", \"value2\"]}"),
+		),
+		mcp.WithString("excludeFilters",
+			mcp.Description("JSON object of filters to exclude. Format: {\"attribute_name\": [\"value1\", \"value2\"]}"),
+		),
+		mcp.WithString("regexes",
+			mcp.Description("JSON array of regexes to filter log messages"),
+		),
+		mcp.WithString("excludeRegexes",
+			mcp.Description("JSON array of regexes to exclude from log messages"),
+		),
+		mcp.WithString("environments",
+			mcp.Description("JSON array of environments to filter logs by"),
 		),
 	),
 	mcp.NewTool("get_metricAttributes",

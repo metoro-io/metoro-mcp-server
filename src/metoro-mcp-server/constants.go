@@ -208,3 +208,26 @@ type GetPodsRequest struct {
 	// Optional: NodeName to get metadata updates. One of ServiceName or NodeName is required
 	NodeName string `json:"nodeName"`
 }
+
+type LogSummaryRequest struct {
+	// Required: Start time of when to get the service summaries in seconds since epoch
+	StartTime int64 `json:"startTime"`
+	// Required: End time of when to get the service summaries in seconds since epoch
+	EndTime int64 `json:"endTime"`
+	// The filters to apply to the log summary, so for example, if you want to get logs for a specific service
+	// you can pass in a filter like {"service_name": ["microservice_a"]}
+	Filters map[string][]string `json:"filters"`
+
+	ExcludeFilters map[string][]string `json:"excludeFilters"`
+	// RegexFilter is a regex to filter the logs
+	Regexes        []string `json:"regexes"`
+	ExcludeRegexes []string `json:"excludeRegexes"`
+	// The cluster/environments to get the logs for. If empty, all clusters will be included
+	Environments []string `json:"environments"`
+}
+
+type GetSingleLogSummaryRequest struct {
+	LogSummaryRequest
+	// The attribute to get the summary for
+	Attribute string `json:"attribute"`
+}
