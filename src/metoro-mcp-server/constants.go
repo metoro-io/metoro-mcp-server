@@ -3,6 +3,9 @@ package main
 const METORO_API_URL_ENV_VAR = "METORO_API_URL"
 const METORO_AUTH_TOKEN_ENV_VAR = "METORO_AUTH_TOKEN"
 
+// TODO: This file should be replaced if we can import the types from Metoro repo directly.
+// These are just duplicates at the moment. If updated in Metoro repository, it should also be updated here!
+
 type GetLogsRequest struct {
 	// Required: Start time of when to get the logs in seconds since epoch
 	StartTime int64 `json:"startTime"`
@@ -25,28 +28,6 @@ type GetLogsRequest struct {
 	Ascending      bool     `json:"ascending"`
 	// The cluster/environments to get the logs for. If empty, all clusters will be included
 	Environments []string `json:"environments"`
-}
-
-type Log struct {
-	// The time that the log line was emitted in milliseconds since the epoch
-	Time int64 `json:"time"`
-	// The severity of the log line
-	Severity string `json:"severity"`
-	// The log message
-	Message string `json:"message"`
-	// The attributes of the log line
-	LogAttributes map[string]string `json:"logAttributes"`
-	// The attributes of the resource that emitted the log line
-	ResourceAttributes map[string]string `json:"resourceAttributes"`
-	// Service name
-	ServiceName string `json:"serviceName"`
-	// Environment
-	Environment string `json:"environment"`
-}
-
-type GetLogsResponse struct {
-	// The logs that match the filters
-	Logs []Log `json:"logs"`
 }
 
 type GetTracesRequest struct {
