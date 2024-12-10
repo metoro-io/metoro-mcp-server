@@ -10,9 +10,9 @@ import (
 
 func getK8sEventsVolumeHandler(arguments map[string]interface{}) (*mcp.CallToolResult, error) {
 	now := time.Now()
-	fiveMinsAgo := now.Add(-5 * time.Minute)
+	sixHoursAgo := now.Add(-6 * time.Hour)
 	request := GetK8sEventMetricsRequest{
-		StartTime: fiveMinsAgo.Unix(),
+		StartTime: sixHoursAgo.Unix(),
 		EndTime:   now.Unix(),
 	}
 

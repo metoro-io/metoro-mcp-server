@@ -10,10 +10,10 @@ import (
 
 func getK8sEventAttributeValuesForIndividualAttributeHandler(arguments map[string]interface{}) (*mcp.CallToolResult, error) {
 	now := time.Now()
-	fiveMinsAgo := now.Add(-5 * time.Minute)
+	sixHoursAgo := now.Add(-6 * time.Hour)
 	request := GetSingleK8sEventSummaryRequest{
 		GetK8sEventsRequest: GetK8sEventsRequest{
-			StartTime: fiveMinsAgo.Unix(),
+			StartTime: sixHoursAgo.Unix(),
 			EndTime:   now.Unix(),
 		},
 	}
