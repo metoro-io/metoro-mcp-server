@@ -18,13 +18,14 @@ var handlers = map[string]server.ToolHandlerFunc{
 	"get_trace_attributes": getTraceAttributesHandler, // resource
 	"get_trace_attribute_values_for_individual_attribute": getTraceAttributeValuesForIndividualAttributeHandler, // tool
 	"get_profiles":              getProfilesHandler,            // tool
-	"get_metricAttributes":      getMetricAttributesHandler,    //resource
-	"get_metric_names":          getMetricNamesHandler,         // resource
-	"get_metric_metadata":       getMetricMetadata,             // resource
 	"get_k8s_events":            getK8sEventsHandler,           // tool
 	"get_k8s_events_attributes": getK8sEventsAttributesHandler, // resource
 	"get_k8s_event_attribute_values_for_individual_attribute": getK8sEventAttributeValuesForIndividualAttributeHandler, // tool
 	"get_k8s_events_volume":                                   getK8sEventsVolumeHandler,                               // tool
+	"get_metricAttributes":                                    getMetricAttributesHandler,                              //resource
+	"get_metric_names":                                        getMetricNamesHandler,                                   // resource
+	"get_metric_metadata":                                     getMetricMetadata,                                       // resource
+	"get_pods":                                                getPodsHandler,                                          // tool
 }
 
 var tools = []mcp.Tool{
@@ -264,6 +265,18 @@ var tools = []mcp.Tool{
 		),
 		mcp.WithString("environments",
 			mcp.Description("JSON array of environments to filter k8s events by"),
+		),
+	),
+	mcp.NewTool("get_pods",
+		mcp.WithDescription("Get pods information for either a specific service (deployment, daemonset, statefulset) or a specific node"),
+		mcp.WithString("serviceName",
+			mcp.Description("Name of the service (service is K8s resource type of either deployment, daemonset, statefulset) to get pod information for. If this is provided, nodeName should be empty"),
+		),
+		mcp.WithString("nodeName",
+			mcp.Description("Name of the node to get the pods that are running on this node. If this is provided, serviceName should be empty"),
+		),
+		mcp.WithString("environments",
+			mcp.Description("JSON array of environments to filter pods by"),
 		),
 	),
 	mcp.NewTool("get_metricAttributes",

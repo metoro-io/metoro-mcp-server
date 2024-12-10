@@ -191,3 +191,20 @@ type GetK8sEventMetricsRequest struct {
 	// Environments is a list of environments to filter the k8s events by. If empty, all environments will be included
 	Environments []string `json:"environments"`
 }
+
+type GetPodsRequest struct {
+	// Required: Timestamp to get metadata updates after this time
+	StartTime int64 `json:"startTime"`
+
+	// Required: Timestamp to get metadata updates before this time
+	EndTime int64 `json:"endTime"`
+
+	// Optional: Environment to filter the pods by. If not provided, all environments are considered
+	Environments []string `json:"environments"`
+
+	// Optional: ServiceName to get metadata updates. One of ServiceName or NodeName is required
+	ServiceName string `json:"serviceName"`
+
+	// Optional: NodeName to get metadata updates. One of ServiceName or NodeName is required
+	NodeName string `json:"nodeName"`
+}
