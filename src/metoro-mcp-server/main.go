@@ -32,6 +32,7 @@ var handlers = map[string]server.ToolHandlerFunc{
 	"get_nodes":                                               getNodesHandler,                                         // tool
 	"get_node_info":                                           getNodeInfoHandler,                                      // tool
 	"get_service_summaries":                                   getServiceSummariesHandler,                              // tool
+	"get_alerts":                                              getAlertsHandler,                                        // tool
 }
 
 var tools = []mcp.Tool{
@@ -373,6 +374,9 @@ var tools = []mcp.Tool{
 		mcp.WithString("environments",
 			mcp.Description("JSON array of environments/clusters to filter services by. If empty, returns services from all environments"),
 		),
+	),
+	mcp.NewTool("get_alerts",
+		mcp.WithDescription("Get information about all configured alerts including their names, descriptions, status, destinations, and types"),
 	),
 }
 
