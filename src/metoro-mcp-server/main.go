@@ -217,9 +217,19 @@ func main() {
 	err = mcpServer.RegisterResource(
 		"api://metrics",
 		"metricNames",
-		"Provides a list of available metric names that can be used for as MetricName arguments to get_metric and get_metric_metadata tools to get metrics timeseries data.",
+		"Provides a list of available metric names that can be used for as MetricName arguments to get_metric, get_metric_metadata and get_metricAttributes tools to get metrics data.",
 		"text/plain",
 		resources.MetricsResourceHandler)
+	if err != nil {
+		panic(err)
+	}
+
+	err = mcpServer.RegisterResource(
+		"api://logAttributes",
+		"logAttributes",
+		"Provides a list of log attribute keys that are available to be used for filtering or grouping logs. These log attribute keys should be used as Filter/ExcludeFilter keys or Splits for get_logs, get_log_attribute_values_for_individual_attribute tools arguments.",
+		"text/plain",
+		resources.LogAttributesResourceHandler)
 	if err != nil {
 		panic(err)
 	}
