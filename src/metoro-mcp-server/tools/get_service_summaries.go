@@ -1,10 +1,12 @@
-package main
+package tools
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	mcpgolang "github.com/metoro-io/mcp-golang"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/model"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/utils"
 	"time"
 )
 
@@ -13,10 +15,10 @@ type GetServiceSummariesHandlerArgs struct {
 	Environments []string `json:"environments" jsonschema:"description=The environments to get service summaries for. If empty, all environments will be used."`
 }
 
-func getServiceSummariesHandler(arguments GetServiceSummariesHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetServiceSummariesHandler(arguments GetServiceSummariesHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
 	fiveMinsAgo := now.Add(-5 * time.Minute)
-	request := GetServiceSummariesRequest{
+	request := model.GetServiceSummariesRequest{
 		StartTime:    fiveMinsAgo.Unix(),
 		EndTime:      now.Unix(),
 		Namespace:    arguments.Namespaces,
@@ -30,10 +32,10 @@ func getServiceSummariesHandler(arguments GetServiceSummariesHandlerArgs) (*mcpg
 	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
-func getServiceSummariesMetoroCall(request GetServiceSummariesRequest) ([]byte, error) {
+func getServiceSummariesMetoroCall(request model.GetServiceSummariesRequest) ([]byte, error) {
 	requestBody, err := json.Marshal(request)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling service summaries request: %v", err)
 	}
-	return MakeMetoroAPIRequest("POST", "serviceSummaries", bytes.NewBuffer(requestBody))
+	return utils.MakeMetoroAPIRequest("POST", "serviceSummaries", bytes.NewBuffer(requestBody))
 }

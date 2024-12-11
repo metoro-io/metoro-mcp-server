@@ -1,10 +1,12 @@
-package main
+package tools
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	mcpgolang "github.com/metoro-io/mcp-golang"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/model"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/utils"
 	"time"
 )
 
@@ -14,7 +16,7 @@ type GetPodsHandlerArgs struct {
 	Environments []string `json:"environments" jsonschema:"description=The environments to get pods for. If empty, all environments will be used."`
 }
 
-func getPodsHandler(arguments GetPodsHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetPodsHandler(arguments GetPodsHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
 	fiveMinsAgo := now.Add(-5 * time.Minute)
 
@@ -23,7 +25,7 @@ func getPodsHandler(arguments GetPodsHandlerArgs) (*mcpgolang.ToolResponse, erro
 		return nil, fmt.Errorf("one of serviceName or nodeName is required")
 	}
 
-	request := GetPodsRequest{
+	request := model.GetPodsRequest{
 		StartTime:    fiveMinsAgo.Unix(),
 		EndTime:      now.Unix(),
 		Environments: arguments.Environments,
@@ -36,7 +38,7 @@ func getPodsHandler(arguments GetPodsHandlerArgs) (*mcpgolang.ToolResponse, erro
 		return nil, fmt.Errorf("error marshaling request: %v", err)
 	}
 
-	resp, err := MakeMetoroAPIRequest("POST", "k8s/pods", bytes.NewBuffer(jsonBody))
+	resp, err := utils.MakeMetoroAPIRequest("POST", "k8s/pods", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return nil, fmt.Errorf("error making Metoro call: %v", err)
 	}

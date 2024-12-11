@@ -1,7 +1,4 @@
-package main
-
-const METORO_API_URL_ENV_VAR = "METORO_API_URL"
-const METORO_AUTH_TOKEN_ENV_VAR = "METORO_AUTH_TOKEN"
+package model
 
 // TODO: This file should be replaced if we can import the types from Metoro repo directly.
 // These are just duplicates at the moment. If updated in Metoro repository, it should also be updated here!

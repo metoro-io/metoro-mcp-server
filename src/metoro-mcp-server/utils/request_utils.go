@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"fmt"
@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"os"
 )
+
+const METORO_API_URL_ENV_VAR = "METORO_API_URL"
+const METORO_AUTH_TOKEN_ENV_VAR = "METORO_AUTH_TOKEN"
 
 // makeMetoroAPIRequest makes an HTTP request to the Metoro API with the given method, endpoint, and body.
 // It handles authentication and common error cases.

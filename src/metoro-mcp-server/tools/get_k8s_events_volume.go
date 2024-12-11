@@ -1,10 +1,12 @@
-package main
+package tools
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	mcpgolang "github.com/metoro-io/mcp-golang"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/model"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/utils"
 	"time"
 )
 
@@ -16,10 +18,10 @@ type GetK8sEventsVolumeHandlerArgs struct {
 	Environments   []string            `json:"environments" jsonschema:"description=Environments to get events from"`
 }
 
-func getK8sEventsVolumeHandler(arguments GetK8sEventsVolumeHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetK8sEventsVolumeHandler(arguments GetK8sEventsVolumeHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
 	sixHoursAgo := now.Add(-6 * time.Hour)
-	request := GetK8sEventMetricsRequest{
+	request := model.GetK8sEventMetricsRequest{
 		StartTime:      sixHoursAgo.Unix(),
 		EndTime:        now.Unix(),
 		Filters:        arguments.Filters,
@@ -35,7 +37,7 @@ func getK8sEventsVolumeHandler(arguments GetK8sEventsVolumeHandlerArgs) (*mcpgol
 		return nil, fmt.Errorf("error marshaling request: %v", err)
 	}
 
-	resp, err := MakeMetoroAPIRequest("POST", "k8s/events/metrics", bytes.NewBuffer(jsonBody))
+	resp, err := utils.MakeMetoroAPIRequest("POST", "k8s/events/metrics", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return nil, fmt.Errorf("error making Metoro call: %v", err)
 	}

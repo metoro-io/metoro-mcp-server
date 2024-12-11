@@ -1,10 +1,12 @@
-package main
+package tools
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	mcpgolang "github.com/metoro-io/mcp-golang"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/model"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/utils"
 	"time"
 )
 
@@ -12,10 +14,10 @@ type GetMetricNamesHandlerArgs struct {
 	Environments []string `json:"environments" jsonschema:"description=Environments to get metrics from. If empty, all environments will be used."`
 }
 
-func getMetricNamesHandler(arguments GetMetricNamesHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetMetricNamesHandler(arguments GetMetricNamesHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
 	fiveMinsAgo := now.Add(-5 * time.Minute)
-	request := FuzzyMetricsRequest{
+	request := model.FuzzyMetricsRequest{
 		StartTime:        fiveMinsAgo.Unix(),
 		EndTime:          now.Unix(),
 		MetricFuzzyMatch: "", // This will return all the metric names.
@@ -28,10 +30,10 @@ func getMetricNamesHandler(arguments GetMetricNamesHandlerArgs) (*mcpgolang.Tool
 	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(response)))), nil
 }
 
-func getMetricNamesMetoroCall(request FuzzyMetricsRequest) ([]byte, error) {
+func getMetricNamesMetoroCall(request model.FuzzyMetricsRequest) ([]byte, error) {
 	jsonData, err := json.Marshal(request)
 	if err != nil {
 		return nil, err
 	}
-	return MakeMetoroAPIRequest("POST", "fuzzyMetricsNames", bytes.NewBuffer(jsonData))
+	return utils.MakeMetoroAPIRequest("POST", "fuzzyMetricsNames", bytes.NewBuffer(jsonData))
 }

@@ -1,13 +1,14 @@
-package main
+package tools
 
 import (
 	"fmt"
 	mcpgolang "github.com/metoro-io/mcp-golang"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/utils"
 )
 
 type GetAlertHandlerArgs struct{}
 
-func getAlertsHandler(arguments GetAlertHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetAlertsHandler(arguments GetAlertHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	body, err := getAlertsMetoroCall()
 	if err != nil {
 		return nil, fmt.Errorf("error getting alerts: %v", err)
@@ -16,5 +17,5 @@ func getAlertsHandler(arguments GetAlertHandlerArgs) (*mcpgolang.ToolResponse, e
 }
 
 func getAlertsMetoroCall() ([]byte, error) {
-	return MakeMetoroAPIRequest("GET", "searchAlerts", nil)
+	return utils.MakeMetoroAPIRequest("GET", "searchAlerts", nil)
 }

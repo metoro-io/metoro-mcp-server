@@ -1,10 +1,12 @@
-package main
+package tools
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	mcpgolang "github.com/metoro-io/mcp-golang"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/model"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/utils"
 	"time"
 )
 
@@ -19,11 +21,11 @@ type GetK8sEventAttributeValueHandlerArgs struct {
 	PrevEndTime    *float64            `json:"prevEndTime" jsonschema:"description=The end time of the previous request"`
 }
 
-func getK8sEventAttributeValuesForIndividualAttributeHandler(arguments GetK8sEventAttributeValueHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetK8sEventAttributeValuesForIndividualAttributeHandler(arguments GetK8sEventAttributeValueHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
 	sixHoursAgo := now.Add(-6 * time.Hour)
-	request := GetSingleK8sEventSummaryRequest{
-		GetK8sEventsRequest: GetK8sEventsRequest{
+	request := model.GetSingleK8sEventSummaryRequest{
+		GetK8sEventsRequest: model.GetK8sEventsRequest{
 			StartTime:      sixHoursAgo.Unix(),
 			EndTime:        now.Unix(),
 			Filters:        arguments.Filters,
@@ -43,7 +45,7 @@ func getK8sEventAttributeValuesForIndividualAttributeHandler(arguments GetK8sEve
 		return nil, fmt.Errorf("error marshaling request: %v", err)
 	}
 
-	resp, err := MakeMetoroAPIRequest("POST", "k8s/events/summaryIndividualAttribute", bytes.NewBuffer(jsonBody))
+	resp, err := utils.MakeMetoroAPIRequest("POST", "k8s/events/summaryIndividualAttribute", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return nil, fmt.Errorf("error making Metoro call: %v", err)
 	}

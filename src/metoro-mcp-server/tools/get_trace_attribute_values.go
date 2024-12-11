@@ -1,10 +1,12 @@
-package main
+package tools
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	mcpgolang "github.com/metoro-io/mcp-golang"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/model"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/utils"
 	"time"
 )
 
@@ -19,11 +21,11 @@ type GetTraceAttributeValuesHandlerArgs struct {
 	Environments   []string            `json:"environments" jsonschema:"description=The environments to get traces from. If empty, traces from all environments will be returned"`
 }
 
-func getTraceAttributeValuesForIndividualAttributeHandler(arguments GetTraceAttributeValuesHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetTraceAttributeValuesForIndividualAttributeHandler(arguments GetTraceAttributeValuesHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
 	fiveMinsAgo := now.Add(-5 * time.Minute)
-	request := GetSingleTraceSummaryRequest{
-		TracesSummaryRequest: TracesSummaryRequest{
+	request := model.GetSingleTraceSummaryRequest{
+		TracesSummaryRequest: model.TracesSummaryRequest{
 			StartTime:      fiveMinsAgo.Unix(),
 			EndTime:        now.Unix(),
 			ServiceNames:   arguments.ServiceNames,
@@ -41,7 +43,7 @@ func getTraceAttributeValuesForIndividualAttributeHandler(arguments GetTraceAttr
 		return nil, fmt.Errorf("error marshaling request: %v", err)
 	}
 
-	resp, err := MakeMetoroAPIRequest("POST", "tracesSummaryIndividualAttribute", bytes.NewBuffer(jsonBody))
+	resp, err := utils.MakeMetoroAPIRequest("POST", "tracesSummaryIndividualAttribute", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return nil, fmt.Errorf("error making Metoro call: %v", err)
 	}

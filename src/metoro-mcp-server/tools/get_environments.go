@@ -1,13 +1,14 @@
-package main
+package tools
 
 import (
 	"fmt"
 	mcpgolang "github.com/metoro-io/mcp-golang"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/utils"
 )
 
 type GetEnvironmentHandlerArgs struct{}
 
-func getEnvironmentsHandler(arguments GetEnvironmentHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetEnvironmentsHandler(arguments GetEnvironmentHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	body, err := getEnvironmentsMetoroCall()
 	if err != nil {
 		return nil, fmt.Errorf("error getting environments: %v", err)
@@ -17,5 +18,5 @@ func getEnvironmentsHandler(arguments GetEnvironmentHandlerArgs) (*mcpgolang.Too
 }
 
 func getEnvironmentsMetoroCall() ([]byte, error) {
-	return MakeMetoroAPIRequest("GET", "environments", nil)
+	return utils.MakeMetoroAPIRequest("GET", "environments", nil)
 }

@@ -1,8 +1,9 @@
-package main
+package tools
 
 import (
 	"fmt"
 	mcpgolang "github.com/metoro-io/mcp-golang"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/utils"
 	"time"
 )
 
@@ -10,7 +11,7 @@ type GetNodeInfoHandlerArgs struct {
 	NodeName string `json:"nodeName" jsonschema:"required,description=The name of the node to get info for"`
 }
 
-func getNodeInfoHandler(arguments GetNodeInfoHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetNodeInfoHandler(arguments GetNodeInfoHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
 	fiveMinsAgo := now.Add(-5 * time.Minute)
 
@@ -22,5 +23,5 @@ func getNodeInfoHandler(arguments GetNodeInfoHandlerArgs) (*mcpgolang.ToolRespon
 }
 
 func getNodeInfoMetoroCall(nodeName string, startTime int64) ([]byte, error) {
-	return MakeMetoroAPIRequest("GET", fmt.Sprintf("infrastructure/node?nodeName=%s&startTime=%d", nodeName, startTime), nil)
+	return utils.MakeMetoroAPIRequest("GET", fmt.Sprintf("infrastructure/node?nodeName=%s&startTime=%d", nodeName, startTime), nil)
 }

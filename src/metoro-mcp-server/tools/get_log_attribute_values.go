@@ -1,10 +1,12 @@
-package main
+package tools
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	mcpgolang "github.com/metoro-io/mcp-golang"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/model"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/utils"
 	"time"
 )
 
@@ -17,11 +19,11 @@ type GetLogAttributeValuesHandlerArgs struct {
 	Environments   []string            `json:"environments" jsonschema:"description=The environments to get logs from"`
 }
 
-func getLogAttributeValuesForIndividualAttributeHandler(arguments GetLogAttributeValuesHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetLogAttributeValuesForIndividualAttributeHandler(arguments GetLogAttributeValuesHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
 	fiveMinsAgo := now.Add(-5 * time.Minute)
-	request := GetSingleLogSummaryRequest{
-		LogSummaryRequest: LogSummaryRequest{
+	request := model.GetSingleLogSummaryRequest{
+		LogSummaryRequest: model.LogSummaryRequest{
 			StartTime:      fiveMinsAgo.Unix(),
 			EndTime:        now.Unix(),
 			Filters:        arguments.Filters,
@@ -38,7 +40,7 @@ func getLogAttributeValuesForIndividualAttributeHandler(arguments GetLogAttribut
 		return nil, fmt.Errorf("error marshaling request: %v", err)
 	}
 
-	resp, err := MakeMetoroAPIRequest("POST", "logsSummaryIndividualAttribute", bytes.NewBuffer(jsonBody))
+	resp, err := utils.MakeMetoroAPIRequest("POST", "logsSummaryIndividualAttribute", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return nil, fmt.Errorf("error making Metoro call: %v", err)
 	}

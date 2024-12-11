@@ -1,10 +1,12 @@
-package main
+package tools
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	mcpgolang "github.com/metoro-io/mcp-golang"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/model"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/utils"
 	"time"
 )
 
@@ -13,10 +15,10 @@ type GetProfileHandlerArgs struct {
 	ContainerNames []string `json:"containerNames" jsonschema:"description=The container names to get profiles for"`
 }
 
-func getProfilesHandler(arguments GetProfileHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetProfilesHandler(arguments GetProfileHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
 	fiveMinsAgo := now.Add(-5 * time.Minute)
-	request := GetProfileRequest{
+	request := model.GetProfileRequest{
 		StartTime:      fiveMinsAgo.Unix(),
 		EndTime:        now.Unix(),
 		ServiceName:    arguments.ServiceName,
@@ -30,10 +32,10 @@ func getProfilesHandler(arguments GetProfileHandlerArgs) (*mcpgolang.ToolRespons
 	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
-func getProfilesMetoroCall(request GetProfileRequest) ([]byte, error) {
+func getProfilesMetoroCall(request model.GetProfileRequest) ([]byte, error) {
 	requestBody, err := json.Marshal(request)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling profiles request: %v", err)
 	}
-	return MakeMetoroAPIRequest("POST", "profiles", bytes.NewBuffer(requestBody))
+	return utils.MakeMetoroAPIRequest("POST", "profiles", bytes.NewBuffer(requestBody))
 }

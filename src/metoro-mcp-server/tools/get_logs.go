@@ -1,10 +1,12 @@
-package main
+package tools
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	mcpgolang "github.com/metoro-io/mcp-golang"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/model"
+	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/utils"
 	"time"
 )
 
@@ -18,10 +20,10 @@ type GetLogsHandlerArgs struct {
 	Environments   []string            `json:"environments" jsonschema:"description=The environments to get logs from. If empty, logs from all environments will be returned"`
 }
 
-func getLogsHandler(arguments GetLogsHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetLogsHandler(arguments GetLogsHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
 	fiveMinsAgo := now.Add(-5 * time.Minute)
-	request := GetLogsRequest{
+	request := model.GetLogsRequest{
 		StartTime:      fiveMinsAgo.Unix(),
 		EndTime:        now.Unix(),
 		Filters:        arguments.Filters,
@@ -39,10 +41,10 @@ func getLogsHandler(arguments GetLogsHandlerArgs) (*mcpgolang.ToolResponse, erro
 	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(resp)))), nil
 }
 
-func getLogsMetoroCall(request GetLogsRequest) ([]byte, error) {
+func getLogsMetoroCall(request model.GetLogsRequest) ([]byte, error) {
 	requestBody, err := json.Marshal(request)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling logs request: %v", err)
 	}
-	return MakeMetoroAPIRequest("POST", "logs", bytes.NewBuffer(requestBody))
+	return utils.MakeMetoroAPIRequest("POST", "logs", bytes.NewBuffer(requestBody))
 }
