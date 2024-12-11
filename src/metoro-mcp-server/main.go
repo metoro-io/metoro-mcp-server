@@ -171,7 +171,26 @@ func main() {
 		"This resource provides a list of names of the kubernetes clusters/environments monitored by Metoro",
 		"text/plain",
 		resources.EnvironmentResourceHandler)
+	if err != nil {
+		panic(err)
+	}
 
+	err = mcpServer.RegisterResource(
+		"api://namespaces",
+		"namespaces",
+		"This resource provides a list of namespaces in the kubernetes clusters/environments monitored by Metoro",
+		"text/plain",
+		resources.NamespacesResourceHandler)
+	if err != nil {
+		panic(err)
+	}
+
+	err = mcpServer.RegisterResource(
+		"api://services",
+		"services",
+		"This resource provides a list of services running in the kubernetes clusters/environments monitored by Metoro",
+		"text/plain",
+		resources.ServicesResourceHandler)
 	if err != nil {
 		panic(err)
 	}
@@ -182,7 +201,6 @@ func main() {
 	}
 
 	<-done
-
 }
 
 func checkEnvVars() error {
