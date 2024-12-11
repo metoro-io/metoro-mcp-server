@@ -76,4 +76,6 @@ The included token is a demo token, publicly available for anyone to use.
 4. Once you are done editing `claude_desktop_config.json` save the file and restart Claude Desktop app.
 5. You should now see the Metoro MCP Server in the dropdown list of MCP Servers in the Claude Desktop App. You are ready to start using Metoro MCP Server with Claude Desktop App!
 
+## Built with
 
+This library is built on top of our [Golang MCP SDK](https://github.com/metoro-io/mcp-golang).
