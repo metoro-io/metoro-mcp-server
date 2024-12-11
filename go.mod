@@ -5,10 +5,8 @@ go 1.23.4
 require (
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/invopop/jsonschema v0.12.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/mark3labs/mcp-go v0.5.1 // indirect
 	github.com/metoro-io/mcp-golang v0.0.0-20241210214509-6fd63e495c48 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
