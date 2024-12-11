@@ -31,6 +31,7 @@ var handlers = map[string]server.ToolHandlerFunc{
 	"get_log_attribute_values_for_individual_attribute":       getLogAttributeValuesForIndividualAttributeHandler,      // tool
 	"get_nodes":                                               getNodesHandler,                                         // tool
 	"get_node_info":                                           getNodeInfoHandler,                                      // tool
+	"get_service_summaries":                                   getServiceSummariesHandler,                              // tool
 }
 
 var tools = []mcp.Tool{
@@ -362,6 +363,15 @@ var tools = []mcp.Tool{
 		mcp.WithString("name",
 			mcp.Description("The name of the metric to get metadata for"),
 			mcp.Required(),
+		),
+	),
+	mcp.NewTool("get_service_summaries",
+		mcp.WithDescription("Get RED metrics (Request count, Error rate, Duration) and other summary information about services running in the cluster"),
+		mcp.WithString("namespace",
+			mcp.Description("The namespace to get service summaries for. If empty, returns services from all namespaces"),
+		),
+		mcp.WithString("environments",
+			mcp.Description("JSON array of environments/clusters to filter services by. If empty, returns services from all environments"),
 		),
 	),
 }
