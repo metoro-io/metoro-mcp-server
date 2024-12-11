@@ -1,4 +1,4 @@
-module github/metoro-io/metoro-mcp-server
+module github.com/metoro-io/metoro-mcp-server
 
 go 1.23.4
 

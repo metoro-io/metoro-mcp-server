@@ -5,7 +5,7 @@ before:
     - go mod tidy
 
 builds:
-  - main: ./src/metoro-mcp-server/main.go
+  - main: ./main.go
     env:
       - CGO_ENABLED=0
     goos:
