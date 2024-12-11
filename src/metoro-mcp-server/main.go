@@ -234,6 +234,16 @@ func main() {
 		panic(err)
 	}
 
+	err = mcpServer.RegisterResource(
+		"api://nodes",
+		"nodes",
+		"Provides a list of nodes in the kubernetes clusters/environments monitored by Metoro",
+		"text/plain",
+		resources.NodesResourceHandler)
+	if err != nil {
+		panic(err)
+	}
+
 	err = mcpServer.Serve()
 	if err != nil {
 		panic(err)
