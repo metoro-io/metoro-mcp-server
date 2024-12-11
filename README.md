@@ -1,5 +1,5 @@
 <div align="center">
-<img src="./resources/Metoro_square.svg" height="300" alt="Metoro MCP Logo">
+<img src="./images/Metoro_square.svg" height="300" alt="Metoro MCP Logo">
 </div>
 <br/>
 <div align="center">
