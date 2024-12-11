@@ -4,65 +4,33 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/mark3labs/mcp-go/mcp"
+	mcpgolang "github.com/metoro-io/mcp-golang"
 	"time"
 )
 
-func getLogAttributeValuesForIndividualAttributeHandler(arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+type GetLogAttributeValuesHandlerArgs struct {
+	Attribute      string              `json:"attribute" jsonschema:"required,description=The attribute to get values for"`
+	Filters        map[string][]string `json:"filters" jsonschema:"description=The filters to apply to the log attribute"`
+	ExcludeFilters map[string][]string `json:"excludeFilters" jsonschema:"description=The filters to exclude from the log attribute"`
+	Regexes        []string            `json:"regexes" jsonschema:"description=The regexes to apply to the log attribute"`
+	ExcludeRegexes []string            `json:"excludeRegexes" jsonschema:"description=The regexes to exclude from the log attribute"`
+	Environments   []string            `json:"environments" jsonschema:"description=The environments to get logs from"`
+}
+
+func getLogAttributeValuesForIndividualAttributeHandler(arguments GetLogAttributeValuesHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
 	fiveMinsAgo := now.Add(-5 * time.Minute)
 	request := GetSingleLogSummaryRequest{
 		LogSummaryRequest: LogSummaryRequest{
-			StartTime: fiveMinsAgo.Unix(),
-			EndTime:   now.Unix(),
+			StartTime:      fiveMinsAgo.Unix(),
+			EndTime:        now.Unix(),
+			Filters:        arguments.Filters,
+			ExcludeFilters: arguments.ExcludeFilters,
+			Regexes:        arguments.Regexes,
+			ExcludeRegexes: arguments.ExcludeRegexes,
+			Environments:   arguments.Environments,
 		},
-	}
-
-	// Attribute is required
-	if attribute, ok := arguments["attribute"].(string); ok && attribute != "" {
-		request.Attribute = attribute
-	} else {
-		return nil, fmt.Errorf("attribute is required")
-	}
-
-	if filtersStr, ok := arguments["filters"].(string); ok && filtersStr != "" {
-		var filters map[string][]string
-		if err := json.Unmarshal([]byte(filtersStr), &filters); err != nil {
-			return nil, fmt.Errorf("error parsing filters JSON: %v", err)
-		}
-		request.Filters = filters
-	}
-
-	if excludeFiltersStr, ok := arguments["excludeFilters"].(string); ok && excludeFiltersStr != "" {
-		var excludeFilters map[string][]string
-		if err := json.Unmarshal([]byte(excludeFiltersStr), &excludeFilters); err != nil {
-			return nil, fmt.Errorf("error parsing excludeFilters JSON: %v", err)
-		}
-		request.ExcludeFilters = excludeFilters
-	}
-
-	if regexesStr, ok := arguments["regexes"].(string); ok && regexesStr != "" {
-		var regexes []string
-		if err := json.Unmarshal([]byte(regexesStr), &regexes); err != nil {
-			return nil, fmt.Errorf("error parsing regexes JSON: %v", err)
-		}
-		request.Regexes = regexes
-	}
-
-	if excludeRegexesStr, ok := arguments["excludeRegexes"].(string); ok && excludeRegexesStr != "" {
-		var excludeRegexes []string
-		if err := json.Unmarshal([]byte(excludeRegexesStr), &excludeRegexes); err != nil {
-			return nil, fmt.Errorf("error parsing excludeRegexes JSON: %v", err)
-		}
-		request.ExcludeRegexes = excludeRegexes
-	}
-
-	if environmentsStr, ok := arguments["environments"].(string); ok && environmentsStr != "" {
-		var environments []string
-		if err := json.Unmarshal([]byte(environmentsStr), &environments); err != nil {
-			return nil, fmt.Errorf("error parsing environments JSON: %v", err)
-		}
-		request.Environments = environments
+		Attribute: arguments.Attribute,
 	}
 
 	jsonBody, err := json.Marshal(request)
@@ -75,5 +43,5 @@ func getLogAttributeValuesForIndividualAttributeHandler(arguments map[string]int
 		return nil, fmt.Errorf("error making Metoro call: %v", err)
 	}
 
-	return mcp.NewToolResultText(string(resp)), nil
+	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(resp)))), nil
 }

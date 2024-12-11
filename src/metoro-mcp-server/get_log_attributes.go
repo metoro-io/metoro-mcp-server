@@ -2,14 +2,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/mark3labs/mcp-go/mcp"
+	mcpgolang "github.com/metoro-io/mcp-golang"
 )
 
-func getLogAttributesHandler(arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+type GetLogAttributesHandlerArgs struct{}
+
+func getLogAttributesHandler(arguments GetLogAttributesHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	resp, err := MakeMetoroAPIRequest("GET", "logsSummaryAttributes", nil)
 	if err != nil {
 		return nil, fmt.Errorf("error making Metoro call: %v", err)
 	}
 
-	return mcp.NewToolResultText(string(resp)), nil
+	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(resp)))), nil
 }

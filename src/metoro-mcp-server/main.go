@@ -7,13 +7,13 @@ import (
 	"os"
 )
 
-type MyTools struct {
+type MetoroTools struct {
 	Name        string
 	Description string
 	Handler     any
 }
 
-var newTools = []MyTools{
+var metoroTools = []MetoroTools{
 	{
 		Name:        "get_environments",
 		Description: "Get Kubernetes environments/clusters, monitored by Metoro",
@@ -84,78 +84,78 @@ var newTools = []MyTools{
 		Description: "Get Kubernetes events volume",
 		Handler:     getK8sEventsVolumeHandler,
 	},
-	//{
-	//	Name:        "get_metricAttributes",
-	//	Description: "Get metric attributes",
-	//	Handler:     getMetricAttributesHandler,
-	//},
-	//{
-	//	Name:        "get_metric_names",
-	//	Description: "Get metric names",
-	//	Handler:     getMetricNamesHandler,
-	//},
-	//{
-	//	Name:        "get_metric_metadata",
-	//	Description: "Get metric metadata",
-	//	Handler:     getMetricMetadata,
-	//},
-	//{
-	//	Name:        "get_pods",
-	//	Description: "Get pods information from your Kubernetes cluster",
-	//	Handler:     getPodsHandler,
-	//},
-	//{
-	//	Name:        "get_k8s_service_information",
-	//	Description: "Get detailed information about a Kubernetes service including its type (Deployment, DaemonSet, etc.), YAML configuration, and current running replicas (excluding HPA)",
-	//	Handler:     getK8sServiceInformationHandler,
-	//},
-	//{
-	//	Name:        "get_log_attributes",
-	//	Description: "Get log attributes",
-	//	Handler:     getLogAttributesHandler,
-	//},
-	//{
-	//	Name:        "get_log_attribute_values_for_individual_attribute",
-	//	Description: "Get log attribute values for a specific attribute",
-	//	Handler:     getLogAttributeValuesForIndividualAttributeHandler,
-	//},
-	//{
-	//	Name:        "get_nodes",
-	//	Description: "Get nodes information from your Kubernetes cluster",
-	//	Handler:     getNodesHandler,
-	//},
-	//{
-	//	Name:        "get_node_info",
-	//	Description: "Get detailed node information from your Kubernetes cluster",
-	//	Handler:     getNodeInfoHandler,
-	//},
-	//{
-	//	Name:        "get_service_summaries",
-	//	Description: "Get service summaries from your Kubernetes cluster",
-	//	Handler:     getServiceSummariesHandler,
-	//},
-	//{
-	//	Name:        "get_alerts",
-	//	Description: "Get alerts from your Kubernetes cluster",
-	//	Handler:     getAlertsHandler,
-	//},
-	//{
-	//	Name:        "get_alert_fires",
-	//	Description: "Get alert fires from your Kubernetes cluster",
-	//	Handler:     getAlertFiresHandler,
-	//},
+	{
+		Name:        "get_metricAttributes",
+		Description: "Get metric attributes",
+		Handler:     getMetricAttributesHandler,
+	},
+	{
+		Name:        "get_metric_names",
+		Description: "Get metric names",
+		Handler:     getMetricNamesHandler,
+	},
+	{
+		Name:        "get_metric_metadata",
+		Description: "Get metric metadata",
+		Handler:     getMetricMetadata,
+	},
+	{
+		Name:        "get_pods",
+		Description: "Get pods information from your Kubernetes cluster",
+		Handler:     getPodsHandler,
+	},
+	{
+		Name:        "get_k8s_service_information",
+		Description: "Get detailed information about a Kubernetes service including its type (Deployment, DaemonSet, etc.), YAML configuration, and current running replicas (excluding HPA)",
+		Handler:     getK8sServiceInformationHandler,
+	},
+	{
+		Name:        "get_log_attributes",
+		Description: "Get log attributes",
+		Handler:     getLogAttributesHandler,
+	},
+	{
+		Name:        "get_log_attribute_values_for_individual_attribute",
+		Description: "Get log attribute values for a specific attribute",
+		Handler:     getLogAttributeValuesForIndividualAttributeHandler,
+	},
+	{
+		Name:        "get_nodes",
+		Description: "Get nodes information from your Kubernetes cluster",
+		Handler:     getNodesHandler,
+	},
+	{
+		Name:        "get_node_info",
+		Description: "Get detailed node information from your Kubernetes cluster",
+		Handler:     getNodeInfoHandler,
+	},
+	{
+		Name:        "get_service_summaries",
+		Description: "Get service summaries from your Kubernetes cluster",
+		Handler:     getServiceSummariesHandler,
+	},
+	{
+		Name:        "get_alerts",
+		Description: "Get alerts from your Kubernetes cluster",
+		Handler:     getAlertsHandler,
+	},
+	{
+		Name:        "get_alert_fires",
+		Description: "Get alert fires from your Kubernetes cluster",
+		Handler:     getAlertFiresHandler,
+	},
 }
 
 func main() {
 	// Check if the appropriate environment variables are set
 	if err := checkEnvVars(); err != nil {
-		fmt.Printf("Server error: %v\n", err)
+		panic(err)
 	}
 
 	done := make(chan struct{})
 
 	mcpServer := mcpgolang.NewServer(stdio.NewStdioServerTransport())
-	for _, tool := range newTools {
+	for _, tool := range metoroTools {
 		err := mcpServer.RegisterTool(tool.Name, tool.Description, tool.Handler)
 		if err != nil {
 			panic(err)

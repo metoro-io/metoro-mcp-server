@@ -4,33 +4,31 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/mark3labs/mcp-go/mcp"
+	mcpgolang "github.com/metoro-io/mcp-golang"
 	"time"
 )
 
-func getPodsHandler(arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+type GetPodsHandlerArgs struct {
+	ServiceName  string   `json:"serviceName" jsonschema:"description=The name of the service to get pods for. One of serviceName or nodeName is required"`
+	NodeName     string   `json:"nodeName" jsonschema:"description=The name of the node to get pods for. One of serviceName or nodeName is required"`
+	Environments []string `json:"environments" jsonschema:"description=The environments to get pods for. If empty, all environments will be used."`
+}
+
+func getPodsHandler(arguments GetPodsHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
 	fiveMinsAgo := now.Add(-5 * time.Minute)
-	request := GetPodsRequest{
-		StartTime: fiveMinsAgo.Unix(),
-		EndTime:   now.Unix(),
-	}
 
-	// One of ServiceName or NodeName is required
-	if serviceName, ok := arguments["serviceName"].(string); ok && serviceName != "" {
-		request.ServiceName = serviceName
-	} else if nodeName, ok := arguments["nodeName"].(string); ok && nodeName != "" {
-		request.NodeName = nodeName
-	} else {
+	// One of serviceName or nodeName is required.
+	if arguments.ServiceName == "" && arguments.NodeName == "" {
 		return nil, fmt.Errorf("one of serviceName or nodeName is required")
 	}
 
-	if environmentsStr, ok := arguments["environments"].(string); ok && environmentsStr != "" {
-		var environments []string
-		if err := json.Unmarshal([]byte(environmentsStr), &environments); err != nil {
-			return nil, fmt.Errorf("error parsing environments JSON: %v", err)
-		}
-		request.Environments = environments
+	request := GetPodsRequest{
+		StartTime:    fiveMinsAgo.Unix(),
+		EndTime:      now.Unix(),
+		Environments: arguments.Environments,
+		ServiceName:  arguments.ServiceName,
+		NodeName:     arguments.NodeName,
 	}
 
 	jsonBody, err := json.Marshal(request)
@@ -43,5 +41,5 @@ func getPodsHandler(arguments map[string]interface{}) (*mcp.CallToolResult, erro
 		return nil, fmt.Errorf("error making Metoro call: %v", err)
 	}
 
-	return mcp.NewToolResultText(string(resp)), nil
+	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(resp)))), nil
 }

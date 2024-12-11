@@ -112,6 +112,20 @@ type GetMetricRequest struct {
 	BucketSize int64 `json:"bucketSize"`
 }
 
+type MetricAttributesRequest struct {
+	StartTime        int64               `json:"startTime"`
+	EndTime          int64               `json:"endTime"`
+	MetricName       string              `json:"metricName"`
+	FilterAttributes map[string][]string `json:"filterAttributes"`
+}
+
+type FuzzyMetricsRequest struct {
+	MetricFuzzyMatch string   `json:"metricFuzzyMatch"`
+	Environments     []string `json:"environments"`
+	StartTime        int64    `json:"startTime"`
+	EndTime          int64    `json:"endTime"`
+}
+
 type GetProfileRequest struct {
 	// Required: ServiceName to get profiling for
 	ServiceName string `json:"serviceName"`
@@ -317,4 +331,15 @@ type GetAllNodesRequest struct {
 	ExcludeFilters map[string][]string `json:"excludeFilters"`
 	// Splits is a list of attributes to split the nodes by, for example, if you want to split the nodes a label
 	Splits []string `json:"splits"`
+}
+
+type GetServiceSummariesRequest struct {
+	// Required: Start time of when to get the service summaries in seconds
+	StartTime int64 `json:"startTime"`
+	// Required: End time of when to get the service summaries in seconds
+	EndTime int64 `json:"endTime"`
+	// If empty, all services across all environments will be returned
+	Environments []string `json:"environments"`
+	// Required: The namespace of the services to get summaries for. If empty, return services from all namespaces
+	Namespace string `json:"namespace"`
 }
