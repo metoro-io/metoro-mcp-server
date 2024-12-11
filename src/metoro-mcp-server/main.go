@@ -195,6 +195,35 @@ func main() {
 		panic(err)
 	}
 
+	err = mcpServer.RegisterResource(
+		"api://traceAttributes",
+		"traceAttributes",
+		"Provides a list of trace attribute keys that are available to be used for filtering or grouping traces. These trace attribute keys should be used as Filter/ExcludeFilter keys or Splits for get_traces, get_trace_metric and get_trace_attribute_values_for_individual_attribute tools arguments.",
+		"text/plain",
+		resources.TraceAttributesResourceHandler)
+	if err != nil {
+		panic(err)
+	}
+	err = mcpServer.RegisterResource(
+		"api://k8sEventAttributes",
+		"k8sEventAttributes",
+		"Provides a list of Kubernetes Event's attribute keys that are available to be used for filtering or grouping K8s Events. These K8s Event attribute keys should be used as Filter/ExcludeFilter keys or Splits for get_k8s_events, get_k8s_events_volume and get_k8s_events_volume tools arguments.",
+		"text/plain",
+		resources.K8sEventsAttributesResourceHandler)
+	if err != nil {
+		panic(err)
+	}
+
+	err = mcpServer.RegisterResource(
+		"api://metrics",
+		"metricNames",
+		"Provides a list of available metric names that can be used for as MetricName arguments to get_metric and get_metric_metadata tools to get metrics timeseries data.",
+		"text/plain",
+		resources.MetricsResourceHandler)
+	if err != nil {
+		panic(err)
+	}
+
 	err = mcpServer.Serve()
 	if err != nil {
 		panic(err)
