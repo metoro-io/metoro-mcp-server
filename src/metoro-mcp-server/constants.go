@@ -43,6 +43,47 @@ type GetTracesRequest struct {
 	Environments   []string            `json:"environments"`
 }
 
+type Aggregation string
+
+const (
+	AggregationSum   Aggregation = "sum"
+	AggregationAvg   Aggregation = "avg"
+	AggregationMax   Aggregation = "max"
+	AggregationMin   Aggregation = "min"
+	AggregationCount Aggregation = "count"
+	AggregationP50   Aggregation = "p50"
+	AggregationP90   Aggregation = "p90"
+	AggregationP95   Aggregation = "p95"
+	AggregationP99   Aggregation = "p99"
+
+	// Only for trace metrics
+	AggregationRequestSize  Aggregation = "requestSize"
+	AggregationResponseSize Aggregation = "responseSize"
+	AggregationTotalSize    Aggregation = "totalSize"
+)
+
+type MetricFunction struct {
+	ID string `json:"id"`
+	// The type of the function
+	FunctionType FunctionType `json:"functionType"`
+	// The payload of the function
+	// TODO: If we have more payloads this can be an interface but for now its a math expression since its the only payload.
+	FunctionPayload MathExpression `json:"functionPayload"`
+}
+
+type MathExpression struct {
+	Variables  []string `json:"variables"`
+	Expression string   `json:"expression"`
+}
+
+type FunctionType string
+
+const (
+	MonotonicDifference  FunctionType = "monotonicDifference"
+	ValueDifference      FunctionType = "valueDifference"
+	CustomMathExpression FunctionType = "customMathExpression"
+)
+
 type GetMetricRequest struct {
 	// MetricName is the name of the metric to get
 	MetricName string `json:"metricName"`

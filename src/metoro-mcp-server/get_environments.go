@@ -2,15 +2,18 @@ package main
 
 import (
 	"fmt"
-	"github.com/mark3labs/mcp-go/mcp"
+	mcpgolang "github.com/metoro-io/mcp-golang"
 )
 
-func getEnvironmentsHandler(arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+type GetEnvironmentHandlerArgs struct{}
+
+func getEnvironmentsHandler(arguments GetEnvironmentHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	body, err := getEnvironmentsMetoroCall()
 	if err != nil {
 		return nil, fmt.Errorf("error getting environments: %v", err)
 	}
-	return mcp.NewToolResultText(fmt.Sprintf("%s", string(body))), nil
+
+	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
 func getEnvironmentsMetoroCall() ([]byte, error) {

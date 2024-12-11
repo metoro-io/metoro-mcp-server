@@ -2,16 +2,18 @@ package main
 
 import (
 	"fmt"
-	"github.com/mark3labs/mcp-go/mcp"
+	mcpgolang "github.com/metoro-io/mcp-golang"
 )
 
-func getServicesHandler(arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+type GetServicesHandlerArgs struct{}
+
+func getServicesHandler(arguments GetServicesHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	body, err := getServicesMetoroCall()
 	if err != nil {
 		return nil, fmt.Errorf("error getting services: %v", err)
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf(" %s", string(body))), nil
+	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
 func getServicesMetoroCall() ([]byte, error) {

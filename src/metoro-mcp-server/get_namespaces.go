@@ -2,15 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/mark3labs/mcp-go/mcp"
+	mcpgolang "github.com/metoro-io/mcp-golang"
 )
 
-func getNamespacesHandler(arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+type GetNamespacesHandlerArgs struct{}
+
+func getNamespacesHandler(arguments GetNamespacesHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	body, err := getNamespacesMetoroCall()
 	if err != nil {
 		return nil, fmt.Errorf("error getting namespaces: %v", err)
 	}
-	return mcp.NewToolResultText(fmt.Sprintf("%s", string(body))), nil
+	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
 func getNamespacesMetoroCall() ([]byte, error) {
