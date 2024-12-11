@@ -28,7 +28,8 @@ var handlers = map[string]server.ToolHandlerFunc{
 	"get_pods":                                                getPodsHandler,                                          // tool
 	"get_k8s_service_information":                             getK8sServiceInformationHandler,                         // tool
 	"get_log_attributes":                                      getLogAttributesHandler,                                 // resource
-	"get_log_attribute_values_for_individual_attribute":        getLogAttributeValuesForIndividualAttributeHandler,      // tool
+	"get_log_attribute_values_for_individual_attribute":       getLogAttributeValuesForIndividualAttributeHandler,      // tool
+	"get_nodes":                                               getNodesHandler,                                         // tool
 }
 
 var tools = []mcp.Tool{
@@ -290,6 +291,21 @@ var tools = []mcp.Tool{
 		),
 		mcp.WithString("environments",
 			mcp.Description("JSON array of environments to filter service information by"),
+		),
+	),
+	mcp.NewTool("get_nodes",
+		mcp.WithDescription("Lists all the nodes/instances that are running in the cluster/environment during a specified time period"),
+		mcp.WithString("environments",
+			mcp.Description("JSON array of environments/clusters to filter nodes by"),
+		),
+		mcp.WithString("filters",
+			mcp.Description("The filters to apply to the nodes. It is a stringified map[string]string[], e.g., '{\"node.name\": [\"nodeX\"]}' should return information for nodeX"),
+		),
+		mcp.WithString("excludeFilters",
+			mcp.Description("The filters that should be excluded from the nodes. It is a stringified map[string]string[] e.g., '{\"node.name\": [\"nodeX\"]}' should return all nodes except for nodeX"),
+		),
+		mcp.WithString("splits",
+			mcp.Description("JSON array of attributes to split the nodes by"),
 		),
 	),
 	mcp.NewTool("get_log_attributes",

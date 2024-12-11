@@ -231,3 +231,18 @@ type GetSingleLogSummaryRequest struct {
 	// The attribute to get the summary for
 	Attribute string `json:"attribute"`
 }
+
+type GetAllNodesRequest struct {
+	// StartTime Required: Start time of when to get the nodes in seconds since epoch
+	StartTime int64 `json:"startTime"`
+	// EndTime Required: End time of when to get the nodes in seconds since epoch
+	EndTime int64 `json:"endTime"`
+	// Environments The cluster/environments to get the nodes for. If empty, all clusters will be included
+	Environments []string `json:"environments"`
+	// Filters The filters to apply to the nodes, so for example, if you want to get subset of nodes that have a specific label
+	Filters map[string][]string `json:"filters"`
+	// ExcludeFilters are filters that should be excluded from the nodes
+	ExcludeFilters map[string][]string `json:"excludeFilters"`
+	// Splits is a list of attributes to split the nodes by, for example, if you want to split the nodes a label
+	Splits []string `json:"splits"`
+}
