@@ -2,7 +2,7 @@ package resources
 
 import (
 	mcpgolang "github.com/metoro-io/mcp-golang"
-	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/utils"
+	"github.com/metoro-mcp-server/utils"
 )
 
 func LogAttributesResourceHandler() (*mcpgolang.ResourceResponse, error) {

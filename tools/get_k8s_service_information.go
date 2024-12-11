@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	mcpgolang "github.com/metoro-io/mcp-golang"
-	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/model"
-	"github/metoro-io/metoro-mcp-server/src/metoro-mcp-server/utils"
+	"github.com/metoro-mcp-server/model"
+	"github.com/metoro-mcp-server/utils"
 	"time"
 )
 
