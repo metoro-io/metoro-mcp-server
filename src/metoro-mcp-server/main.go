@@ -237,7 +237,7 @@ func main() {
 	err = mcpServer.RegisterResource(
 		"api://nodes",
 		"nodes",
-		"Provides a list of nodes in the kubernetes clusters/environments monitored by Metoro",
+		"Provides a list of nodes in the kubernetes clusters/environments monitored by Metoro. Any of these nodes/instances can be used as a filter/exclude for get_metric tool with the key 'kubernetes.io/hostname' and value as the node names in this resource.",
 		"text/plain",
 		resources.NodesResourceHandler)
 	if err != nil {
