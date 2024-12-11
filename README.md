@@ -37,6 +37,7 @@ This MCP server exposes those APIs to an LLM so you can ask your AI questions ab
 2. Download the Metoro MCP Server from the latest release: https://github.com/metoro-io/metoro-mcp-server/releases
 
 ### If you already have a Metoro Account:
+Copy your auth token from your Metoro account in [Settings](https://us-east.metoro.io/settings) -> Users Settings. 
 Create a file in `~/Library/Application Support/Claude/claude_desktop_config.json` with the following contents:
 ```json
 {
