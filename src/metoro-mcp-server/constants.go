@@ -172,6 +172,37 @@ type GetTraceMetricRequest struct {
 	BucketSize int64 `json:"bucketSize"`
 }
 
+type GetSingleTraceSummaryRequest struct {
+	TracesSummaryRequest
+	// The attribute to get the summary for
+	Attribute string `json:"attribute"`
+}
+
+type TracesSummaryRequest struct {
+	// Required: Start time of when to get the service summaries in seconds since epoch
+	StartTime int64 `json:"startTime"`
+	// Required: End time of when to get the service summaries in seconds since epoch
+	EndTime int64 `json:"endTime"`
+
+	// The filters to apply to the trace summary, so for example, if you want to get traces for a specific service
+	// you can pass in a filter like {"service_name": ["microservice_a"]}
+	Filters map[string][]string `json:"filters"`
+	// ExcludeFilters are used to exclude traces based on a filter
+	ExcludeFilters map[string][]string `json:"excludeFilters"`
+
+	// Regexes are used to filter traces based on a regex inclusively
+	Regexes []string `json:"regexes"`
+	// ExcludeRegexes are used to filter traces based on a regex exclusively
+	ExcludeRegexes []string `json:"excludeRegexes"`
+
+	// Optional: The name of the service to get the trace metrics for
+	// Acts as an additional filter
+	ServiceNames []string `json:"serviceNames"`
+
+	// Environments is the environments to get the traces for. If empty, all environments will be included
+	Environments []string `json:"environments"`
+}
+
 type GetK8sEventsRequest struct {
 	// Required: Start time of when to get the k8s events in seconds since epoch
 	StartTime int64 `json:"startTime"`

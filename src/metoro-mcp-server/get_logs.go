@@ -32,11 +32,11 @@ func getLogsHandler(arguments GetLogsHandlerArgs) (*mcpgolang.ToolResponse, erro
 		Environments:   arguments.Environments,
 	}
 
-	body, err := getLogsMetoroCall(request)
+	resp, err := getLogsMetoroCall(request)
 	if err != nil {
 		return nil, fmt.Errorf("error getting logs: %v", err)
 	}
-	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
+	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(resp)))), nil
 }
 
 func getLogsMetoroCall(request GetLogsRequest) ([]byte, error) {

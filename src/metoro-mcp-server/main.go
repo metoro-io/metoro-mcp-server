@@ -44,46 +44,46 @@ var newTools = []MyTools{
 		Description: "Get metrics from your Kubernetes cluster, monitored by Metoro",
 		Handler:     getMetricHandler,
 	},
-	//{
-	//	Name:        "get_trace_metric",
-	//	Description: "Get trace metrics from your Kubernetes cluster, monitored by Metoro",
-	//	Handler:     getTraceMetricHandler,
-	//},
-	//{
-	//	Name:        "get_trace_attributes",
-	//	Description: "Get trace attributes from your Kubernetes cluster",
-	//	Handler:     getTraceAttributesHandler,
-	//},
-	//{
-	//	Name:        "get_trace_attribute_values_for_individual_attribute",
-	//	Description: "Get trace attribute values for a specific attribute",
-	//	Handler:     getTraceAttributeValuesForIndividualAttributeHandler,
-	//},
-	//{
-	//	Name:        "get_profiles",
-	//	Description: "Get profiles from your Kubernetes cluster",
-	//	Handler:     getProfilesHandler,
-	//},
-	//{
-	//	Name:        "get_k8s_events",
-	//	Description: "Get Kubernetes events from your clusters with filtering options",
-	//	Handler:     getK8sEventsHandler,
-	//},
-	//{
-	//	Name:        "get_k8s_events_attributes",
-	//	Description: "Get Kubernetes events attributes",
-	//	Handler:     getK8sEventsAttributesHandler,
-	//},
-	//{
-	//	Name:        "get_k8s_event_attribute_values_for_individual_attribute",
-	//	Description: "Get Kubernetes event attribute values for a specific attribute",
-	//	Handler:     getK8sEventAttributeValuesForIndividualAttributeHandler,
-	//},
-	//{
-	//	Name:        "get_k8s_events_volume",
-	//	Description: "Get Kubernetes events volume",
-	//	Handler:     getK8sEventsVolumeHandler,
-	//},
+	{
+		Name:        "get_trace_metric",
+		Description: "Get trace metrics from your Kubernetes cluster, monitored by Metoro",
+		Handler:     getTraceMetricHandler,
+	},
+	{
+		Name:        "get_trace_attributes",
+		Description: "Get trace attributes from your Kubernetes cluster",
+		Handler:     getTraceAttributesHandler,
+	},
+	{
+		Name:        "get_trace_attribute_values_for_individual_attribute",
+		Description: "Get trace attribute values for a specific attribute",
+		Handler:     getTraceAttributeValuesForIndividualAttributeHandler,
+	},
+	{
+		Name:        "get_profiles",
+		Description: "Get profiles from your Kubernetes cluster",
+		Handler:     getProfilesHandler,
+	},
+	{
+		Name:        "get_k8s_events",
+		Description: "Get Kubernetes events from your clusters with filtering options",
+		Handler:     getK8sEventsHandler,
+	},
+	{
+		Name:        "get_k8s_events_attributes",
+		Description: "Get Kubernetes events attributes",
+		Handler:     getK8sEventsAttributesHandler,
+	},
+	{
+		Name:        "get_k8s_event_attribute_values_for_individual_attribute",
+		Description: "Get Kubernetes event attribute values for a specific attribute",
+		Handler:     getK8sEventAttributeValuesForIndividualAttributeHandler,
+	},
+	{
+		Name:        "get_k8s_events_volume",
+		Description: "Get Kubernetes events volume",
+		Handler:     getK8sEventsVolumeHandler,
+	},
 	//{
 	//	Name:        "get_metricAttributes",
 	//	Description: "Get metric attributes",

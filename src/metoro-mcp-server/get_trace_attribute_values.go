@@ -4,104 +4,36 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/mark3labs/mcp-go/mcp"
+	mcpgolang "github.com/metoro-io/mcp-golang"
 	"time"
 )
 
-type GetSingleTraceSummaryRequest struct {
-	TracesSummaryRequest
-	// The attribute to get the summary for
-	Attribute string `json:"attribute"`
+type GetTraceAttributeValuesHandlerArgs struct {
+	Attribute    string   `json:"attribute" jsonschema:"required, description=The name of the attribute to get values for"`
+	ServiceNames []string `json:"serviceNames" jsonschema:"description=The service names to get attribute values for"`
+	//  TODO: I don't think we need these two fields for the LLM tool
+	Filters        map[string][]string `json:"filters" jsonschema:"description=The filters to apply to the traces. it is a map of filter keys to array values where array values are ORed when the filters are applied.e.g. key for service name is service.name"`
+	ExcludeFilters map[string][]string `json:"excludeFilters" jsonschema:"description=The exclude filters to exclude/eliminate the traces. Traces matching the exclude traces will not be returned. it is a map of filter keys to array values where array values are ORed when the filters are applied.e.g. key for service name is service.name"`
+	Regexes        []string            `json:"regexes" jsonschema:"description=The regexes to apply to the trace's endpoints. Traces with endpoints matching regexes will be returned"`
+	ExcludeRegexes []string            `json:"excludeRegexes" jsonschema:"description=The regexes to exclude from the trace's endpoints. Traces with endpoints matching regexes will be excluded"`
+	Environments   []string            `json:"environments" jsonschema:"description=The environments to get traces from. If empty, traces from all environments will be returned"`
 }
 
-type TracesSummaryRequest struct {
-	// Required: Start time of when to get the service summaries in seconds since epoch
-	StartTime int64 `json:"startTime"`
-	// Required: End time of when to get the service summaries in seconds since epoch
-	EndTime int64 `json:"endTime"`
-
-	// The filters to apply to the trace summary, so for example, if you want to get traces for a specific service
-	// you can pass in a filter like {"service_name": ["microservice_a"]}
-	Filters map[string][]string `json:"filters"`
-	// ExcludeFilters are used to exclude traces based on a filter
-	ExcludeFilters map[string][]string `json:"excludeFilters"`
-
-	// Regexes are used to filter traces based on a regex inclusively
-	Regexes []string `json:"regexes"`
-	// ExcludeRegexes are used to filter traces based on a regex exclusively
-	ExcludeRegexes []string `json:"excludeRegexes"`
-
-	// Optional: The name of the service to get the trace metrics for
-	// Acts as an additional filter
-	ServiceNames []string `json:"serviceNames"`
-
-	// Environments is the environments to get the traces for. If empty, all environments will be included
-	Environments []string `json:"environments"`
-}
-
-func getTraceAttributeValuesForIndividualAttributeHandler(arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+func getTraceAttributeValuesForIndividualAttributeHandler(arguments GetTraceAttributeValuesHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
 	fiveMinsAgo := now.Add(-5 * time.Minute)
 	request := GetSingleTraceSummaryRequest{
 		TracesSummaryRequest: TracesSummaryRequest{
-			StartTime: fiveMinsAgo.Unix(),
-			EndTime:   now.Unix(),
+			StartTime:      fiveMinsAgo.Unix(),
+			EndTime:        now.Unix(),
+			ServiceNames:   arguments.ServiceNames,
+			Filters:        arguments.Filters,
+			ExcludeFilters: arguments.ExcludeFilters,
+			Regexes:        arguments.Regexes,
+			ExcludeRegexes: arguments.ExcludeRegexes,
+			Environments:   arguments.Environments,
 		},
-	}
-
-	// Required attribute parameter
-	if attribute, ok := arguments["attribute"].(string); ok && attribute != "" {
-		request.Attribute = attribute
-	} else {
-		return nil, fmt.Errorf("attribute is required")
-	}
-
-	if serviceNamesStr, ok := arguments["serviceNames"].(string); ok && serviceNamesStr != "" {
-		var serviceNames []string
-		if err := json.Unmarshal([]byte(serviceNamesStr), &serviceNames); err != nil {
-			return nil, fmt.Errorf("error parsing serviceNames JSON: %v", err)
-		}
-		request.ServiceNames = serviceNames
-	}
-
-	if filtersStr, ok := arguments["filters"].(string); ok && filtersStr != "" {
-		var filters map[string][]string
-		if err := json.Unmarshal([]byte(filtersStr), &filters); err != nil {
-			return nil, fmt.Errorf("error parsing filters JSON: %v", err)
-		}
-		request.Filters = filters
-	}
-
-	if excludeFiltersStr, ok := arguments["excludeFilters"].(string); ok && excludeFiltersStr != "" {
-		var excludeFilters map[string][]string
-		if err := json.Unmarshal([]byte(excludeFiltersStr), &excludeFilters); err != nil {
-			return nil, fmt.Errorf("error parsing excludeFilters JSON: %v", err)
-		}
-		request.ExcludeFilters = excludeFilters
-	}
-
-	if regexesStr, ok := arguments["regexes"].(string); ok && regexesStr != "" {
-		var regexes []string
-		if err := json.Unmarshal([]byte(regexesStr), &regexes); err != nil {
-			return nil, fmt.Errorf("error parsing regexes JSON: %v", err)
-		}
-		request.Regexes = regexes
-	}
-
-	if excludeRegexesStr, ok := arguments["excludeRegexes"].(string); ok && excludeRegexesStr != "" {
-		var excludeRegexes []string
-		if err := json.Unmarshal([]byte(excludeRegexesStr), &excludeRegexes); err != nil {
-			return nil, fmt.Errorf("error parsing excludeRegexes JSON: %v", err)
-		}
-		request.ExcludeRegexes = excludeRegexes
-	}
-
-	if environmentsStr, ok := arguments["environments"].(string); ok && environmentsStr != "" {
-		var environments []string
-		if err := json.Unmarshal([]byte(environmentsStr), &environments); err != nil {
-			return nil, fmt.Errorf("error parsing environments JSON: %v", err)
-		}
-		request.Environments = environments
+		Attribute: arguments.Attribute,
 	}
 
 	jsonBody, err := json.Marshal(request)
@@ -114,5 +46,5 @@ func getTraceAttributeValuesForIndividualAttributeHandler(arguments map[string]i
 		return nil, fmt.Errorf("error making Metoro call: %v", err)
 	}
 
-	return mcp.NewToolResultText(string(resp)), nil
+	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(resp)))), nil
 }
