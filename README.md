@@ -78,4 +78,4 @@ The included token is a demo token, publicly available for anyone to use.
 
 ## Built with
 
-This library is built on top of our [Golang MCP SDK](https://github.com/metoro-io/mcp-golang).
+This server is built on top of our [Golang MCP SDK](https://github.com/metoro-io/mcp-golang).
