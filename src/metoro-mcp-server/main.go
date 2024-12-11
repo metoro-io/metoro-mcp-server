@@ -30,6 +30,7 @@ var handlers = map[string]server.ToolHandlerFunc{
 	"get_log_attributes":                                      getLogAttributesHandler,                                 // resource
 	"get_log_attribute_values_for_individual_attribute":       getLogAttributeValuesForIndividualAttributeHandler,      // tool
 	"get_nodes":                                               getNodesHandler,                                         // tool
+	"get_node_info":                                           getNodeInfoHandler,                                      // tool
 }
 
 var tools = []mcp.Tool{
@@ -291,6 +292,13 @@ var tools = []mcp.Tool{
 		),
 		mcp.WithString("environments",
 			mcp.Description("JSON array of environments to filter service information by"),
+		),
+	),
+	mcp.NewTool("get_node_info",
+		mcp.WithDescription("Get detailed information about a specific node/instance in the cluster"),
+		mcp.WithString("nodeName",
+			mcp.Description("Name of the node to get information for"),
+			mcp.Required(),
 		),
 	),
 	mcp.NewTool("get_nodes",
