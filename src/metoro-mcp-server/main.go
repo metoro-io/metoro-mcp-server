@@ -149,6 +149,73 @@ var metoroTools = []MetoroTools{
 	},
 }
 
+type MetoroResource struct {
+	Path        string
+	Name        string
+	Description string
+	ContentType string
+	Handler     any
+}
+
+var metoroResources = []MetoroResource{
+	{
+		Path:        "api://environments",
+		Name:        "environments",
+		Description: "This resource provides a list of names of the kubernetes clusters/environments monitored by Metoro",
+		ContentType: "text/plain",
+		Handler:     resources.EnvironmentResourceHandler,
+	},
+	{
+		Path:        "api://namespaces",
+		Name:        "namespaces",
+		Description: "This resource provides a list of namespaces in the kubernetes clusters/environments monitored by Metoro",
+		ContentType: "text/plain",
+		Handler:     resources.NamespacesResourceHandler,
+	},
+	{
+		Path:        "api://services",
+		Name:        "services",
+		Description: "This resource provides a list of services running in the kubernetes clusters/environments monitored by Metoro",
+		ContentType: "text/plain",
+		Handler:     resources.ServicesResourceHandler,
+	},
+	{
+		Path:        "api://traceAttributes",
+		Name:        "traceAttributes",
+		Description: "Provides a list of trace attribute keys that are available to be used for filtering or grouping traces. These trace attribute keys should be used as Filter/ExcludeFilter keys or Splits for get_traces, get_trace_metric and get_trace_attribute_values_for_individual_attribute tools arguments.",
+		ContentType: "text/plain",
+		Handler:     resources.TraceAttributesResourceHandler,
+	},
+	{
+		Path:        "api://k8sEventAttributes",
+		Name:        "k8sEventAttributes",
+		Description: "Provides a list of Kubernetes Event's attribute keys that are available to be used for filtering or grouping K8s Events. These K8s Event attribute keys should be used as Filter/ExcludeFilter keys or Splits for get_k8s_events, get_k8s_events_volume and get_k8s_events_volume tools arguments.",
+		ContentType: "text/plain",
+		Handler:     resources.K8sEventsAttributesResourceHandler,
+	},
+	{
+		Path:        "api://metrics",
+		Name:        "metricNames",
+		Description: "Provides a list of available metric names that can be used for as MetricName arguments to get_metric, get_metric_metadata and get_metricAttributes tools to get metrics data.",
+		ContentType: "text/plain",
+		Handler:     resources.MetricsResourceHandler,
+	},
+	{
+		Path:        "api://logAttributes",
+		Name:        "logAttributes",
+		Description: "Provides a list of log attribute keys that are available to be used for filtering or grouping logs. These log attribute keys should be used as Filter/ExcludeFilter keys or Splits for get_logs, get_log_attribute_values_for_individual_attribute tools arguments.",
+		ContentType: "text/plain",
+		Handler:     resources.LogAttributesResourceHandler,
+	},
+	{
+		Path:        "api://nodes",
+		Name:        "nodes",
+		Description: "Provides a list of nodes in the kubernetes clusters/environments monitored by Metoro. Any of these nodes/instances can be used as a filter/exclude for get_metric tool with the key 'kubernetes.io/hostname' and value as the node names in this resource.",
+		ContentType: "text/plain",
+		Handler:     resources.NodesResourceHandler,
+	},
+}
+
 func main() {
 	// Check if the appropriate environment variables are set
 	if err := checkEnvVars(); err != nil {
@@ -158,6 +225,8 @@ func main() {
 	done := make(chan struct{})
 
 	mcpServer := mcpgolang.NewServer(stdio.NewStdioServerTransport())
+
+	// Add tools
 	for _, tool := range metoroTools {
 		err := mcpServer.RegisterTool(tool.Name, tool.Description, tool.Handler)
 		if err != nil {
@@ -165,86 +234,20 @@ func main() {
 		}
 	}
 
-	err := mcpServer.RegisterResource(
-		"api://environments",
-		"environments",
-		"This resource provides a list of names of the kubernetes clusters/environments monitored by Metoro",
-		"text/plain",
-		resources.EnvironmentResourceHandler)
-	if err != nil {
-		panic(err)
+	// Add resources
+	for _, resource := range metoroResources {
+		err := mcpServer.RegisterResource(
+			resource.Path,
+			resource.Name,
+			resource.Description,
+			resource.ContentType,
+			resource.Handler)
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	err = mcpServer.RegisterResource(
-		"api://namespaces",
-		"namespaces",
-		"This resource provides a list of namespaces in the kubernetes clusters/environments monitored by Metoro",
-		"text/plain",
-		resources.NamespacesResourceHandler)
-	if err != nil {
-		panic(err)
-	}
-
-	err = mcpServer.RegisterResource(
-		"api://services",
-		"services",
-		"This resource provides a list of services running in the kubernetes clusters/environments monitored by Metoro",
-		"text/plain",
-		resources.ServicesResourceHandler)
-	if err != nil {
-		panic(err)
-	}
-
-	err = mcpServer.RegisterResource(
-		"api://traceAttributes",
-		"traceAttributes",
-		"Provides a list of trace attribute keys that are available to be used for filtering or grouping traces. These trace attribute keys should be used as Filter/ExcludeFilter keys or Splits for get_traces, get_trace_metric and get_trace_attribute_values_for_individual_attribute tools arguments.",
-		"text/plain",
-		resources.TraceAttributesResourceHandler)
-	if err != nil {
-		panic(err)
-	}
-	err = mcpServer.RegisterResource(
-		"api://k8sEventAttributes",
-		"k8sEventAttributes",
-		"Provides a list of Kubernetes Event's attribute keys that are available to be used for filtering or grouping K8s Events. These K8s Event attribute keys should be used as Filter/ExcludeFilter keys or Splits for get_k8s_events, get_k8s_events_volume and get_k8s_events_volume tools arguments.",
-		"text/plain",
-		resources.K8sEventsAttributesResourceHandler)
-	if err != nil {
-		panic(err)
-	}
-
-	err = mcpServer.RegisterResource(
-		"api://metrics",
-		"metricNames",
-		"Provides a list of available metric names that can be used for as MetricName arguments to get_metric, get_metric_metadata and get_metricAttributes tools to get metrics data.",
-		"text/plain",
-		resources.MetricsResourceHandler)
-	if err != nil {
-		panic(err)
-	}
-
-	err = mcpServer.RegisterResource(
-		"api://logAttributes",
-		"logAttributes",
-		"Provides a list of log attribute keys that are available to be used for filtering or grouping logs. These log attribute keys should be used as Filter/ExcludeFilter keys or Splits for get_logs, get_log_attribute_values_for_individual_attribute tools arguments.",
-		"text/plain",
-		resources.LogAttributesResourceHandler)
-	if err != nil {
-		panic(err)
-	}
-
-	err = mcpServer.RegisterResource(
-		"api://nodes",
-		"nodes",
-		"Provides a list of nodes in the kubernetes clusters/environments monitored by Metoro. Any of these nodes/instances can be used as a filter/exclude for get_metric tool with the key 'kubernetes.io/hostname' and value as the node names in this resource.",
-		"text/plain",
-		resources.NodesResourceHandler)
-	if err != nil {
-		panic(err)
-	}
-
-	err = mcpServer.Serve()
+	err := mcpServer.Serve()
 	if err != nil {
 		panic(err)
 	}
