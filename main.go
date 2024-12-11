@@ -4,9 +4,9 @@ import (
 	"fmt"
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/mcp-golang/transport/stdio"
-	"github.com/metoro-mcp-server/resources"
-	"github.com/metoro-mcp-server/tools"
-	"github.com/metoro-mcp-server/utils"
+	"github.com/metoro-io/metoro-mcp-server/resources"
+	"github.com/metoro-io/metoro-mcp-server/tools"
+	"github.com/metoro-io/metoro-mcp-server/utils"
 	"os"
 )
 

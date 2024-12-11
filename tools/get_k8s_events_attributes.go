@@ -3,7 +3,7 @@ package tools
 import (
 	"fmt"
 	mcpgolang "github.com/metoro-io/mcp-golang"
-	"github.com/metoro-mcp-server/utils"
+	"github.com/metoro-io/metoro-mcp-server/utils"
 )
 
 type GetK8sEventsAttributesHandlerArgs struct{}
