@@ -33,6 +33,7 @@ var handlers = map[string]server.ToolHandlerFunc{
 	"get_node_info":                                           getNodeInfoHandler,                                      // tool
 	"get_service_summaries":                                   getServiceSummariesHandler,                              // tool
 	"get_alerts":                                              getAlertsHandler,                                        // tool
+	"get_alert_fires":                                         getAlertFiresHandler,                                    // tool
 }
 
 var tools = []mcp.Tool{
@@ -377,6 +378,13 @@ var tools = []mcp.Tool{
 	),
 	mcp.NewTool("get_alerts",
 		mcp.WithDescription("Get information about all configured alerts including their names, descriptions, status, destinations, and types"),
+	),
+	mcp.NewTool("get_alert_fires",
+		mcp.WithDescription("Get detailed information about all firing instances of a specific alert, including timing, messages, and metric properties"),
+		mcp.WithString("alertId",
+			mcp.Description("UUID of the alert to get firing instances for"),
+			mcp.Required(),
+		),
 	),
 }
 
