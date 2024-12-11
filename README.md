@@ -34,9 +34,7 @@ This MCP server exposes those APIs to an LLM so you can ask your AI questions ab
 
 ## Demo
 
-
-<video src="https://github.com/user-attachments/assets/b3f21e9a-45b8-4c17-8d8c-cff560d8694f"/>
-
+https://github.com/user-attachments/assets/b3f21e9a-45b8-4c17-8d8c-cff560d8694f
 
 ## How can I use Metoro MCP Server? 
 1. Install the [Claude Desktop App](https://claude.ai/download).
