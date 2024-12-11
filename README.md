@@ -1,3 +1,22 @@
+<div align="center">
+<img src="./resources/Metoro_square.svg" height="300" alt="Metoro MCP Logo">
+</div>
+<br/>
+<div align="center">
+
+![GitHub stars](https://img.shields.io/github/stars/metoro-io/metoro-mcp-server?style=social)
+![GitHub forks](https://img.shields.io/github/forks/metoro-io/metoro-mcp-server?style=social)
+![GitHub issues](https://img.shields.io/github/issues/metoro-io/metoro-mcp-server)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/metoro-io/metoro-mcp-server)
+![GitHub license](https://img.shields.io/github/license/metoro-io/metoro-mcp-server)
+![GitHub contributors](https://img.shields.io/github/contributors/metoro-io/metoro-mcp-server)
+![GitHub last commit](https://img.shields.io/github/last-commit/metoro-io/metoro-mcp-server)
+[![GoDoc](https://pkg.go.dev/badge/github.com/metoro-io/metoro-mcp-server.svg)](https://pkg.go.dev/github.com/metoro-io/metoro-mcp-server)
+[![Go Report Card](https://goreportcard.com/badge/github.com/metoro-io/metoro-mcp-server)](https://goreportcard.com/report/github.com/metoro-io/metoro-mcp-server)
+![Tests](https://github.com/metoro-io/metoro-mcp-server/actions/workflows/go-test.yml/badge.svg)
+
+</div>
+
 # metoro-mcp-server
 This repository contains th Metoro MCP (Model Context Protocol) Server. This MCP Server allows you to interact with your Kubernetes cluster via the Claude Desktop App!
 
