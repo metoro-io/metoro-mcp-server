@@ -4,72 +4,39 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/mark3labs/mcp-go/mcp"
+	mcpgolang "github.com/metoro-io/mcp-golang"
 	"time"
 )
 
-func getLogsHandler(arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+// TODO: If we figure out how to input start and end times we can directly use GetLogsRequest struct.
+type GetLogsHandlerArgs struct {
+	Filters        map[string][]string `json:"filters" jsonschema:"description=The filters to apply to the logs. it is a map of filter keys to array values where array values are ORed.e.g. key for service name is service.name"`
+	ExcludeFilters map[string][]string `json:"excludeFilters" jsonschema:"description=The filters to exclude from the logs. e.g., '{\"service.name\": [\"/k8s/namespaceX/serviceX\"]}' should exclude logs for serviceX in namespaceX"`
+	Regexes        []string            `json:"regexes" jsonschema:"description=The regexes to apply to the log's messages. Logs with message matching regexes will be returned"`
+	ExcludeRegexes []string            `json:"excludeRegexes" jsonshcema:"description=The regexes to exclude from the log's messages. Logs with message matching regexes will be excluded"`
+	Ascending      bool                `json:"ascending" jsonschema:"description=If true, logs will be returned in ascending order, otherwise in descending order"`
+	Environments   []string            `json:"environments" jsonschema:"description=The environments to get logs from. If empty, logs from all environments will be returned"`
+}
+
+func getLogsHandler(arguments GetLogsHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
 	fiveMinsAgo := now.Add(-5 * time.Minute)
 	request := GetLogsRequest{
-		StartTime: fiveMinsAgo.Unix(),
-		EndTime:   now.Unix(),
+		StartTime:      fiveMinsAgo.Unix(),
+		EndTime:        now.Unix(),
+		Filters:        arguments.Filters,
+		ExcludeFilters: arguments.ExcludeFilters,
+		Regexes:        arguments.Regexes,
+		ExcludeRegexes: arguments.ExcludeRegexes,
+		Ascending:      arguments.Ascending,
+		Environments:   arguments.Environments,
 	}
 
-	//if prevEndTime, ok := arguments["prevEndTime"]; ok && prevEndTime != nil {
-	//	val := prevEndTime.(int64)
-	//	request.PrevEndTime = &val
-	//}
-
-	if filtersStr, ok := arguments["filters"].(string); ok && filtersStr != "" {
-		var filters map[string][]string
-		if err := json.Unmarshal([]byte(filtersStr), &filters); err != nil {
-			return nil, fmt.Errorf("error parsing filters JSON: %v", err)
-		}
-		request.Filters = filters
-	}
-
-	if excludeFiltersStr, ok := arguments["excludeFilters"].(string); ok && excludeFiltersStr != "" {
-		var excludeFilters map[string][]string
-		if err := json.Unmarshal([]byte(excludeFiltersStr), &excludeFilters); err != nil {
-			return nil, fmt.Errorf("error parsing excludeFilters JSON: %v", err)
-		}
-		request.ExcludeFilters = excludeFilters
-	}
-
-	if regexesStr, ok := arguments["regexes"].(string); ok && regexesStr != "" {
-		var regexes []string
-		if err := json.Unmarshal([]byte(regexesStr), &regexes); err != nil {
-			return nil, fmt.Errorf("error parsing regexes JSON: %v", err)
-		}
-		request.Regexes = regexes
-	}
-
-	if excludeRegexesStr, ok := arguments["excludeRegexes"].(string); ok && excludeRegexesStr != "" {
-		var excludeRegexes []string
-		if err := json.Unmarshal([]byte(excludeRegexesStr), &excludeRegexes); err != nil {
-			return nil, fmt.Errorf("error parsing excludeRegexes JSON: %v", err)
-		}
-		request.ExcludeRegexes = excludeRegexes
-	}
-
-	if ascending, ok := arguments["ascending"].(bool); ok {
-		request.Ascending = ascending
-	}
-
-	if environmentsStr, ok := arguments["environments"].(string); ok && environmentsStr != "" {
-		var environments []string
-		if err := json.Unmarshal([]byte(environmentsStr), &environments); err != nil {
-			return nil, fmt.Errorf("error parsing environments JSON: %v", err)
-		}
-		request.Environments = environments
-	}
-
-	body, err := getLogsMetoroCall(request)
+	resp, err := getLogsMetoroCall(request)
 	if err != nil {
 		return nil, fmt.Errorf("error getting logs: %v", err)
 	}
-	return mcp.NewToolResultText(fmt.Sprintf("%s", string(body))), nil
+	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(resp)))), nil
 }
 
 func getLogsMetoroCall(request GetLogsRequest) ([]byte, error) {

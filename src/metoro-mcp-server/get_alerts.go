@@ -2,17 +2,19 @@ package main
 
 import (
 	"fmt"
-	"github.com/mark3labs/mcp-go/mcp"
+	mcpgolang "github.com/metoro-io/mcp-golang"
 )
 
-func getAlertsMetoroCall() ([]byte, error) {
-	return MakeMetoroAPIRequest("GET", "searchAlerts", nil)
-}
+type GetAlertHandlerArgs struct{}
 
-func getAlertsHandler(arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+func getAlertsHandler(arguments GetAlertHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	body, err := getAlertsMetoroCall()
 	if err != nil {
 		return nil, fmt.Errorf("error getting alerts: %v", err)
 	}
-	return mcp.NewToolResultText(string(body)), nil
+	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
+}
+
+func getAlertsMetoroCall() ([]byte, error) {
+	return MakeMetoroAPIRequest("GET", "searchAlerts", nil)
 }

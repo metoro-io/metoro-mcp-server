@@ -4,77 +4,42 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/mark3labs/mcp-go/mcp"
+	mcpgolang "github.com/metoro-io/mcp-golang"
 	"time"
 )
 
-type Aggregation string
-type MetricFunction struct {
-	Name       string            `json:"name"`
-	Parameters map[string]string `json:"parameters"`
+type GetMetricHandlerArgs struct {
+	MetricName     string              `json:"metricName" jsonschema:"required,description=The name of the metric to get"`
+	Aggregation    Aggregation         `json:"aggregation" jsonschema:"required,description=The aggregation to apply to the metric. e.g. sum, avg, min, max, count"`
+	Filters        map[string][]string `json:"filters" jsonschema:"description=Filters to apply to the metric. Metrics matching the filters will be returned"`
+	ExcludeFilters map[string][]string `json:"excludeFilters" jsonschema:"description=Exclude filters to apply to the metric. Metrics matching the exclude filters will not be returned"`
+	Splits         []string            `json:"splits" jsonschema:"description=The splits to apply to the metric. Metrics will be split by the given keys"`
+	Functions      []MetricFunction    `json:"functions" jsonschema:"description=The functions to apply to the metric"`
+	LimitResults   bool                `json:"limitResults" jsonschema:"description=If true, the results will be limited to improve performance"`
+	BucketSize     int64               `json:"bucketSize" jsonschema:"description=The size of each datapoint bucket in seconds, if not provided metoro will select the best bucket size for the given duration for performance and clarity"`
 }
 
-func getMetricHandler(arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+func getMetricHandler(arguments GetMetricHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
 	fiveMinsAgo := now.Add(-5 * time.Minute)
 	request := GetMetricRequest{
-		StartTime: fiveMinsAgo.Unix(),
-		EndTime:   now.Unix(),
-	}
-
-	if metricName, ok := arguments["metricName"].(string); ok && metricName != "" {
-		request.MetricName = metricName
-	}
-
-	if filtersStr, ok := arguments["filters"].(string); ok && filtersStr != "" {
-		var filters map[string][]string
-		if err := json.Unmarshal([]byte(filtersStr), &filters); err != nil {
-			return nil, fmt.Errorf("error parsing filters JSON: %v", err)
-		}
-		request.Filters = filters
-	}
-
-	if excludeFiltersStr, ok := arguments["excludeFilters"].(string); ok && excludeFiltersStr != "" {
-		var excludeFilters map[string][]string
-		if err := json.Unmarshal([]byte(excludeFiltersStr), &excludeFilters); err != nil {
-			return nil, fmt.Errorf("error parsing excludeFilters JSON: %v", err)
-		}
-		request.ExcludeFilters = excludeFilters
-	}
-
-	if splitsStr, ok := arguments["splits"].(string); ok && splitsStr != "" {
-		var splits []string
-		if err := json.Unmarshal([]byte(splitsStr), &splits); err != nil {
-			return nil, fmt.Errorf("error parsing splits JSON: %v", err)
-		}
-		request.Splits = splits
-	}
-
-	if aggregation, ok := arguments["aggregation"].(string); ok && aggregation != "" {
-		request.Aggregation = Aggregation(aggregation)
-	}
-
-	if functionsStr, ok := arguments["functions"].(string); ok && functionsStr != "" {
-		var functions []MetricFunction
-		if err := json.Unmarshal([]byte(functionsStr), &functions); err != nil {
-			return nil, fmt.Errorf("error parsing functions JSON: %v", err)
-		}
-		request.Functions = functions
-	}
-
-	if limitResults, ok := arguments["limitResults"].(bool); ok {
-		request.LimitResults = limitResults
-	}
-
-	if bucketSize, ok := arguments["bucketSize"].(float64); ok {
-		request.BucketSize = int64(bucketSize)
+		StartTime:      fiveMinsAgo.Unix(),
+		EndTime:        now.Unix(),
+		MetricName:     arguments.MetricName,
+		Filters:        arguments.Filters,
+		ExcludeFilters: arguments.ExcludeFilters,
+		Splits:         arguments.Splits,
+		Aggregation:    arguments.Aggregation,
+		Functions:      arguments.Functions,
+		LimitResults:   arguments.LimitResults,
+		BucketSize:     arguments.BucketSize,
 	}
 
 	body, err := getMetricMetoroCall(request)
 	if err != nil {
 		return nil, fmt.Errorf("error getting metric: %v", err)
 	}
-	return mcp.NewToolResultText(fmt.Sprintf("%s", string(body))), nil
+	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
 func getMetricMetoroCall(request GetMetricRequest) ([]byte, error) {

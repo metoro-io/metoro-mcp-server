@@ -2,28 +2,25 @@ package main
 
 import (
 	"fmt"
-	"github.com/mark3labs/mcp-go/mcp"
+	mcpgolang "github.com/metoro-io/mcp-golang"
 	"time"
 )
 
-func getAlertFiresMetoroCall(alertId string, startTime, endTime int64) ([]byte, error) {
-	return MakeMetoroAPIRequest("GET", fmt.Sprintf("alertFires?alertId=%s&startTime=%d&endTime=%d", alertId, startTime, endTime), nil)
+type GetAlertFiresHandlerArgs struct {
+	AlertId string `json:"alertId" jsonschema:"required,description=The alert ID to get fires for"`
 }
 
-func getAlertFiresHandler(arguments map[string]interface{}) (*mcp.CallToolResult, error) {
-	alertId, ok := arguments["alertId"].(string)
-	if !ok || alertId == "" {
-		return nil, fmt.Errorf("alertId is required")
-	}
-
+func getAlertFiresHandler(arguments GetAlertFiresHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
 	fiveMinsAgo := now.Add(-5 * time.Minute)
-	startTime := fiveMinsAgo.Unix()
-	endTime := now.Unix()
 
-	body, err := getAlertFiresMetoroCall(alertId, startTime, endTime)
+	body, err := getAlertFiresMetoroCall(arguments.AlertId, fiveMinsAgo.Unix(), now.Unix())
 	if err != nil {
 		return nil, fmt.Errorf("error getting alert fires: %v", err)
 	}
-	return mcp.NewToolResultText(string(body)), nil
+	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
+}
+
+func getAlertFiresMetoroCall(alertId string, startTime, endTime int64) ([]byte, error) {
+	return MakeMetoroAPIRequest("GET", fmt.Sprintf("alertFires?alertId=%s&startTime=%d&endTime=%d", alertId, startTime, endTime), nil)
 }

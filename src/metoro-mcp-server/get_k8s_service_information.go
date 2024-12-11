@@ -4,33 +4,24 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/mark3labs/mcp-go/mcp"
+	mcpgolang "github.com/metoro-io/mcp-golang"
 	"time"
 )
 
-func getK8sServiceInformationHandler(arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+type GetK8sSErviceInformationHandlerArgs struct {
+	ServiceName  string   `json:"serviceName" jsonschema:"required,description=The name of the service to get information for"`
+	Environments []string `json:"environments" jsonschema:"description=The environments to get information for. If empty, all environments will be used."`
+}
+
+func getK8sServiceInformationHandler(arguments GetK8sSErviceInformationHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
 	fiveMinsAgo := now.Add(-5 * time.Minute)
 	request := GetPodsRequest{
-		StartTime: fiveMinsAgo.Unix(),
-		EndTime:   now.Unix(),
+		StartTime:    fiveMinsAgo.Unix(),
+		EndTime:      now.Unix(),
+		ServiceName:  arguments.ServiceName,
+		Environments: arguments.Environments,
 	}
-
-	// ServiceName is required for this endpoint
-	if serviceName, ok := arguments["serviceName"].(string); ok && serviceName != "" {
-		request.ServiceName = serviceName
-	} else {
-		return nil, fmt.Errorf("serviceName is required")
-	}
-
-	if environmentsStr, ok := arguments["environments"].(string); ok && environmentsStr != "" {
-		var environments []string
-		if err := json.Unmarshal([]byte(environmentsStr), &environments); err != nil {
-			return nil, fmt.Errorf("error parsing environments JSON: %v", err)
-		}
-		request.Environments = environments
-	}
-
 	jsonBody, err := json.Marshal(request)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling request: %v", err)
@@ -41,5 +32,5 @@ func getK8sServiceInformationHandler(arguments map[string]interface{}) (*mcp.Cal
 		return nil, fmt.Errorf("error making Metoro call: %v", err)
 	}
 
-	return mcp.NewToolResultText(string(resp)), nil
+	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(resp)))), nil
 }

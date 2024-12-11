@@ -2,26 +2,20 @@ package main
 
 import (
 	"fmt"
-	"github.com/mark3labs/mcp-go/mcp"
+	mcpgolang "github.com/metoro-io/mcp-golang"
 )
 
-type MetricMetadata struct {
-	Type        string `json:"type"`
-	Unit        string `json:"metricUnit"`
-	Description string `json:"metricDescription"`
+type GetMetricMetadataHandlerArgs struct {
+	Name string `json:"name" jsonschema:"required,description=The name of the metric to get metadata for"`
 }
 
-func getMetricMetadata(arguments map[string]interface{}) (*mcp.CallToolResult, error) {
-	metricName := arguments["name"].(string)
-	if metricName == "" {
-		return nil, fmt.Errorf("metricName is required")
-	}
-	response, err := getMetricMetadataMetoroCall(metricName)
+func getMetricMetadata(arguments GetMetricMetadataHandlerArgs) (*mcpgolang.ToolResponse, error) {
+	response, err := getMetricMetadataMetoroCall(arguments.Name)
 	if err != nil {
 		return nil, fmt.Errorf("error calling Metoro get metric metadata api: %v", err)
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("%s", string(response))), nil
+	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(response)))), nil
 }
 
 func getMetricMetadataMetoroCall(metricName string) ([]byte, error) {

@@ -4,43 +4,29 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/mark3labs/mcp-go/mcp"
+	mcpgolang "github.com/metoro-io/mcp-golang"
 	"time"
 )
 
-type MetricAttributesRequest struct {
-	StartTime        int64               `json:"startTime"`
-	EndTime          int64               `json:"endTime"`
-	MetricName       string              `json:"metricName"`
-	FilterAttributes map[string][]string `json:"filterAttributes"`
+type GetMetricAttributesHandlerArgs struct {
+	MetricName       string              `json:"metricName" jsonschema:"required,description=The name of the metric to get attributes for"`
+	FilterAttributes map[string][]string `json:"filterAttributes" jsonschema:"description=The attributes to filter the metric attributes by"`
 }
 
-func getMetricAttributesHandler(arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+func getMetricAttributesHandler(arguments GetMetricAttributesHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
 	fiveMinsAgo := now.Add(-5 * time.Minute)
 	request := MetricAttributesRequest{
-		StartTime: fiveMinsAgo.Unix(),
-		EndTime:   now.Unix(),
+		StartTime:        fiveMinsAgo.Unix(),
+		EndTime:          now.Unix(),
+		MetricName:       arguments.MetricName,
+		FilterAttributes: arguments.FilterAttributes,
 	}
-
-	if metricName, ok := arguments["metricName"].(string); ok && metricName != "" {
-		request.MetricName = metricName
-	}
-
-	if filterAttributesStr, ok := arguments["filterAttributes"].(string); ok && filterAttributesStr != "" {
-		var filterAttributes map[string][]string
-		if err := json.Unmarshal([]byte(filterAttributesStr), &filterAttributes); err != nil {
-			return nil, fmt.Errorf("error parsing filterAttributes JSON: %v", err)
-		}
-		request.FilterAttributes = filterAttributes
-	}
-
 	response, err := getMetricAttributesMetoroCall(request)
 	if err != nil {
 		return nil, fmt.Errorf("error calling Metoro API: %v", err)
 	}
-
-	return mcp.NewToolResultText(fmt.Sprintf("%s", string(response))), nil
+	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(response)))), nil
 }
 
 func getMetricAttributesMetoroCall(request MetricAttributesRequest) ([]byte, error) {
@@ -48,6 +34,5 @@ func getMetricAttributesMetoroCall(request MetricAttributesRequest) ([]byte, err
 	if err != nil {
 		return nil, err
 	}
-
 	return MakeMetoroAPIRequest("POST", "metricAttributes", bytes.NewBuffer(jsonData))
 }

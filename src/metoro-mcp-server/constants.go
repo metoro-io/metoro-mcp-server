@@ -43,6 +43,47 @@ type GetTracesRequest struct {
 	Environments   []string            `json:"environments"`
 }
 
+type Aggregation string
+
+const (
+	AggregationSum   Aggregation = "sum"
+	AggregationAvg   Aggregation = "avg"
+	AggregationMax   Aggregation = "max"
+	AggregationMin   Aggregation = "min"
+	AggregationCount Aggregation = "count"
+	AggregationP50   Aggregation = "p50"
+	AggregationP90   Aggregation = "p90"
+	AggregationP95   Aggregation = "p95"
+	AggregationP99   Aggregation = "p99"
+
+	// Only for trace metrics
+	AggregationRequestSize  Aggregation = "requestSize"
+	AggregationResponseSize Aggregation = "responseSize"
+	AggregationTotalSize    Aggregation = "totalSize"
+)
+
+type MetricFunction struct {
+	ID string `json:"id"`
+	// The type of the function
+	FunctionType FunctionType `json:"functionType"`
+	// The payload of the function
+	// TODO: If we have more payloads this can be an interface but for now its a math expression since its the only payload.
+	FunctionPayload MathExpression `json:"functionPayload"`
+}
+
+type MathExpression struct {
+	Variables  []string `json:"variables"`
+	Expression string   `json:"expression"`
+}
+
+type FunctionType string
+
+const (
+	MonotonicDifference  FunctionType = "monotonicDifference"
+	ValueDifference      FunctionType = "valueDifference"
+	CustomMathExpression FunctionType = "customMathExpression"
+)
+
 type GetMetricRequest struct {
 	// MetricName is the name of the metric to get
 	MetricName string `json:"metricName"`
@@ -69,6 +110,20 @@ type GetMetricRequest struct {
 	LimitResults bool `json:"limitResults"`
 	// BucketSize is the size of each datapoint bucket in seconds
 	BucketSize int64 `json:"bucketSize"`
+}
+
+type MetricAttributesRequest struct {
+	StartTime        int64               `json:"startTime"`
+	EndTime          int64               `json:"endTime"`
+	MetricName       string              `json:"metricName"`
+	FilterAttributes map[string][]string `json:"filterAttributes"`
+}
+
+type FuzzyMetricsRequest struct {
+	MetricFuzzyMatch string   `json:"metricFuzzyMatch"`
+	Environments     []string `json:"environments"`
+	StartTime        int64    `json:"startTime"`
+	EndTime          int64    `json:"endTime"`
 }
 
 type GetProfileRequest struct {
@@ -129,6 +184,37 @@ type GetTraceMetricRequest struct {
 
 	// BucketSize is the size of each datapoint bucket in seconds
 	BucketSize int64 `json:"bucketSize"`
+}
+
+type GetSingleTraceSummaryRequest struct {
+	TracesSummaryRequest
+	// The attribute to get the summary for
+	Attribute string `json:"attribute"`
+}
+
+type TracesSummaryRequest struct {
+	// Required: Start time of when to get the service summaries in seconds since epoch
+	StartTime int64 `json:"startTime"`
+	// Required: End time of when to get the service summaries in seconds since epoch
+	EndTime int64 `json:"endTime"`
+
+	// The filters to apply to the trace summary, so for example, if you want to get traces for a specific service
+	// you can pass in a filter like {"service_name": ["microservice_a"]}
+	Filters map[string][]string `json:"filters"`
+	// ExcludeFilters are used to exclude traces based on a filter
+	ExcludeFilters map[string][]string `json:"excludeFilters"`
+
+	// Regexes are used to filter traces based on a regex inclusively
+	Regexes []string `json:"regexes"`
+	// ExcludeRegexes are used to filter traces based on a regex exclusively
+	ExcludeRegexes []string `json:"excludeRegexes"`
+
+	// Optional: The name of the service to get the trace metrics for
+	// Acts as an additional filter
+	ServiceNames []string `json:"serviceNames"`
+
+	// Environments is the environments to get the traces for. If empty, all environments will be included
+	Environments []string `json:"environments"`
 }
 
 type GetK8sEventsRequest struct {
@@ -245,4 +331,15 @@ type GetAllNodesRequest struct {
 	ExcludeFilters map[string][]string `json:"excludeFilters"`
 	// Splits is a list of attributes to split the nodes by, for example, if you want to split the nodes a label
 	Splits []string `json:"splits"`
+}
+
+type GetServiceSummariesRequest struct {
+	// Required: Start time of when to get the service summaries in seconds
+	StartTime int64 `json:"startTime"`
+	// Required: End time of when to get the service summaries in seconds
+	EndTime int64 `json:"endTime"`
+	// If empty, all services across all environments will be returned
+	Environments []string `json:"environments"`
+	// Required: The namespace of the services to get summaries for. If empty, return services from all namespaces
+	Namespace string `json:"namespace"`
 }

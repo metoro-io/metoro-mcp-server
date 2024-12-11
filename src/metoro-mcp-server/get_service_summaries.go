@@ -4,19 +4,30 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/mark3labs/mcp-go/mcp"
+	mcpgolang "github.com/metoro-io/mcp-golang"
 	"time"
 )
 
-type GetServiceSummariesRequest struct {
-	// Required: Start time of when to get the service summaries in seconds
-	StartTime int64 `json:"startTime"`
-	// Required: End time of when to get the service summaries in seconds
-	EndTime int64 `json:"endTime"`
-	// If empty, all services across all environments will be returned
-	Environments []string `json:"environments"`
-	// Required: The namespace of the services to get summaries for. If empty, return services from all namespaces
-	Namespace string `json:"namespace"`
+type GetServiceSummariesHandlerArgs struct {
+	Namespaces   string   `json:"namespace" jsonschema:"description=The namespace to get service summaries for. If empty, all namespaces will be used."`
+	Environments []string `json:"environments" jsonschema:"description=The environments to get service summaries for. If empty, all environments will be used."`
+}
+
+func getServiceSummariesHandler(arguments GetServiceSummariesHandlerArgs) (*mcpgolang.ToolResponse, error) {
+	now := time.Now()
+	fiveMinsAgo := now.Add(-5 * time.Minute)
+	request := GetServiceSummariesRequest{
+		StartTime:    fiveMinsAgo.Unix(),
+		EndTime:      now.Unix(),
+		Namespace:    arguments.Namespaces,
+		Environments: arguments.Environments,
+	}
+
+	body, err := getServiceSummariesMetoroCall(request)
+	if err != nil {
+		return nil, fmt.Errorf("error getting service summaries: %v", err)
+	}
+	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
 func getServiceSummariesMetoroCall(request GetServiceSummariesRequest) ([]byte, error) {
@@ -25,31 +36,4 @@ func getServiceSummariesMetoroCall(request GetServiceSummariesRequest) ([]byte, 
 		return nil, fmt.Errorf("error marshaling service summaries request: %v", err)
 	}
 	return MakeMetoroAPIRequest("POST", "serviceSummaries", bytes.NewBuffer(requestBody))
-}
-
-func getServiceSummariesHandler(arguments map[string]interface{}) (*mcp.CallToolResult, error) {
-	now := time.Now()
-	fiveMinsAgo := now.Add(-5 * time.Minute)
-	request := GetServiceSummariesRequest{
-		StartTime: fiveMinsAgo.Unix(),
-		EndTime:   now.Unix(),
-	}
-
-	if namespace, ok := arguments["namespace"].(string); ok {
-		request.Namespace = namespace
-	}
-
-	if environmentsStr, ok := arguments["environments"].(string); ok && environmentsStr != "" {
-		var environments []string
-		if err := json.Unmarshal([]byte(environmentsStr), &environments); err != nil {
-			return nil, fmt.Errorf("error parsing environments JSON: %v", err)
-		}
-		request.Environments = environments
-	}
-
-	body, err := getServiceSummariesMetoroCall(request)
-	if err != nil {
-		return nil, fmt.Errorf("error getting service summaries: %v", err)
-	}
-	return mcp.NewToolResultText(string(body)), nil
 }
