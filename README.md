@@ -34,7 +34,10 @@ This MCP server exposes those APIs to an LLM so you can ask your AI questions ab
 
 ## How can I use Metoro MCP Server? 
 1. Install the [Claude Desktop App](https://claude.ai/download).
-2. Download the Metoro MCP Server from the latest release: https://github.com/metoro-io/metoro-mcp-server/releases
+2. Make sure you have [Golang](https://golang.org/dl/) installed. `brew install go` for mac or `sudo apt-get install golang` for ubuntu.
+3. Clone the repository: `git clone https://github.com/metoro-io/metoro-mcp-server.git`
+4. Navigate to the repository directory: `cd metoro-mcp-server`
+5. Build the server executable: `go build -o metoro-mcp-server`
 
 ### If you already have a Metoro Account:
 Copy your auth token from your Metoro account in [Settings](https://us-east.metoro.io/settings) -> Users Settings. 
