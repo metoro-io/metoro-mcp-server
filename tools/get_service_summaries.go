@@ -7,20 +7,19 @@ import (
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
-	"time"
 )
 
 type GetServiceSummariesHandlerArgs struct {
-	Namespaces   string   `json:"namespace" jsonschema:"description=The namespace to get service summaries for. If empty, all namespaces will be used."`
-	Environments []string `json:"environments" jsonschema:"description=The environments to get service summaries for. If empty, all environments will be used."`
+	TimeConfig   utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get service summaries for. e.g. if you want to get summaries for the last 5 minutes, you would set time_period=5 and time_window=Minutes. Try to use a time period 1 hour or less"`
+	Namespaces   string           `json:"namespace" jsonschema:"description=The namespace to get service summaries for. If empty, all namespaces will be used."`
+	Environments []string         `json:"environments" jsonschema:"description=The environments to get service summaries for. If empty, all environments will be used."`
 }
 
 func GetServiceSummariesHandler(arguments GetServiceSummariesHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	now := time.Now()
-	fiveMinsAgo := now.Add(-5 * time.Minute)
+	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
 	request := model.GetServiceSummariesRequest{
-		StartTime:    fiveMinsAgo.Unix(),
-		EndTime:      now.Unix(),
+		StartTime:    startTime,
+		EndTime:      endTime,
 		Namespace:    arguments.Namespaces,
 		Environments: arguments.Environments,
 	}

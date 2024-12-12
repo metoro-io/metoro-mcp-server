@@ -7,18 +7,17 @@ import (
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
-	"time"
 )
 
 type GetPodsHandlerArgs struct {
-	ServiceName  string   `json:"serviceName" jsonschema:"description=The name of the service to get pods for. One of serviceName or nodeName is required"`
-	NodeName     string   `json:"nodeName" jsonschema:"description=The name of the node to get pods for. One of serviceName or nodeName is required"`
-	Environments []string `json:"environments" jsonschema:"description=The environments to get pods for. If empty, all environments will be used."`
+	TimeConfig   utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get pods for. e.g. if you want to get pods for the last 5 minutes, you would set time_period=5 and time_window=Minutes"`
+	ServiceName  string           `json:"serviceName" jsonschema:"description=The name of the service to get pods for. One of serviceName or nodeName is required"`
+	NodeName     string           `json:"nodeName" jsonschema:"description=The name of the node to get pods for. One of serviceName or nodeName is required"`
+	Environments []string         `json:"environments" jsonschema:"description=The environments to get pods for. If empty, all environments will be used."`
 }
 
 func GetPodsHandler(arguments GetPodsHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	now := time.Now()
-	fiveMinsAgo := now.Add(-5 * time.Minute)
+	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
 
 	// One of serviceName or nodeName is required.
 	if arguments.ServiceName == "" && arguments.NodeName == "" {
@@ -26,8 +25,8 @@ func GetPodsHandler(arguments GetPodsHandlerArgs) (*mcpgolang.ToolResponse, erro
 	}
 
 	request := model.GetPodsRequest{
-		StartTime:    fiveMinsAgo.Unix(),
-		EndTime:      now.Unix(),
+		StartTime:    startTime,
+		EndTime:      endTime,
 		Environments: arguments.Environments,
 		ServiceName:  arguments.ServiceName,
 		NodeName:     arguments.NodeName,

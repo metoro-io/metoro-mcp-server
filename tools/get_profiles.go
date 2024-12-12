@@ -7,20 +7,19 @@ import (
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
-	"time"
 )
 
 type GetProfileHandlerArgs struct {
-	ServiceName    string   `json:"serviceName" jsonschema:"required,description=The name of the service to get profiles for"`
-	ContainerNames []string `json:"containerNames" jsonschema:"description=The container names to get profiles for"`
+	TimeConfig     utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get profiles for. e.g. if you want to get profiles for the last 5 minutes, you would set time_period=5 and time_window=Minutes."`
+	ServiceName    string           `json:"serviceName" jsonschema:"required,description=The name of the service to get profiles for"`
+	ContainerNames []string         `json:"containerNames" jsonschema:"description=The container names to get profiles for"`
 }
 
 func GetProfilesHandler(arguments GetProfileHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	now := time.Now()
-	fiveMinsAgo := now.Add(-5 * time.Minute)
+	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
 	request := model.GetProfileRequest{
-		StartTime:      fiveMinsAgo.Unix(),
-		EndTime:        now.Unix(),
+		StartTime:      startTime,
+		EndTime:        endTime,
 		ServiceName:    arguments.ServiceName,
 		ContainerNames: arguments.ContainerNames,
 	}

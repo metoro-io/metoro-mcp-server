@@ -13,7 +13,7 @@ type GetNodeInfoHandlerArgs struct {
 
 func GetNodeInfoHandler(arguments GetNodeInfoHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
-	fiveMinsAgo := now.Add(-5 * time.Minute)
+	fiveMinsAgo := now.Add(-10 * time.Minute)
 
 	body, err := getNodeInfoMetoroCall(arguments.NodeName, fiveMinsAgo.Unix())
 	if err != nil {
