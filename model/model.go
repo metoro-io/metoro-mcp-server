@@ -62,15 +62,15 @@ const (
 type MetricFunction struct {
 	ID string `json:"id"`
 	// The type of the function
-	FunctionType FunctionType `json:"functionType"`
+	FunctionType FunctionType `json:"functionType" jsonschema:"required,description=The type of the function to apply to the metric possible values are monotonicDifference / valueDifference / customMathExpression"`
 	// The payload of the function
 	// TODO: If we have more payloads this can be an interface but for now its a math expression since its the only payload.
-	FunctionPayload MathExpression `json:"functionPayload"`
+	FunctionPayload MathExpression `json:"functionPayload" jsonschema:"description=The payload of the customMathExpression. this is only set for customMathExpression. "`
 }
 
 type MathExpression struct {
-	Variables  []string `json:"variables"`
-	Expression string   `json:"expression"`
+	Variables  []string `json:"variables" jsonschema:"description=The variables to use in the math expression. For now this should always be ['a'] if set"`
+	Expression string   `json:"expression" jsonschema:"description=The math expression to apply to the metric. For example if you want to divide the metric by 60 you would set the expression as a / 60"`
 }
 
 type FunctionType string
