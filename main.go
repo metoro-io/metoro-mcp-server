@@ -19,33 +19,42 @@ type MetoroTools struct {
 var metoroTools = []MetoroTools{
 	{
 		Name:        "get_environments",
-		Description: "Get Kubernetes environments/clusters, monitored by Metoro",
+		Description: "Get Kubernetes environments/clusters",
 		Handler:     tools.GetEnvironmentsHandler,
 	},
 	{
 		Name:        "get_services",
-		Description: "Get services running in your Kubernetes cluster, monitored by Metoro",
+		Description: "Get services running in your Kubernetes cluster. Metoro treats the following Kubernetes resources as a 'service': Deployment, StatefulSet, DaemonSet",
 		Handler:     tools.GetServicesHandler,
 	},
 	{
 		Name:        "get_namespaces",
-		Description: "Get namespaces in your Kubernetes cluster, monitored by Metoro",
+		Description: "Get namespaces in your Kubernetes cluster",
 		Handler:     tools.GetNamespacesHandler,
 	},
 	{
-		Name:        "get_logs",
-		Description: "Get logs from all/any services/hosts/pods running in your Kubernetes cluster. Results are limited to 100 logs lines",
-		Handler:     tools.GetLogsHandler,
+		Name: "get_logs",
+		Description: `Get logs from all or specific services/hosts/pods running in your Kubernetes cluster. Results are limited to 100 logs lines. How to use this tool:
+                      First, use get_log_attributes tool to retrieve the available log attribute keys which can be used as Filter or ExcludeFilter keys for this tool.
+                      e.g. Filter use case: get_logs with filters: {key: [value]} for including specific logs. Where key was retrieved from get_log_attributes tool.
+                      If you want to filter log messages with a specific substring, you can use Regexes or ExcludeRegexes argument.`,
+		Handler: tools.GetLogsHandler,
 	},
 	{
-		Name:        "get_traces",
-		Description: "Get traces from services running in your Kubernetes cluster in the last 5 minutes, monitored by Metoro",
-		Handler:     tools.GetTracesHandler,
+		Name: "get_traces",
+		Description: `Get traces from all or specific services/hosts/pods running in your Kubernetes cluster. Results are limited to 100 traces. How to use this tool:
+					  First, use get_trace_attributes tool to retrieve the available trace attribute keys which can be used as Filter/ExcludeFilter keys.
+                      e.g. Filter use case: get_traces with filters: {key: [value]} for including specific traces. Where key was retrieved from get_trace_attributes tool.
+					  Regexes and ExcludeRegexes arguments can be used to filter traces endpoints that match the given regexes.`,
+		Handler: tools.GetTracesHandler,
 	},
 	{
-		Name:        "get_metric",
-		Description: "Get metrics from your Kubernetes cluster, monitored by Metoro",
-		Handler:     tools.GetMetricHandler,
+		Name: "get_metric",
+		Description: `Get a specific metric's timeseries data. How to use this tool: 
+                      First, use get_metric_names tool to retrieve the available metric names which can be used as MetricName argument for this tool.
+                      Then use get_metric_attributes tool to retrieve the available attribute keys for a specific MetricName which can be used as Filter/ExcludeFilter keys for this tool.
+                      You can also use Splits argument to group the metric data by the given metric attribute keys.`,
+		Handler: tools.GetMetricHandler,
 	},
 	{
 		Name:        "get_trace_metric",
