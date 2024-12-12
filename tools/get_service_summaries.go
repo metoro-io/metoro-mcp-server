@@ -10,9 +10,9 @@ import (
 )
 
 type GetServiceSummariesHandlerArgs struct {
-	TimeConfig   utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get service summaries for. e.g. if you want to get summaries for the last 5 minutes, you would set time_period=5 and time_window=Minutes. Try to use a time period 1 hour or less"`
-	Namespaces   string           `json:"namespace" jsonschema:"description=The namespace to get service summaries for. If empty, all namespaces will be used."`
-	Environments []string         `json:"environments" jsonschema:"description=The environments to get service summaries for. If empty, all environments will be used."`
+	TimeConfig   utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get service summaries for. e.g. if you want to get summaries for the last 5 minutes you would set time_period=5 and time_window=Minutes. Try to use a time period 1 hour or less. You can also set an absoulute time range by setting start_time and end_time"`
+	Namespaces   string           `json:"namespace" jsonschema:"description=The namespace to get service summaries for. If empty all namespaces will be used."`
+	Environments []string         `json:"environments" jsonschema:"description=The environments to get service summaries for. If empty all environments will be used."`
 }
 
 func GetServiceSummariesHandler(arguments GetServiceSummariesHandlerArgs) (*mcpgolang.ToolResponse, error) {

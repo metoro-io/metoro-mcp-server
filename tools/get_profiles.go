@@ -10,7 +10,7 @@ import (
 )
 
 type GetProfileHandlerArgs struct {
-	TimeConfig     utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get profiles for. e.g. if you want to get profiles for the last 5 minutes, you would set time_period=5 and time_window=Minutes."`
+	TimeConfig     utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get the profiles data. e.g. if you want to get profiles for the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absoulute time range by setting start_time and end_time"`
 	ServiceName    string           `json:"serviceName" jsonschema:"required,description=The name of the service to get profiles for"`
 	ContainerNames []string         `json:"containerNames" jsonschema:"description=The container names to get profiles for"`
 }
