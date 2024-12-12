@@ -12,7 +12,10 @@ type GetAlertFiresHandlerArgs struct {
 }
 
 func GetAlertFiresHandler(arguments GetAlertFiresHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
+	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error calculating time range: %v", err)
+	}
 	body, err := getAlertFiresMetoroCall(arguments.AlertId, startTime, endTime)
 	if err != nil {
 		return nil, fmt.Errorf("error getting alert fires: %v", err)

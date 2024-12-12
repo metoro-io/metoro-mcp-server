@@ -19,7 +19,10 @@ type GetK8sEventsVolumeHandlerArgs struct {
 }
 
 func GetK8sEventsVolumeHandler(arguments GetK8sEventsVolumeHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
+	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error calculating time range: %v", err)
+	}
 	request := model.GetK8sEventMetricsRequest{
 		StartTime:      startTime,
 		EndTime:        endTime,

@@ -16,7 +16,10 @@ type GetServiceSummariesHandlerArgs struct {
 }
 
 func GetServiceSummariesHandler(arguments GetServiceSummariesHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
+	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error calculating time range: %v", err)
+	}
 	request := model.GetServiceSummariesRequest{
 		StartTime:    startTime,
 		EndTime:      endTime,

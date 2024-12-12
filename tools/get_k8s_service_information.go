@@ -16,7 +16,10 @@ type GetK8sServiceInformationHandlerArgs struct {
 }
 
 func GetK8sServiceInformationHandler(arguments GetK8sServiceInformationHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
+	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error calculating time range: %v", err)
+	}
 	request := model.GetPodsRequest{
 		StartTime:    startTime,
 		EndTime:      endTime,

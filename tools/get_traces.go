@@ -21,7 +21,10 @@ type GetTracesHandlerArgs struct {
 }
 
 func GetTracesHandler(arguments GetTracesHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
+	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error calculating time range: %v", err)
+	}
 	request := model.GetTracesRequest{
 		StartTime:      startTime,
 		EndTime:        endTime,

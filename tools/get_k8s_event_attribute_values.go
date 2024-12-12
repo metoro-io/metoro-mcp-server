@@ -22,7 +22,10 @@ type GetK8sEventAttributeValueHandlerArgs struct {
 }
 
 func GetK8sEventAttributeValuesForIndividualAttributeHandler(arguments GetK8sEventAttributeValueHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
+	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error calculating time range: %v", err)
+	}
 	request := model.GetSingleK8sEventSummaryRequest{
 		GetK8sEventsRequest: model.GetK8sEventsRequest{
 			StartTime:      startTime,
