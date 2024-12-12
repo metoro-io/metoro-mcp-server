@@ -7,8 +7,8 @@ import (
 )
 
 type GetAlertFiresHandlerArgs struct {
-	TimeConfig utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get alert fires for. e.g. if you want to get fires for the last 5 minutes, you would set time_period=5 and time_window=Minutes"`
-	AlertId    string           `json:"alert_id" jsonschema:"required,description=The ID of the alert to get fires for"`
+	TimeConfig utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get alert fires for. e.g. if you want to get alert fires for the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absoulute time range by setting start_time and end_time"`
+	AlertId    string           `json:"alert_id" jsonschema:"required,description=The ID of the alert to get the alert fires for"`
 }
 
 func GetAlertFiresHandler(arguments GetAlertFiresHandlerArgs) (*mcpgolang.ToolResponse, error) {

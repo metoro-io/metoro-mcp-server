@@ -10,9 +10,9 @@ import (
 )
 
 type GetK8sServiceInformationHandlerArgs struct {
-	TimeConfig   utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time to get state of the service. e.g. if you want to see the state of the service 5 minutes ago, you would set time_period=5 and time_window=Minutes"`
-	ServiceName  string           `json:"serviceName" jsonschema:"required,description=The name of the service to get information for"`
-	Environments []string         `json:"environments" jsonschema:"description=The environments to get information for. If empty, all environments will be used."`
+	TimeConfig   utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time to get state of the YAML file. e.g. if you want to see the state of the service 5 minutes ago you would set time_period=5 and time_window=Minutes. You can also set an absoulute time range by setting start_time and end_time"`
+	ServiceName  string           `json:"serviceName" jsonschema:"required,description=The name of the service to get YAML file for."`
+	Environments []string         `json:"environments" jsonschema:"description=The environments to get service YAML for. If empty all environments will be used."`
 }
 
 func GetK8sServiceInformationHandler(arguments GetK8sServiceInformationHandlerArgs) (*mcpgolang.ToolResponse, error) {

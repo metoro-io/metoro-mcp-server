@@ -129,7 +129,7 @@ var metoroTools = []MetoroTools{
 	},
 	{
 		Name:        "get_k8s_service_information",
-		Description: "Get detailed information about a Kubernetes service including its type (Deployment, DaemonSet, etc.), YAML configuration, and current running replicas (excluding HPA)",
+		Description: "Get detailed information including the YAML of a Kubernetes service. This tool is useful for understanding the configuration of a service.",
 		Handler:     tools.GetK8sServiceInformationHandler,
 	},
 	{
