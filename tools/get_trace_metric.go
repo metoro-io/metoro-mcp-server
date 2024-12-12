@@ -7,10 +7,10 @@ import (
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
-	"time"
 )
 
 type GetTraceMetricHandlerArgs struct {
+	TimeConfig     utils.TimeConfig       `json:"time_config" jsonschema:"required,description=The time period to get traces for. e.g. if you want to get traces for the last 5 minutes, you would set time_period=5 and time_window=Minutes"`
 	ServiceNames   []string               `json:"serviceNames" jsonschema:"description=Service names to return traces for"`
 	Filters        map[string][]string    `json:"filters" jsonschema:"description=The filters to apply to the traces. it is a map of filter keys to array values where array values are ORed.e.g. key for service name is service.name"`
 	ExcludeFilters map[string][]string    `json:"excludeFilters" jsonschema:"description=The exclude filters to exclude/eliminate the traces. Traces matching the exclude traces will not be returned. it is a map of filter keys to array values where array values are ORed.e.g. key for service name is service.name"`
@@ -23,11 +23,10 @@ type GetTraceMetricHandlerArgs struct {
 }
 
 func GetTraceMetricHandler(arguments GetTraceMetricHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	now := time.Now()
-	fiveMinsAgo := now.Add(-5 * time.Minute)
+	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
 	request := model.GetTraceMetricRequest{
-		StartTime:      fiveMinsAgo.Unix(),
-		EndTime:        now.Unix(),
+		StartTime:      startTime,
+		EndTime:        endTime,
 		ServiceNames:   arguments.ServiceNames,
 		Filters:        arguments.Filters,
 		ExcludeFilters: arguments.ExcludeFilters,

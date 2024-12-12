@@ -7,10 +7,10 @@ import (
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
-	"time"
 )
 
 type GetMetricHandlerArgs struct {
+	TimeConfig     utils.TimeConfig       `json:"time_config" jsonschema:"required,description=The time period to get the metric/timeseries data for. e.g. if you want to get the timeseries/metric data for the last 5 minutes, you would set time_period=5 and time_window=Minutes"`
 	MetricName     string                 `json:"metricName" jsonschema:"required,description=The name of the metric to get"`
 	Aggregation    model.Aggregation      `json:"aggregation" jsonschema:"required,description=The aggregation to apply to the metric. e.g. sum, avg, min, max, count"`
 	Filters        map[string][]string    `json:"filters" jsonschema:"description=Filters to apply to the metric. Metrics matching the filters will be returned"`
@@ -22,11 +22,10 @@ type GetMetricHandlerArgs struct {
 }
 
 func GetMetricHandler(arguments GetMetricHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	now := time.Now()
-	fiveMinsAgo := now.Add(-5 * time.Minute)
+	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
 	request := model.GetMetricRequest{
-		StartTime:      fiveMinsAgo.Unix(),
-		EndTime:        now.Unix(),
+		StartTime:      startTime,
+		EndTime:        endTime,
 		MetricName:     arguments.MetricName,
 		Filters:        arguments.Filters,
 		ExcludeFilters: arguments.ExcludeFilters,

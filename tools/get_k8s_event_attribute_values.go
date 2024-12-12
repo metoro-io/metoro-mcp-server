@@ -7,10 +7,10 @@ import (
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
-	"time"
 )
 
 type GetK8sEventAttributeValueHandlerArgs struct {
+	TimeConfig     utils.TimeConfig    `json:"time_config" jsonschema:"required,description=The time period to get the possible values of K8 event attributes values. e.g. if you want to see the possible values for the attributes in the last 5 minutes, you would set time_period=5 and time_window=Minutes"`
 	Attribute      string              `json:"attribute" jsonschema:"required,description=The attribute to get values for"`
 	Filters        map[string][]string `json:"filters" jsonschema:"description=The filters to apply to the events. it is a map of filter keys to array values where array values are ORed when the filters are applied.e.g. key for service name is service.name"`
 	ExcludeFilters map[string][]string `json:"excludeFilters" jsonschema:"description=The exclude filters to exclude/eliminate the events. Events matching the exclude filters will not be returned. it is a map of filter keys to array values where array values are ORed when the filters are applied.e.g. key for service name is service.name"`
@@ -22,20 +22,17 @@ type GetK8sEventAttributeValueHandlerArgs struct {
 }
 
 func GetK8sEventAttributeValuesForIndividualAttributeHandler(arguments GetK8sEventAttributeValueHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	now := time.Now()
-	sixHoursAgo := now.Add(-6 * time.Hour)
+	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
 	request := model.GetSingleK8sEventSummaryRequest{
 		GetK8sEventsRequest: model.GetK8sEventsRequest{
-			StartTime:      sixHoursAgo.Unix(),
-			EndTime:        now.Unix(),
+			StartTime:      startTime,
+			EndTime:        endTime,
 			Filters:        arguments.Filters,
 			ExcludeFilters: arguments.ExcludeFilters,
 			Regexes:        arguments.Regexes,
 			ExcludeRegexes: arguments.ExcludeRegexes,
 			Environments:   arguments.Environments,
 			Ascending:      arguments.Ascending,
-			// TODO: Deal with the prevend time when you are dealing with the start and endtime.
-			//PrevEndTime: arguments.PrevEndTime,
 		},
 		Attribute: arguments.Attribute,
 	}

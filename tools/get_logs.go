@@ -7,11 +7,10 @@ import (
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
-	"time"
 )
 
-// TODO: If we figure out how to input start and end times we can directly use GetLogsRequest struct.
 type GetLogsHandlerArgs struct {
+	TimeConfig     utils.TimeConfig    `json:"time_config" jsonschema:"required,description=The time period to get the logs for. e.g. if you want the get the logs for the last 5 minutes, you would set time_period=5 and time_window=Minutes"`
 	Filters        map[string][]string `json:"filters" jsonschema:"description=The filters to apply to the logs. it is a map of filter keys to array values where array values are ORed.e.g. key for service name is service.name"`
 	ExcludeFilters map[string][]string `json:"excludeFilters" jsonschema:"description=The filters to exclude from the logs. e.g., '{\"service.name\": [\"/k8s/namespaceX/serviceX\"]}' should exclude logs for serviceX in namespaceX"`
 	Regexes        []string            `json:"regexes" jsonschema:"description=The regexes to apply to the log's messages. Logs with message matching regexes will be returned"`
@@ -21,11 +20,11 @@ type GetLogsHandlerArgs struct {
 }
 
 func GetLogsHandler(arguments GetLogsHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	now := time.Now()
-	fiveMinsAgo := now.Add(-5 * time.Minute)
+	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
+
 	request := model.GetLogsRequest{
-		StartTime:      fiveMinsAgo.Unix(),
-		EndTime:        now.Unix(),
+		StartTime:      startTime,
+		EndTime:        endTime,
 		Filters:        arguments.Filters,
 		ExcludeFilters: arguments.ExcludeFilters,
 		Regexes:        arguments.Regexes,

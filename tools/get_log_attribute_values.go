@@ -7,10 +7,10 @@ import (
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
-	"time"
 )
 
 type GetLogAttributeValuesHandlerArgs struct {
+	TimeConfig     utils.TimeConfig    `json:"time_config" jsonschema:"required,description=The time period to get log attribute values for. e.g. if you want to get values for the last 5 minutes, you would set time_period=5 and time_window=Minutes"`
 	Attribute      string              `json:"attribute" jsonschema:"required,description=The attribute to get values for"`
 	Filters        map[string][]string `json:"filters" jsonschema:"description=The filters to apply to the log attribute"`
 	ExcludeFilters map[string][]string `json:"excludeFilters" jsonschema:"description=The filters to exclude from the log attribute"`
@@ -20,12 +20,11 @@ type GetLogAttributeValuesHandlerArgs struct {
 }
 
 func GetLogAttributeValuesForIndividualAttributeHandler(arguments GetLogAttributeValuesHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	now := time.Now()
-	fiveMinsAgo := now.Add(-5 * time.Minute)
+	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
 	request := model.GetSingleLogSummaryRequest{
 		LogSummaryRequest: model.LogSummaryRequest{
-			StartTime:      fiveMinsAgo.Unix(),
-			EndTime:        now.Unix(),
+			StartTime:      startTime,
+			EndTime:        endTime,
 			Filters:        arguments.Filters,
 			ExcludeFilters: arguments.ExcludeFilters,
 			Regexes:        arguments.Regexes,

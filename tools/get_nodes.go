@@ -7,10 +7,10 @@ import (
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
-	"time"
 )
 
 type GetNodesHandlerArgs struct {
+	TimeConfig     utils.TimeConfig    `json:"time_config" jsonschema:"required,description=The time period to get nodes for. e.g. if you want to get nodes for the last 5 minutes, you would set time_period=5 and time_window=Minutes"`
 	Filters        map[string][]string `json:"filters" jsonschema:"description=The filters to apply to the nodes"`
 	ExcludeFilters map[string][]string `json:"excludeFilters" jsonschema:"description=The filters to exclude from the nodes"`
 	Splits         []string            `json:"splits" jsonschema:"description=The splits to apply to the nodes"`
@@ -18,11 +18,10 @@ type GetNodesHandlerArgs struct {
 }
 
 func GetNodesHandler(arguments GetNodesHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	now := time.Now()
-	fiveMinsAgo := now.Add(-5 * time.Minute)
+	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
 	request := model.GetAllNodesRequest{
-		StartTime:      fiveMinsAgo.Unix(),
-		EndTime:        now.Unix(),
+		StartTime:      startTime,
+		EndTime:        endTime,
 		Filters:        arguments.Filters,
 		ExcludeFilters: arguments.ExcludeFilters,
 		Splits:         arguments.Splits,

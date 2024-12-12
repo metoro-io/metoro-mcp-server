@@ -34,7 +34,7 @@ var metoroTools = []MetoroTools{
 	},
 	{
 		Name:        "get_logs",
-		Description: "Get logs from all/any services/hosts/pods running in your Kubernetes cluster in the last 5 minutes, monitored by Metoro",
+		Description: "Get logs from all/any services/hosts/pods running in your Kubernetes cluster. Results are limited to 100 logs lines",
 		Handler:     tools.GetLogsHandler,
 	},
 	{
