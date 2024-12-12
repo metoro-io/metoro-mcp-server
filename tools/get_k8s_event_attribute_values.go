@@ -23,7 +23,8 @@ type GetK8sEventAttributeValueHandlerArgs struct {
 
 func GetK8sEventAttributeValuesForIndividualAttributeHandler(arguments GetK8sEventAttributeValueHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
-	sixHoursAgo := now.Add(-6 * time.Hour)
+	// TODO: Figure out the best timerange for this.
+	sixHoursAgo := now.Add(-6 * time.Hour) // Events need to be fetched for the last 6 hours at least as most clusters are very chill.
 	request := model.GetSingleK8sEventSummaryRequest{
 		GetK8sEventsRequest: model.GetK8sEventsRequest{
 			StartTime:      sixHoursAgo.Unix(),

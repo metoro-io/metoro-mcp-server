@@ -7,33 +7,29 @@ import (
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
-	"time"
 )
 
 type GetK8sEventsHandlerArgs struct {
+	TimeConfig     utils.TimeConfig    `json:"time_config" jsonschema:"required,description=The time period to get events for. e.g. if you want to get events for the last 6 hours, you would set time_period=6 and time_window=Hours"`
 	Filters        map[string][]string `json:"filters" jsonschema:"description=Filters to apply to the events"`
-	ExcludeFilters map[string][]string `json:"excludeFilters" jsonschema:"description=Filters to exclude from the events"`
+	ExcludeFilters map[string][]string `json:"exclude_filters" jsonschema:"description=Filters to exclude from the events"`
 	Regexes        []string            `json:"regexes" jsonschema:"description=Regexes to apply to the event messages"`
-	ExcludeRegexes []string            `json:"excludeRegexes" jsonschema:"description=Regexes to exclude from the event messages"`
-	Environments   []string            `json:"environments" jsonschema:"description=Environments to get events from"`
+	ExcludeRegexes []string            `json:"exclude_regexes" jsonschema:"description=Regexes to exclude from the event messages"`
 	Ascending      bool                `json:"ascending" jsonschema:"description=If true, events will be returned in ascending order, otherwise in descending order"`
-	PrevEndTime    *float64            `json:"prevEndTime" jsonschema:"description=The end time of the previous request"`
+	Environments   []string            `json:"environments" jsonschema:"description=Environments to get events from"`
 }
 
 func GetK8sEventsHandler(arguments GetK8sEventsHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	now := time.Now()
-	sixHoursAgo := now.Add(-6 * time.Hour)
+	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
 	request := model.GetK8sEventsRequest{
-		StartTime:      sixHoursAgo.Unix(),
-		EndTime:        now.Unix(),
+		StartTime:      startTime,
+		EndTime:        endTime,
 		Filters:        arguments.Filters,
 		ExcludeFilters: arguments.ExcludeFilters,
 		Regexes:        arguments.Regexes,
 		ExcludeRegexes: arguments.ExcludeRegexes,
-		Environments:   arguments.Environments,
 		Ascending:      arguments.Ascending,
-		// TODO: Deal with the prevend time when you are dealing with the start and endtime.
-		//PrevEndTime: arguments.PrevEndTime,
+		Environments:   arguments.Environments,
 	}
 
 	jsonBody, err := json.Marshal(request)

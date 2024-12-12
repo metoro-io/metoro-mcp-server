@@ -4,18 +4,16 @@ import (
 	"fmt"
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/utils"
-	"time"
 )
 
 type GetAlertFiresHandlerArgs struct {
-	AlertId string `json:"alertId" jsonschema:"required,description=The alert ID to get fires for"`
+	TimeConfig utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get alert fires for. e.g. if you want to get fires for the last 5 minutes, you would set time_period=5 and time_window=Minutes"`
+	AlertId    string           `json:"alert_id" jsonschema:"required,description=The ID of the alert to get fires for"`
 }
 
 func GetAlertFiresHandler(arguments GetAlertFiresHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	now := time.Now()
-	fiveMinsAgo := now.Add(-5 * time.Minute)
-
-	body, err := getAlertFiresMetoroCall(arguments.AlertId, fiveMinsAgo.Unix(), now.Unix())
+	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
+	body, err := getAlertFiresMetoroCall(arguments.AlertId, startTime, endTime)
 	if err != nil {
 		return nil, fmt.Errorf("error getting alert fires: %v", err)
 	}

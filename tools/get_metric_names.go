@@ -16,9 +16,9 @@ type GetMetricNamesHandlerArgs struct {
 
 func GetMetricNamesHandler(arguments GetMetricNamesHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	now := time.Now()
-	fiveMinsAgo := now.Add(-5 * time.Minute)
+	hourAgo := now.Add(-1 * time.Hour)
 	request := model.FuzzyMetricsRequest{
-		StartTime:        fiveMinsAgo.Unix(),
+		StartTime:        hourAgo.Unix(),
 		EndTime:          now.Unix(),
 		MetricFuzzyMatch: "", // This will return all the metric names.
 		Environments:     arguments.Environments,

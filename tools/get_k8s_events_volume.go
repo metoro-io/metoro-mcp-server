@@ -7,10 +7,10 @@ import (
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
-	"time"
 )
 
 type GetK8sEventsVolumeHandlerArgs struct {
+	TimeConfig     utils.TimeConfig    `json:"time_config" jsonschema:"required,description=The time period to get events for. e.g. if you want to get events for the last 5 minutes, you would set time_period=5 and time_window=Minutes"`
 	Filters        map[string][]string `json:"filters" jsonschema:"description=Filters to apply to the events"`
 	ExcludeFilters map[string][]string `json:"excludeFilters" jsonschema:"description=Filters to exclude from the events"`
 	Regexes        []string            `json:"regexes" jsonschema:"description=Regexes to apply to the event messages"`
@@ -19,11 +19,10 @@ type GetK8sEventsVolumeHandlerArgs struct {
 }
 
 func GetK8sEventsVolumeHandler(arguments GetK8sEventsVolumeHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	now := time.Now()
-	sixHoursAgo := now.Add(-6 * time.Hour)
+	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
 	request := model.GetK8sEventMetricsRequest{
-		StartTime:      sixHoursAgo.Unix(),
-		EndTime:        now.Unix(),
+		StartTime:      startTime,
+		EndTime:        endTime,
 		Filters:        arguments.Filters,
 		ExcludeFilters: arguments.ExcludeFilters,
 		Regexes:        arguments.Regexes,
