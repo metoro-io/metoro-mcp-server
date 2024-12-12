@@ -1,6 +1,9 @@
 package utils
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 // TimeWindow represents supported time window units
 type TimeWindow string
@@ -22,15 +25,18 @@ func CalculateTimeRange(config TimeConfig) (startTime, endTime int64) {
 	now := time.Now()
 	var duration time.Duration
 
-	switch config.TimeWindow {
-	case Minutes:
+	// Convert to lowercase for case-insensitive comparison
+	window := strings.ToLower(string(config.TimeWindow))
+
+	switch window {
+	case "minutes", "minute", "min", "mins":
 		duration = time.Duration(config.TimePeriod) * time.Minute
-	case Hours:
+	case "hours", "hour", "hr", "hrs":
 		duration = time.Duration(config.TimePeriod) * time.Hour
-	case Days:
+	case "days", "day":
 		duration = time.Duration(config.TimePeriod) * 24 * time.Hour
 	default:
-		// Default to minutes if unspecified
+		// Default to minutes if unspecified or invalid
 		duration = time.Duration(config.TimePeriod) * time.Minute
 	}
 
