@@ -11,7 +11,7 @@ import (
 )
 
 type GetMetricNamesHandlerArgs struct {
-	Environments []string `json:"environments" jsonschema:"description=Environments to get metrics from. If empty, all environments will be used."`
+	Environments []string `json:"environments" jsonschema:"description=Environments to get metrics names from. If empty all environments will be used."`
 }
 
 func GetMetricNamesHandler(arguments GetMetricNamesHandlerArgs) (*mcpgolang.ToolResponse, error) {

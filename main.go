@@ -56,7 +56,7 @@ var metoroTools = []MetoroTools{
 		Name: "get_metric",
 		Description: `Get a specific metric's timeseries data. How to use this tool: 
                       First, use get_metric_names tool to retrieve the available metric names which can be used as MetricName argument for this tool.
-                      Then use get_metric_attributes tool to retrieve the available attribute keys for a specific MetricName which can be used as Filter/ExcludeFilter keys for this tool.
+                      Then use get_metric_attributes tool to retrieve the available attribute keys and values for a specific MetricName which can be used as Filter/ExcludeFilter keys for this tool.
                       You can also use Splits argument to group the metric data by the given metric attribute keys.`,
 		Handler: tools.GetMetricHandler,
 	},
@@ -109,7 +109,7 @@ var metoroTools = []MetoroTools{
 	},
 	{
 		Name:        "get_metric_attributes",
-		Description: "Get possible attribute keys for a metric which can be used for filtering them.",
+		Description: "Get possible attribute keys and values for a metric which can be used for filtering them.",
 		Handler:     tools.GetMetricAttributesHandler,
 	},
 	{
@@ -144,8 +144,13 @@ var metoroTools = []MetoroTools{
 	},
 	{
 		Name:        "get_nodes",
-		Description: "Get the nodes that are running in your cluster. You can filter the nodes by their labels or environments",
+		Description: "Get the nodes that are running in your cluster. To use this tool, first call get_node_attributes to get the possible node attribute keys and values which can be used for filtering nodes.",
 		Handler:     tools.GetNodesHandler,
+	},
+	{
+		Name:        "get_node_attributes",
+		Description: "Get possible node attribute keys and values which can be used for filtering nodes.",
+		Handler:     tools.GetNodeAttributesHandler,
 	},
 	{
 		Name:        "get_node_info",

@@ -8,7 +8,7 @@ import (
 )
 
 type GetNodeInfoHandlerArgs struct {
-	NodeName string `json:"nodeName" jsonschema:"required,description=The name of the node to get info for"`
+	NodeName string `json:"nodeName" jsonschema:"required,description=The name of the node to get the YAML/information for"`
 }
 
 func GetNodeInfoHandler(arguments GetNodeInfoHandlerArgs) (*mcpgolang.ToolResponse, error) {
