@@ -18,7 +18,10 @@ type GetNodesHandlerArgs struct {
 }
 
 func GetNodesHandler(arguments GetNodesHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
+	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error calculating time range: %v", err)
+	}
 	request := model.GetAllNodesRequest{
 		StartTime:      startTime,
 		EndTime:        endTime,

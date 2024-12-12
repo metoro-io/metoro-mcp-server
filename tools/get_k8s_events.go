@@ -20,7 +20,10 @@ type GetK8sEventsHandlerArgs struct {
 }
 
 func GetK8sEventsHandler(arguments GetK8sEventsHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
+	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error calculating time range: %v", err)
+	}
 	request := model.GetK8sEventsRequest{
 		StartTime:      startTime,
 		EndTime:        endTime,

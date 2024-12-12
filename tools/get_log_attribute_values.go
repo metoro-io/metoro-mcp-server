@@ -20,7 +20,10 @@ type GetLogAttributeValuesHandlerArgs struct {
 }
 
 func GetLogAttributeValuesForIndividualAttributeHandler(arguments GetLogAttributeValuesHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
+	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error calculating time range: %v", err)
+	}
 	request := model.GetSingleLogSummaryRequest{
 		LogSummaryRequest: model.LogSummaryRequest{
 			StartTime:      startTime,

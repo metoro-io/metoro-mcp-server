@@ -22,7 +22,10 @@ type GetMetricHandlerArgs struct {
 }
 
 func GetMetricHandler(arguments GetMetricHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
+	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error calculating time range: %v", err)
+	}
 	request := model.GetMetricRequest{
 		StartTime:      startTime,
 		EndTime:        endTime,

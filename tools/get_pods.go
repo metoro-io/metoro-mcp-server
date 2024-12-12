@@ -17,7 +17,10 @@ type GetPodsHandlerArgs struct {
 }
 
 func GetPodsHandler(arguments GetPodsHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	startTime, endTime := utils.CalculateTimeRange(arguments.TimeConfig)
+	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error calculating time range: %v", err)
+	}
 
 	// One of serviceName or nodeName is required.
 	if arguments.ServiceName == "" && arguments.NodeName == "" {
