@@ -25,7 +25,7 @@ func CreateDashboardHandler(arguments CreateDashboardHandlerArgs) (*mcpgolang.To
 		Name:             arguments.DashboardName,
 		Id:               uuid.NewString(),
 		DashboardJson:    string(dashboardJson),
-		DefaultTimeRange: "1h", // TODO: Make this configurable as well maybe?
+		DefaultTimeRange: "1h",
 	}
 
 	resp, err := setDashboardMetoroCall(newDashboardRequest)
