@@ -362,8 +362,8 @@ const (
 type WidgetPosition struct {
 	X *int `json:"x,omitempty"`
 	Y *int `json:"y,omitempty"`
-	W *int `json:"w,omitempty"`
-	H *int `json:"h,omitempty"`
+	W *int `json:"w,omitempty" jsonschema:"required,description=The width of the widget. The dashboard is divided into 12 columns.For example a sensible value for a graph would be 6"`
+	H *int `json:"h,omitempty" jsonschema:"required,description=The height of the widget. Each row is 128px. A sensible value for a graph would be 3."`
 }
 
 // Widget is the base interface for all widget types
