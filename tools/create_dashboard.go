@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/google/uuid"
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
@@ -21,8 +20,6 @@ func CreateDashboardHandler(arguments CreateDashboardHandlerArgs) (*mcpgolang.To
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling dashboard properties: %v", err)
 	}
-
-	println(fmt.Sprintf("dashboardJson: %s", spew.Sdump(dashboardJson)))
 
 	newDashboardRequest := model.SetDashboardRequest{
 		Name:             arguments.DashboardName,
