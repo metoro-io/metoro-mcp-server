@@ -27,7 +27,7 @@ func GetMetricNamesHandler(arguments GetMetricNamesHandlerArgs) (*mcpgolang.Tool
 	if err != nil {
 		return nil, fmt.Errorf("error calling Metoro API: %v", err)
 	}
-	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(response)))), nil
+	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(response)))), nil
 }
 
 func getMetricNamesMetoroCall(request model.FuzzyMetricsRequest) ([]byte, error) {

@@ -172,6 +172,15 @@ var metoroTools = []MetoroTools{
 		Description: "Get list of alert fires from your Kubernetes cluster. Alert fires are the instances when an alert is triggered. This tool provides information about the alert name, the time it was triggered, the time it recovered, the environment, and the service name (if available) and the alert trigger message.",
 		Handler:     tools.GetAlertFiresHandler,
 	},
+	{
+		Name: "create_dashboard",
+		Description: `Create a dashboard with the described metrics. This tool is useful for creating a dashboard with the metrics you are interested in.
+											  How to use this tool:
+					  First, use get_metric_names tool to retrieve the available metric names which can be used as MetricName argument for this tool.
+					  Then use get_metric_attributes tool to retrieve the available attribute keys and values for a specific MetricName which can be used as Filter/ExcludeFilter keys for this tool.
+					  You can also use Splits argument to group the metric data by the given metric attribute keys.`,
+		Handler: tools.CreateDashboardHandler,
+	},
 }
 
 type MetoroResource struct {

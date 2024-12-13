@@ -2,7 +2,11 @@ module github.com/metoro-io/metoro-mcp-server
 
 go 1.23.4
 
-require github.com/metoro-io/mcp-golang v0.1.0
+require (
+	github.com/davecgh/go-spew v1.1.1
+	github.com/google/uuid v1.6.0
+	github.com/metoro-io/mcp-golang v0.3.0
+)
 
 require (
 	github.com/bahlo/generic-list-go v0.2.0 // indirect

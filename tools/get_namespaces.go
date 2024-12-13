@@ -13,7 +13,7 @@ func GetNamespacesHandler(arguments GetNamespacesHandlerArgs) (*mcpgolang.ToolRe
 	if err != nil {
 		return nil, fmt.Errorf("error getting namespaces: %v", err)
 	}
-	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
+	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
 func getNamespacesMetoroCall() ([]byte, error) {

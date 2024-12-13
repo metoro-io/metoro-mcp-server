@@ -16,7 +16,7 @@ func GetMetricMetadata(arguments GetMetricMetadataHandlerArgs) (*mcpgolang.ToolR
 		return nil, fmt.Errorf("error calling Metoro get metric metadata api: %v", err)
 	}
 
-	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(response)))), nil
+	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(response)))), nil
 }
 
 func getMetricMetadataMetoroCall(metricName string) ([]byte, error) {

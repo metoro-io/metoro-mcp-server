@@ -340,3 +340,85 @@ type GetServiceSummariesRequest struct {
 	// Required: The namespace of the services to get summaries for. If empty, return services from all namespaces
 	Namespace string `json:"namespace"`
 }
+
+// Dasboarding structs
+type SetDashboardRequest struct {
+	Name             string `json:"name"`
+	Id               string `json:"id"`
+	DashboardJson    string `json:"dashboardJson"`
+	DefaultTimeRange string `json:"defaultTimeRange"`
+}
+
+// WidgetType is an enum representing different types of widgets
+type WidgetType string
+
+const (
+	MetricChartWidgetType WidgetType = "MetricChart"
+	GroupWidgetType       WidgetType = "Group"
+	MarkdownWidgetType    WidgetType = "Markdown"
+)
+
+// WidgetPosition represents the position of a widget relative to its parent
+type WidgetPosition struct {
+	X *int `json:"x,omitempty"`
+	Y *int `json:"y,omitempty"`
+	W *int `json:"w,omitempty"`
+	H *int `json:"h,omitempty"`
+}
+
+// Widget is the base interface for all widget types
+type Widget struct {
+	WidgetType WidgetType      `json:"widgetType" jsonschema:"required,description=The type of the widget. This can be MetricChart / Group / Markdown"`
+	Position   *WidgetPosition `json:"position,omitempty" jsonschema:"description=The position of the widget in the dashboard"`
+}
+
+//// Variable represents a configurable variable in a widget
+//type Variable struct {
+//	Name              string     `json:"name"`
+//	Key               string     `json:"key"`
+//	DefaultValue      string     `json:"defaultValue"`
+//	DefaultType       MetricType `json:"defaultType"`
+//	DefaultMetricName *string    `json:"defaultMetricName,omitempty"`
+//	IsOverrideable    bool       `json:"isOverrideable"`
+//}
+
+// GroupWidget represents a group of widgets
+type GroupWidget struct {
+	Widget   `json:",inline"`
+	Title    *string             `json:"title,omitempty" jsonschema:"description=The title of the group widget if present"`
+	Children []MetricChartWidget `json:"children" jsonschema:"description=The children widgets of the group widget. The children are MetricChartWidgets."`
+	//Variables []Variable `json:"variables,omitempty"`
+}
+
+// MetricChartWidget represents a metric chart widget
+type MetricChartWidget struct {
+	Widget         `json:",inline"`
+	MetricName     string              `json:"metricName" jsonschema:"description=The name of the metric to use in the chart if MetricType is metric. If MetricType is trace, this is not used and can be empty. This value is same as the metricName in the get_metric tool and the possible metricNames can be found in the get_metric_names tool"`
+	Filters        map[string][]string `json:"filters,omitempty" jsonschema:"description=The filters to apply to the metric. This is the same as the filters in the get_metric or get_trace_metric tool depending on the MetricType"`
+	ExcludeFilters map[string][]string `json:"excludeFilters,omitempty" jsonschema:"description=The exclude filters to apply to the metric. This is the same as the exclude filters in the get_metric or get_trace_metric tool depending on the MetricType"`
+	Splits         []string            `json:"splits,omitempty" jsonshcema:"description=Splits will allow you to group/split metrics by an attribute. This is useful if you would like to see the breakdown of a particular metric by an attribute. For example if you want to see the breakdown of the metric by service_name you would set the splits as ['service_name']"`
+	Aggregation    string              `json:"aggregation" jsonschema:"description=The aggregation to apply to the metrics. This is the same as the aggregation in the get_metric or get_trace_metric tool depending on the MetricType"`
+	Title          *string             `json:"title,omitempty" jsonschema:"description=The title of the metric chart widget if present"`
+	Type           ChartType           `json:"type" jsonschema:"description=The type of the chart to display. Possible values are line / bar."`
+	MetricType     MetricType          `json:"metricType" jsonschema:"description=The type of the metric to use in the chart. Possible values are metric / trace. If metric, the metricName should be used."`
+	Functions      []MetricFunction    `json:"functions" jsonschema:"description=The functions to apply to the metric. This is the same as the functions in the get_metric or get_trace_metric tool depending on the MetricType"`
+}
+
+// MarkdownWidget represents a markdown content widget
+type MarkdownWidget struct {
+	Widget  `json:",inline"`
+	Content string `json:"content"`
+}
+type ChartType string
+
+const (
+	ChartTypeLine ChartType = "line"
+	ChartTypeBar  ChartType = "bar"
+)
+
+type MetricType string
+
+const (
+	Metric MetricType = "metric" // please excuse the bad naming... this is a metric metric type.
+	Trace  MetricType = "trace"  // trace metric type.
+)

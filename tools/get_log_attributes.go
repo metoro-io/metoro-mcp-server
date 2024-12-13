@@ -14,5 +14,5 @@ func GetLogAttributesHandler(arguments GetLogAttributesHandlerArgs) (*mcpgolang.
 		return nil, fmt.Errorf("error making Metoro call: %v", err)
 	}
 
-	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(resp)))), nil
+	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(resp)))), nil
 }

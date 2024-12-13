@@ -14,7 +14,7 @@ func GetEnvironmentsHandler(arguments GetEnvironmentHandlerArgs) (*mcpgolang.Too
 		return nil, fmt.Errorf("error getting environments: %v", err)
 	}
 
-	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
+	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
 func getEnvironmentsMetoroCall() ([]byte, error) {

@@ -41,7 +41,7 @@ func GetMetricHandler(arguments GetMetricHandlerArgs) (*mcpgolang.ToolResponse, 
 	if err != nil {
 		return nil, fmt.Errorf("error getting metric: %v", err)
 	}
-	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
+	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
 func getMetricMetoroCall(request model.GetMetricRequest) ([]byte, error) {
