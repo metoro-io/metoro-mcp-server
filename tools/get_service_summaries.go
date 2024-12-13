@@ -31,7 +31,7 @@ func GetServiceSummariesHandler(arguments GetServiceSummariesHandlerArgs) (*mcpg
 	if err != nil {
 		return nil, fmt.Errorf("error getting service summaries: %v", err)
 	}
-	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
+	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
 func getServiceSummariesMetoroCall(request model.GetServiceSummariesRequest) ([]byte, error) {

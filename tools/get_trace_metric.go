@@ -45,7 +45,7 @@ func GetTraceMetricHandler(arguments GetTraceMetricHandlerArgs) (*mcpgolang.Tool
 	if err != nil {
 		return nil, fmt.Errorf("error getting trace metric: %v", err)
 	}
-	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
+	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
 func getTraceMetricMetoroCall(request model.GetTraceMetricRequest) ([]byte, error) {

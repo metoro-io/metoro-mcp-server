@@ -14,7 +14,7 @@ func GetServicesHandler(arguments GetServicesHandlerArgs) (*mcpgolang.ToolRespon
 		return nil, fmt.Errorf("error getting services: %v", err)
 	}
 
-	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
+	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
 func getServicesMetoroCall() ([]byte, error) {

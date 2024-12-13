@@ -20,7 +20,7 @@ func GetAlertFiresHandler(arguments GetAlertFiresHandlerArgs) (*mcpgolang.ToolRe
 	if err != nil {
 		return nil, fmt.Errorf("error getting alert fires: %v", err)
 	}
-	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
+	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
 func getAlertFiresMetoroCall(alertId string, startTime, endTime int64) ([]byte, error) {

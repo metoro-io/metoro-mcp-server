@@ -33,7 +33,7 @@ func GetNodesHandler(arguments GetNodesHandlerArgs) (*mcpgolang.ToolResponse, er
 	if err != nil {
 		return nil, fmt.Errorf("error getting nodes: %v", err)
 	}
-	return mcpgolang.NewToolReponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
+	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
 func getNodesMetoroCall(request model.GetAllNodesRequest) ([]byte, error) {
