@@ -2,8 +2,10 @@ package tools
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
@@ -20,7 +22,7 @@ type GetMetricHandlerArgs struct {
 	BucketSize     int64                  `json:"bucketSize" jsonschema:"description=The size of each datapoint bucket in seconds if not provided metoro will select the best bucket size for the given duration for performance and clarity"`
 }
 
-func GetMetricHandler(arguments GetMetricHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetMetricHandler(ctx context.Context, arguments GetMetricHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
 	if err != nil {
 		return nil, fmt.Errorf("error calculating time range: %v", err)
@@ -37,17 +39,17 @@ func GetMetricHandler(arguments GetMetricHandlerArgs) (*mcpgolang.ToolResponse, 
 		BucketSize:     arguments.BucketSize,
 	}
 
-	body, err := getMetricMetoroCall(request)
+	body, err := getMetricMetoroCall(ctx, request)
 	if err != nil {
 		return nil, fmt.Errorf("error getting metric: %v", err)
 	}
 	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
-func getMetricMetoroCall(request model.GetMetricRequest) ([]byte, error) {
+func getMetricMetoroCall(ctx context.Context, request model.GetMetricRequest) ([]byte, error) {
 	requestBody, err := json.Marshal(request)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling metric request: %v", err)
 	}
-	return utils.MakeMetoroAPIRequest("POST", "metric", bytes.NewBuffer(requestBody))
+	return utils.MakeMetoroAPIRequest("POST", "metric", bytes.NewBuffer(requestBody), utils.GetAPIRequirementsFromRequest(ctx))
 }

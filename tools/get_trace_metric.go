@@ -2,8 +2,10 @@ package tools
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
@@ -22,7 +24,7 @@ type GetTraceMetricHandlerArgs struct {
 	Environments   []string               `json:"environments" jsonschema:"description=The environments to get traces from. If empty traces from all environments will be returned"`
 }
 
-func GetTraceMetricHandler(arguments GetTraceMetricHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetTraceMetricHandler(ctx context.Context, arguments GetTraceMetricHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
 	if err != nil {
 		return nil, fmt.Errorf("error calculating time range: %v", err)
@@ -41,20 +43,20 @@ func GetTraceMetricHandler(arguments GetTraceMetricHandlerArgs) (*mcpgolang.Tool
 		Environments:   arguments.Environments,
 	}
 
-	body, err := getTraceMetricMetoroCall(request)
+	body, err := getTraceMetricMetoroCall(ctx, request)
 	if err != nil {
 		return nil, fmt.Errorf("error getting trace metric: %v", err)
 	}
 	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
-func getTraceMetricMetoroCall(request model.GetTraceMetricRequest) ([]byte, error) {
+func getTraceMetricMetoroCall(ctx context.Context, request model.GetTraceMetricRequest) ([]byte, error) {
 	jsonBody, err := json.Marshal(request)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling request: %v", err)
 	}
 
-	resp, err := utils.MakeMetoroAPIRequest("POST", "traceMetric", bytes.NewBuffer(jsonBody))
+	resp, err := utils.MakeMetoroAPIRequest("POST", "traceMetric", bytes.NewBuffer(jsonBody), utils.GetAPIRequirementsFromRequest(ctx))
 	if err != nil {
 		return nil, fmt.Errorf("error making Metoro call: %v", err)
 	}

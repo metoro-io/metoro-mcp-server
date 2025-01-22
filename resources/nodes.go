@@ -2,11 +2,13 @@ package resources
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"time"
+
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
-	"time"
 )
 
 func NodesResourceHandler() (*mcpgolang.ResourceResponse, error) {
@@ -24,7 +26,8 @@ func NodesResourceHandler() (*mcpgolang.ResourceResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	response, err := utils.MakeMetoroAPIRequest("POST", "infrastructure/nodes", bytes.NewBuffer(jsonRequest))
+	ctx := context.Background()
+	response, err := utils.MakeMetoroAPIRequest("POST", "infrastructure/nodes", bytes.NewBuffer(jsonRequest), utils.GetAPIRequirementsFromRequest(ctx))
 	if err != nil {
 		return nil, err
 	}

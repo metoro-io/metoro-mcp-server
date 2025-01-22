@@ -2,8 +2,10 @@ package tools
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
@@ -16,7 +18,7 @@ type GetNodesHandlerArgs struct {
 	Environments   []string            `json:"environments" jsonschema:"description=The environments to get nodes that belong to. If empty all environments will be used."`
 }
 
-func GetNodesHandler(arguments GetNodesHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetNodesHandler(ctx context.Context, arguments GetNodesHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
 	if err != nil {
 		return nil, fmt.Errorf("error calculating time range: %v", err)
@@ -29,17 +31,17 @@ func GetNodesHandler(arguments GetNodesHandlerArgs) (*mcpgolang.ToolResponse, er
 		Splits:         []string{},
 		Environments:   arguments.Environments,
 	}
-	body, err := getNodesMetoroCall(request)
+	body, err := getNodesMetoroCall(ctx, request)
 	if err != nil {
 		return nil, fmt.Errorf("error getting nodes: %v", err)
 	}
 	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
-func getNodesMetoroCall(request model.GetAllNodesRequest) ([]byte, error) {
+func getNodesMetoroCall(ctx context.Context, request model.GetAllNodesRequest) ([]byte, error) {
 	requestBody, err := json.Marshal(request)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling nodes request: %v", err)
 	}
-	return utils.MakeMetoroAPIRequest("POST", "infrastructure/nodes", bytes.NewBuffer(requestBody))
+	return utils.MakeMetoroAPIRequest("POST", "infrastructure/nodes", bytes.NewBuffer(requestBody), utils.GetAPIRequirementsFromRequest(ctx))
 }

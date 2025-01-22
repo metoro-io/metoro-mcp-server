@@ -2,11 +2,13 @@ package resources
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"time"
+
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
-	"time"
 )
 
 func MetricsResourceHandler() (*mcpgolang.ResourceResponse, error) {
@@ -22,7 +24,8 @@ func MetricsResourceHandler() (*mcpgolang.ResourceResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := utils.MakeMetoroAPIRequest("POST", "fuzzyMetricsNames", bytes.NewBuffer(jsonData))
+	ctx := context.Background()
+	resp, err := utils.MakeMetoroAPIRequest("POST", "fuzzyMetricsNames", bytes.NewBuffer(jsonData), utils.GetAPIRequirementsFromRequest(ctx))
 	if err != nil {
 		return nil, err
 	}
