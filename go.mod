@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/metoro-io/mcp-golang v0.6.0
+	github.com/metoro-io/mcp-golang v0.7.0
 )
 
 require (

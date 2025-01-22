@@ -32,7 +32,7 @@ func GetAPIRequirementsFromRequest(ctx context.Context) *APIRequirements {
 	if ginContext.Request.Header.Get("Authorization") != "" {
 		return &APIRequirements{
 			authHeader: ginContext.Request.Header.Get("Authorization"),
-			metoroUrl:  ginContext.Request.Header.Get("localhost:8080"),
+			metoroUrl:  "http://localhost:8080",
 		}
 	}
 	return nil
