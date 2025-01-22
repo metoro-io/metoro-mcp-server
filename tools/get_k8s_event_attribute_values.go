@@ -2,8 +2,10 @@ package tools
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
@@ -20,7 +22,7 @@ type GetK8sEventAttributeValueHandlerArgs struct {
 	Ascending      bool                `json:"ascending" jsonschema:"description=If true, events will be returned in ascending order, otherwise in descending order"`
 }
 
-func GetK8sEventAttributeValuesForIndividualAttributeHandler(arguments GetK8sEventAttributeValueHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetK8sEventAttributeValuesForIndividualAttributeHandler(ctx context.Context, arguments GetK8sEventAttributeValueHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
 	if err != nil {
 		return nil, fmt.Errorf("error calculating time range: %v", err)
@@ -44,7 +46,7 @@ func GetK8sEventAttributeValuesForIndividualAttributeHandler(arguments GetK8sEve
 		return nil, fmt.Errorf("error marshaling request: %v", err)
 	}
 
-	resp, err := utils.MakeMetoroAPIRequest("POST", "k8s/events/summaryIndividualAttribute", bytes.NewBuffer(jsonBody))
+	resp, err := utils.MakeMetoroAPIRequest("POST", "k8s/events/summaryIndividualAttribute", bytes.NewBuffer(jsonBody), utils.GetAPIRequirementsFromRequest(ctx))
 	if err != nil {
 		return nil, fmt.Errorf("error making Metoro call: %v", err)
 	}

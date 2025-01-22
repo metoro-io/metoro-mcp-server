@@ -1,12 +1,15 @@
 package resources
 
 import (
+	"context"
+
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/utils"
 )
 
 func TraceAttributesResourceHandler() (*mcpgolang.ResourceResponse, error) {
-	resp, err := utils.MakeMetoroAPIRequest("GET", "tracesSummaryAttributes", nil)
+	ctx := context.Background()
+	resp, err := utils.MakeMetoroAPIRequest("GET", "tracesSummaryAttributes", nil, utils.GetAPIRequirementsFromRequest(ctx))
 	if err != nil {
 		return nil, err
 	}

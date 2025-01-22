@@ -2,8 +2,10 @@ package tools
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
@@ -18,7 +20,7 @@ type GetK8sEventsVolumeHandlerArgs struct {
 	Environments   []string            `json:"environments" jsonschema:"description=Environments to get events from"`
 }
 
-func GetK8sEventsVolumeHandler(arguments GetK8sEventsVolumeHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetK8sEventsVolumeHandler(ctx context.Context, arguments GetK8sEventsVolumeHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
 	if err != nil {
 		return nil, fmt.Errorf("error calculating time range: %v", err)
@@ -39,7 +41,7 @@ func GetK8sEventsVolumeHandler(arguments GetK8sEventsVolumeHandlerArgs) (*mcpgol
 		return nil, fmt.Errorf("error marshaling request: %v", err)
 	}
 
-	resp, err := utils.MakeMetoroAPIRequest("POST", "k8s/events/metrics", bytes.NewBuffer(jsonBody))
+	resp, err := utils.MakeMetoroAPIRequest("POST", "k8s/events/metrics", bytes.NewBuffer(jsonBody), utils.GetAPIRequirementsFromRequest(ctx))
 	if err != nil {
 		return nil, fmt.Errorf("error making Metoro call: %v", err)
 	}

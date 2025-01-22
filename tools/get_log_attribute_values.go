@@ -2,8 +2,10 @@ package tools
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
@@ -19,7 +21,7 @@ type GetLogAttributeValuesHandlerArgs struct {
 	Environments   []string            `json:"environments" jsonschema:"description=The environments to get possible values of a log attributes for. If empty, possible values from all environments will be returned"`
 }
 
-func GetLogAttributeValuesForIndividualAttributeHandler(arguments GetLogAttributeValuesHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetLogAttributeValuesForIndividualAttributeHandler(ctx context.Context, arguments GetLogAttributeValuesHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
 	if err != nil {
 		return nil, fmt.Errorf("error calculating time range: %v", err)
@@ -42,7 +44,7 @@ func GetLogAttributeValuesForIndividualAttributeHandler(arguments GetLogAttribut
 		return nil, fmt.Errorf("error marshaling request: %v", err)
 	}
 
-	resp, err := utils.MakeMetoroAPIRequest("POST", "logsSummaryIndividualAttribute", bytes.NewBuffer(jsonBody))
+	resp, err := utils.MakeMetoroAPIRequest("POST", "logsSummaryIndividualAttribute", bytes.NewBuffer(jsonBody), utils.GetAPIRequirementsFromRequest(ctx))
 	if err != nil {
 		return nil, fmt.Errorf("error making Metoro call: %v", err)
 	}

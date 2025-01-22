@@ -1,12 +1,15 @@
 package resources
 
 import (
+	"context"
+
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/utils"
 )
 
 func NamespacesResourceHandler() (*mcpgolang.ResourceResponse, error) {
-	response, err := utils.MakeMetoroAPIRequest("GET", "namespaces", nil)
+	ctx := context.Background()
+	response, err := utils.MakeMetoroAPIRequest("GET", "namespaces", nil, utils.GetAPIRequirementsFromRequest(ctx))
 	if err != nil {
 		return nil, err
 	}

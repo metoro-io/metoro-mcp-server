@@ -1,7 +1,9 @@
 package tools
 
 import (
+	"context"
 	"fmt"
+
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/utils"
 )
@@ -11,18 +13,18 @@ type GetAlertFiresHandlerArgs struct {
 	AlertId    string           `json:"alert_id" jsonschema:"required,description=The ID of the alert to get the alert fires for"`
 }
 
-func GetAlertFiresHandler(arguments GetAlertFiresHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func GetAlertFiresHandler(ctx context.Context, arguments GetAlertFiresHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
 	if err != nil {
 		return nil, fmt.Errorf("error calculating time range: %v", err)
 	}
-	body, err := getAlertFiresMetoroCall(arguments.AlertId, startTime, endTime)
+	body, err := getAlertFiresMetoroCall(ctx, arguments.AlertId, startTime, endTime)
 	if err != nil {
 		return nil, fmt.Errorf("error getting alert fires: %v", err)
 	}
 	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
-func getAlertFiresMetoroCall(alertId string, startTime, endTime int64) ([]byte, error) {
-	return utils.MakeMetoroAPIRequest("GET", fmt.Sprintf("alertFires?alertId=%s&startTime=%d&endTime=%d", alertId, startTime, endTime), nil)
+func getAlertFiresMetoroCall(ctx context.Context, alertId string, startTime, endTime int64) ([]byte, error) {
+	return utils.MakeMetoroAPIRequest("GET", fmt.Sprintf("alertFires?alertId=%s&startTime=%d&endTime=%d", alertId, startTime, endTime), nil, utils.GetAPIRequirementsFromRequest(ctx))
 }
