@@ -76,10 +76,10 @@ var MetoroToolsList = []MetoroTools{
 	{
 		Name: "get_k8s_events",
 		Description: `Get the Kubernetes events from your clusters. Kubernetes events are useful for understanding what is happening in your cluster. 
-                      They are emitted by the Kubernetes API server when there is a change in the state of the cluster. How to use this tool:
-                      First, use get_k8s_events_attributes tool to retrieve the available Kubernetes event attribute keys which can be used as Filter/ExcludeFilter keys for this tool.
-                      Then use get_k8s_event_attribute_values_for_individual_attribute tool to get the possible values a Kubernetes event attribute key can be for filtering Kubernetes events.
-                      And then you can call this tool (get_k8s_events) to get the specific events you are looking for. e.g. Filter use case: get_k8s_events with filters: {key: [value]} for including specific Kubernetes events. Where key was retrieved from get_k8s_events_attributes tool and value was retrieved from get_k8s_event_attribute_values_for_individual_attribute tool. Multiple values for a key are ORed together.`,
+They are emitted by the Kubernetes API server when there is a change in the state of the cluster. How to use this tool:
+First, use get_k8s_events_attributes tool to retrieve the available Kubernetes event attribute keys which can be used as Filter/ExcludeFilter keys for this tool.
+Then use get_k8s_event_attribute_values_for_individual_attribute tool to get the possible values a Kubernetes event attribute key can be for filtering Kubernetes events.
+And then you can call this tool (get_k8s_events) to get the specific events you are looking for. e.g. Filter use case: get_k8s_events with filters: {key: [value]} for including specific Kubernetes events.`,
 		Handler: GetK8sEventsHandler,
 	},
 	{
