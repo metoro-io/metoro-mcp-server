@@ -194,4 +194,24 @@ get_k8s_events(Filters: {"service.name": ["SERVICE_NAME_HERE"]})
 	// 				  You can also use Splits argument to group the metric data by the given metric attribute keys. Only use the attribute keys and values that are available for the MetricName that are returned from get_metric_attributes tool.`,
 	// 	Handler: CreateDashboardHandler,
 	// },
+	{
+		Name:        "get_kubernetes_objects",
+		Description: "Get Kubernetes objects from the clusters monitored by Metoro. This tool allows you to query Kubernetes objects (like Pods, Nodes, etc.) at a specific point in time, with optional filtering by namespace, name, labels, service, and environment.",
+		Handler:     GetKubernetesObjectsHandler,
+	},
+	{
+		Name:        "get_kubernetes_metric",
+		Description: "Get Kubernetes metrics from the clusters monitored by Metoro. This tool allows you to query and aggregate Kubernetes metrics with optional filtering, splitting by attributes, and applying various functions to the metrics.",
+		Handler:     GetKubernetesMetricHandler,
+	},
+	{
+		Name:        "get_kubernetes_summary_attributes",
+		Description: "Get the possible attribute keys which can be used for filtering Kubernetes metrics and summaries.",
+		Handler:     GetKubernetesSummaryAttributesHandler,
+	},
+	{
+		Name:        "get_kubernetes_summary_individual_attribute",
+		Description: "Get the possible values for a specific Kubernetes attribute key which can be used for filtering metrics and summaries.",
+		Handler:     GetKubernetesSummaryForIndividualAttributeHandler,
+	},
 }
