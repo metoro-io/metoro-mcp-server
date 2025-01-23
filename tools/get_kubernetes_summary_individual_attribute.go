@@ -20,10 +20,6 @@ type GetKubernetesSummaryForIndividualAttributeHandlerArgs struct {
 	// ExcludeFilters are filters that should be excluded
 	ExcludeFilters map[string][]string `json:"excludeFilters" jsonschema:"description=The exclude filters to apply to the kubernetes summary. For example, if you want to get summary for all services except microservice_a you can pass in {'service.name': ['microservice_a']}"`
 	// Regexes are used to filter based on a regex inclusively
-	Regexes []string `json:"regexes" jsonschema:"description=Regexes to filter the kubernetes summary inclusively"`
-	// ExcludeRegexes are used to filter based on a regex exclusively
-	ExcludeRegexes []string `json:"excludeRegexes" jsonschema:"description=Regexes to filter the kubernetes summary exclusively"`
-	// The environments to get the summary for
 	Environments []string `json:"environments" jsonschema:"description=The environments to get the kubernetes summary from. If empty, all environments will be included"`
 }
 
@@ -58,8 +54,6 @@ func GetKubernetesSummaryForIndividualAttributeHandler(ctx context.Context, argu
 		EndTime:        endTime,
 		Filters:        arguments.Filters,
 		ExcludeFilters: arguments.ExcludeFilters,
-		Regexes:        arguments.Regexes,
-		ExcludeRegexes: arguments.ExcludeRegexes,
 		Environments:   arguments.Environments,
 	}
 
