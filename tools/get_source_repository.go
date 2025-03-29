@@ -66,5 +66,5 @@ func getSourceRepositoryMetoroCall(ctx context.Context, args GetSourceRepository
 		return nil, fmt.Errorf("error marshalling request: %v", err)
 	}
 
-	return utils.MakeMetoroAPIRequest("POST", "api/v1/source/repository", bytes.NewBuffer(reqBody), utils.GetAPIRequirementsFromRequest(ctx))
+	return utils.MakeMetoroAPIRequest("POST", "source/repository", bytes.NewBuffer(reqBody), utils.GetAPIRequirementsFromRequest(ctx))
 }
