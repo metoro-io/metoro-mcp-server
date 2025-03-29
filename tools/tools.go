@@ -161,4 +161,9 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 					  You can also use Splits argument to group the metric data by the given metric attribute keys. Only use the attribute keys and values that are available for the MetricName that are returned from get_attribute_keys and get_attribute_values tools.`,
 		Handler: CreateDashboardHandler,
 	},
+	{
+		Name:        "get_source_repository",
+		Description: "Get the source repository URL/path for a specific service. This tool is useful for finding where the code for a service is stored. You need to provide the service name time range and optionally specific environments to search in.",
+		Handler:     GetSourceRepositoryHandler,
+	},
 }
