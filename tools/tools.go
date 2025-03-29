@@ -103,11 +103,11 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Description: "Get available metric names to query. These metric names can be used as MetricName argument for get_metric, get_metric_metadata and get_timeseries_data and get_attribute_keys tools.",
 		Handler:     GetMetricNamesHandler,
 	},
-	//{
-	//	Name:        "get_metric_metadata",
-	//	Description: "Get metric metadata tool can be used to get detailed information about a metric including its type, unit and description.",
-	//	Handler:     GetMetricMetadata,
-	//},
+	{
+		Name:        "get_metric_metadata",
+		Description: "Get metric description and type and unit for a metric. This tool can be used to get detailed information about a metric including its type, unit and description. Use this tool after getting the metric name that you are interested in from the get_metric_names tool and before calling the get_timeseries_data tool to understand the metric better.",
+		Handler:     GetMetricMetadata,
+	},
 	{
 		Name:        "get_pods",
 		Description: "Get the pods that are running in your cluster. You must provide either a ServiceName to get pods for a specific service or a NodeName to get pods running on a specific node.",
