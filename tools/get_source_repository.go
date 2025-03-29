@@ -12,13 +12,13 @@ import (
 
 type GetSourceRepositoryHandlerArgs struct {
 	// Required: Service name to get the source repository for
-	ServiceName string `json:"serviceName" jsonschema:"required description=The name of the service to get the source repository for"`
+	ServiceName string `json:"serviceName" jsonschema:"required,description=The name of the service to get the source repository for"`
 
 	// Optional: Environment to filter by. If not provided, all environments are considered
 	Environments []string `json:"environments" jsonschema:"description=List of environments to search for the service in. If empty all environments will be considered"`
 
 	// Required: Time configuration for the query
-	TimeConfig utils.TimeConfig `json:"time_config" jsonschema:"required description=The time period to get the source repository information for. You can use relative time (e.g. last 5 minutes) or absolute time range."`
+	TimeConfig utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get the source repository information for. You can use relative time (e.g. last 5 minutes) or absolute time range."`
 }
 
 type GetSourceRepositoryRequest struct {
