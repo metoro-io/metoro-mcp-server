@@ -17,11 +17,8 @@ type GetSourceRepositoryHandlerArgs struct {
 	// Optional: Environment to filter by. If not provided, all environments are considered
 	Environments []string `json:"environments" jsonschema:"description=List of environments to search for the service in. If empty all environments will be considered"`
 
-	// Required: Timestamp to get metadata updates after this time
-	StartTime int64 `json:"startTime" jsonschema:"required description=Unix timestamp (in milliseconds) to get the source repository information after this time"`
-
-	// Required: Timestamp to get metadata updates before this time
-	EndTime int64 `json:"endTime" jsonschema:"required description=Unix timestamp (in milliseconds) to get the source repository information before this time"`
+	// Required: Time configuration for the query
+	TimeConfig utils.TimeConfig `json:"time_config" jsonschema:"required description=The time period to get the source repository information for. You can use relative time (e.g. last 5 minutes) or absolute time range."`
 }
 
 type GetSourceRepositoryRequest struct {
@@ -43,7 +40,12 @@ type GetSourceRepositoryResponse struct {
 }
 
 func GetSourceRepositoryHandler(ctx context.Context, arguments GetSourceRepositoryHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	body, err := getSourceRepositoryMetoroCall(ctx, arguments)
+	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error calculating time range: %v", err)
+	}
+
+	body, err := getSourceRepositoryMetoroCall(ctx, arguments, startTime, endTime)
 	if err != nil {
 		return nil, fmt.Errorf("error getting source repository: %v", err)
 	}
@@ -51,12 +53,12 @@ func GetSourceRepositoryHandler(ctx context.Context, arguments GetSourceReposito
 	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
-func getSourceRepositoryMetoroCall(ctx context.Context, args GetSourceRepositoryHandlerArgs) ([]byte, error) {
+func getSourceRepositoryMetoroCall(ctx context.Context, args GetSourceRepositoryHandlerArgs, startTime, endTime int64) ([]byte, error) {
 	req := GetSourceRepositoryRequest{
 		ServiceName:  args.ServiceName,
 		Environments: args.Environments,
-		StartTime:    args.StartTime,
-		EndTime:      args.EndTime,
+		StartTime:    startTime,
+		EndTime:      endTime,
 	}
 
 	reqBody, err := json.Marshal(req)
