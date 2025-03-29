@@ -21,7 +21,7 @@ type GetMultiMetricHandlerArgs struct {
 // TODO: Add kubernetes resource request type attributes.
 type SingleMetricRequest struct {
 	Type              model.MetricType    `json:"type" jsonschema:"required,enum=metric,enum=trace,enum=logs,enum=kubernetes_resource,description=Type of timeseries data to retrieve"`
-	MetricName        string              `json:"metricName" jsonschema:"description=THIS IS ONLY REQUIRED IF THE type is 'metric'.The name of the metric to use for getting the timeseries data for type 'metric'"`
+	MetricName        string              `json:"metricName" jsonschema:"description=THIS IS ONLY REQUIRED IF THE type is 'metric'.The name of the metric to use for getting the timeseries data for type 'metric'. If metric name ends with _total metoro already accounts for rate differences when returning the value so you don't need to calculate the rate yourself."`
 	Aggregation       model.Aggregation   `json:"aggregation" jsonschema:"required,enum=sum,enum=count,enum=min,enum=max,enum=avg,enum=p50,enum=p90,enum=p95,enum=p99,description=The aggregation to apply to the timeseries at the datapoint bucket size level. The aggregation will be applied to every datapoint bucket. For example if the bucket size is 1 minute and the aggregation is sum then the sum of all datapoints in a minute will be returned"`
 	Filters           map[string][]string `json:"filters" jsonschema:"description=Filters to apply to the timeseries. Only the timeseries that match these filters will be returned. Get the possible filter keys and values from the get_attribute_keys and get_attribute_values tools. e.g. {service_name: [/k8s/namespaceX/serviceX]} should return timseries for serviceX in namespaceX. This is just and example. Do not guess the attribute keys and values."`
 	ExcludeFilters    map[string][]string `json:"excludeFilters" jsonschema:"description=Filters to exclude the timeseries data. Timeseries matching the exclude filters will not be returned. Get the possible exclude filter keys and values from the get_attribute_keys and get_attribute_values tools. e.g. {service_name: [/k8s/namespaceX/serviceX]} should exclude timeseries from serviceX in namespaceX. This is just and example. Do not guess the attribute keys and values"`
@@ -41,7 +41,7 @@ func GetMultiMetricHandler(ctx context.Context, arguments GetMultiMetricHandlerA
 	request := model.GetMultiMetricRequest{
 		StartTime: startTime,
 		EndTime:   endTime,
-		Metrics:   convertTimeseriesToAPITimeseries(arguments.Timeseries),
+		Metrics:   convertTimeseriesToAPITimeseries(arguments.Timeseries, startTime, endTime),
 		Formulas:  arguments.Formulas,
 	}
 
@@ -64,7 +64,7 @@ func getMultiMetricMetoroCall(ctx context.Context, request model.GetMultiMetricR
 	return utils.MakeMetoroAPIRequest("POST", "metrics", bytes.NewBuffer(requestBody), utils.GetAPIRequirementsFromRequest(ctx))
 }
 
-func convertTimeseriesToAPITimeseries(timeseries []SingleMetricRequest) []model.SingleMetricRequest {
+func convertTimeseriesToAPITimeseries(timeseries []SingleMetricRequest, startTime int64, endTime int64) []model.SingleMetricRequest {
 	result := make([]model.SingleMetricRequest, len(timeseries))
 
 	for i, ts := range timeseries {
@@ -77,6 +77,8 @@ func convertTimeseriesToAPITimeseries(timeseries []SingleMetricRequest) []model.
 		switch ts.Type {
 		case model.Metric:
 			apiRequest.Metric = &model.GetMetricRequest{
+				StartTime:      startTime,
+				EndTime:        endTime,
 				MetricName:     ts.MetricName,
 				Filters:        ts.Filters,
 				ExcludeFilters: ts.ExcludeFilters,
@@ -89,6 +91,8 @@ func convertTimeseriesToAPITimeseries(timeseries []SingleMetricRequest) []model.
 
 		case model.Trace:
 			apiRequest.Trace = &model.GetTraceMetricRequest{
+				StartTime:      startTime,
+				EndTime:        endTime,
 				Filters:        ts.Filters,
 				ExcludeFilters: ts.ExcludeFilters,
 				Splits:         ts.Splits,
@@ -104,6 +108,8 @@ func convertTimeseriesToAPITimeseries(timeseries []SingleMetricRequest) []model.
 		case model.Logs:
 			apiRequest.Logs = &model.GetLogMetricRequest{
 				GetLogsRequest: model.GetLogsRequest{
+					StartTime:      startTime,
+					EndTime:        endTime,
 					Filters:        ts.Filters,
 					ExcludeFilters: ts.ExcludeFilters,
 					Regexes:        ts.Regexes,
