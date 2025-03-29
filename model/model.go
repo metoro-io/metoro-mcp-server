@@ -83,11 +83,11 @@ const (
 
 type GetMetricRequest struct {
 	// MetricName is the name of the metric to get
-	MetricName string `json:"metricName"`
+	MetricName string `json:"metricName" jsonschema:"required,description=Name of the metric to get the timeseries data for. Do not guess the metricName, get the possible values from get_metric_names tool"`
 	// Required: Start time of when to get the logs in seconds since epoch
-	StartTime int64 `json:"startTime"`
+	StartTime int64 `json:"startTime" jsonschema:"required,description=Start time of when to get the metrics in seconds since epoch"`
 	// Required: End time of when to get the logs in seconds since epoch
-	EndTime int64 `json:"endTime"`
+	EndTime int64 `json:"endTime" jsonschema:"required,description=Start time of when to get the metrics in seconds since epoch"`
 	// The filters to apply to the logs, so for example, if you want to get logs for a specific service
 	// you can pass in a filter like {"service_name": ["microservice_a"]}
 	Filters map[string][]string `json:"filters"`
@@ -476,7 +476,7 @@ type SingleMetricRequest struct {
 	Trace  *GetTraceMetricRequest `json:"trace,omitempty" jsonschema:"description=Trace metric request details when type is 'trace'"`
 	Logs   *GetLogMetricRequest   `json:"logs,omitempty" jsonschema:"description=Log metric request details when type is 'logs'"`
 	// TODO: Add kubernetes resource request
-	ShouldNotReturn   bool   `json:"shouldNotReturn" jsonschema:"description=If true, result won't be returned (useful for formulas)"`
+	ShouldNotReturn   bool   `json:"shouldNotReturn" jsonschema:"description=If true result won't be returned (useful for formulas)"`
 	FormulaIdentifier string `json:"formulaIdentifier" jsonschema:"description=Identifier to reference this metric in formulas"`
 }
 

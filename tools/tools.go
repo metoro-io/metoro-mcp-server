@@ -46,8 +46,8 @@ var MetoroToolsList = []MetoroTools{
 		Name: "get_timeseries_data",
 		Description: `Get one or more timeseries data for a metric or traces or logs or kubernetes resources. This tool is useful for understanding how the underlying type of data (specific/metric/trace/kubernetes resources/logs) change over time. You can also apply formulas to combine timeseries to calculate rates or ratios or differences etc. How to use this tool:
 					  First you need the type of timeseries data you are requesting for. This can be one of metric or traces or logs or kubernetes resources. If it is metrics then you need to call the get_metric_names tool to get the available metric names which can be used as MetricName argument for this tool.
-					  Then use get_metric_attributes tool to retrieve the available attribute keys and values for a specific MetricName which can be used as Filter/ExcludeFilter keys or Splits argument for this tool.
-					  You can also use Splits argument to group the metric data by the given metric attribute keys. Only use the attribute keys and values that are available for the MetricName that are returned from get_metric_attributes tool.`,
+					  Then use get_attribute_keys tool to retrieve the available attribute keys and get_attribute_values to retrieve values for the attribute key that you are interested in to use in Filter/ExcludeFilter keys or Splits argument for this tool.
+					  You can also use Splits argument to group the metric data by the given metric attribute keys. Only use the attribute keys and values that are available for the MetricName that are returned from get_attribute_keys and get_attribute_values tools.`,
 		Handler: GetMultiMetricHandler,
 	},
 	{
@@ -61,14 +61,14 @@ var MetoroToolsList = []MetoroTools{
 		Name: "get_attribute_values",
 		Description: `"Get the possible values of an attribute key for a given type of data which can be one of metric trace logs or kubernetes_resource. This can be used as a value for a filtering key for filtering data. How to use this tool:
 					  First you need the type of data you are requesting for. This can be one of metric or traces or logs or kubernetes resources. Then you need the attribute keys for the given type of data. You can use get_attribute_keys tool to get the available attribute keys for the given type of data.
-					  Then you can call this tool to get the possible values for a given attribute key for the given type of data. If you want to get the possible values for a metric attribute key you can use the get_metric_names tool to get the available metric names which can be used as MetricName argument for this tool and then use get_metric_attributes tool to get the available attribute keys and values for this MetricName which can be used as Filter/ExcludeFilter keys for`,
+					  Then you can call this tool to get the possible values for a given attribute key for the given type of data. If you want to get the possible values for a metric attribute key you can use the get_metric_names tool to get the available metric names which can be used as MetricName argument for this tool and then use get_attribute_keys tool to get the available attribute keys and get_attribute_values to get values for the key which can be used as Filter/ExcludeFilter keys for`,
 		Handler: GetAttributeValuesHandler,
 	},
-	{
-		Name:        "get_trace_attribute_values_for_individual_attribute",
-		Description: "Get trace the possible values a trace attribute key can be used as a value for filtering traces",
-		Handler:     GetTraceAttributeValuesForIndividualAttributeHandler,
-	},
+	//{
+	//	Name:        "get_trace_attribute_values_for_individual_attribute",
+	//	Description: "Get trace the possible values a trace attribute key can be used as a value for filtering traces",
+	//	Handler:     GetTraceAttributeValuesForIndividualAttributeHandler,
+	//},
 	{
 		Name:        "get_profiles",
 		Description: "Get profiles of your services running in your Kubernetes cluster. This tool is useful for answering performance related questions for a specific service. It provides information about which functions taking time in the service.",
@@ -100,7 +100,7 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 	},
 	{
 		Name:        "get_metric_names",
-		Description: "Get available metric names to query. These metric names can be used as MetricName argument for get_metric, get_metric_metadata and get_metric_attributes tools.",
+		Description: "Get available metric names to query. These metric names can be used as MetricName argument for get_metric, get_metric_metadata and get_timeseries_data and get_attribute_keys tools.",
 		Handler:     GetMetricNamesHandler,
 	},
 	//{
@@ -118,11 +118,11 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Description: "Get detailed information including the YAML of a Kubernetes service. This tool is useful for understanding the configuration of a service.",
 		Handler:     GetK8sServiceInformationHandler,
 	},
-	{
-		Name:        "get_log_attribute_values_for_individual_attribute",
-		Description: "Get possible values for a specific log attribute key which can be used for filtering logs.",
-		Handler:     GetLogAttributeValuesForIndividualAttributeHandler,
-	},
+	//{
+	//	Name:        "get_log_attribute_values_for_individual_attribute",
+	//	Description: "Get possible values for a specific log attribute key which can be used for filtering logs.",
+	//	Handler:     GetLogAttributeValuesForIndividualAttributeHandler,
+	//},
 	{
 		Name:        "get_nodes",
 		Description: "Get the nodes that are running in your cluster. To use this tool, first call get_node_attributes to get the possible node attribute keys and values which can be used for filtering nodes.",
@@ -157,8 +157,8 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Name: "create_dashboard",
 		Description: `Create a dashboard with the described metrics. This tool is useful for creating a dashboard with the metrics you are interested in.
 											  How to use this tool:
-					  First use get_metric_names tool to retrieve the available metric names which can be used as MetricName argument for this tool and then use get_metric_attributes tool to retrieve the available attribute keys and values for this MetricName which can be used as Filter/ExcludeFilter keys or Splits argument for MetricChartWidget argument for this tool.
-					  You can also use Splits argument to group the metric data by the given metric attribute keys. Only use the attribute keys and values that are available for the MetricName that are returned from get_metric_attributes tool.`,
+					  First use get_metric_names tool to retrieve the available metric names which can be used as MetricName argument for this tool and then use get_attribute_keys tool to retrieve the available attribute keys and get_attribute_values for getting the values for the attribute key that you are interested in to use in Filter/ExcludeFilter keys or Splits argument for MetricChartWidget argument for this tool.
+					  You can also use Splits argument to group the metric data by the given metric attribute keys. Only use the attribute keys and values that are available for the MetricName that are returned from get_attribute_keys and get_attribute_values tools.`,
 		Handler: CreateDashboardHandler,
 	},
 }
