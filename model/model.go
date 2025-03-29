@@ -83,11 +83,11 @@ const (
 
 type GetMetricRequest struct {
 	// MetricName is the name of the metric to get
-	MetricName string `json:"metricName"`
+	MetricName string `json:"metricName" jsonschema:"required,description=Name of the metric to get the timeseries data for. Do not guess the metricName, get the possible values from get_metric_names tool"`
 	// Required: Start time of when to get the logs in seconds since epoch
-	StartTime int64 `json:"startTime"`
+	StartTime int64 `json:"startTime" jsonschema:"required,description=Start time of when to get the metrics in seconds since epoch"`
 	// Required: End time of when to get the logs in seconds since epoch
-	EndTime int64 `json:"endTime"`
+	EndTime int64 `json:"endTime" jsonschema:"required,description=Start time of when to get the metrics in seconds since epoch"`
 	// The filters to apply to the logs, so for example, if you want to get logs for a specific service
 	// you can pass in a filter like {"service_name": ["microservice_a"]}
 	Filters map[string][]string `json:"filters"`
@@ -419,6 +419,95 @@ const (
 type MetricType string
 
 const (
-	Metric MetricType = "metric" // please excuse the bad naming... this is a metric metric type.
-	Trace  MetricType = "trace"  // trace metric type.
+	Metric MetricType = "metric" // please excuse the bad naming... this is a metric timeseries type.
+	Trace  MetricType = "trace"  // trace timeseries type.
+
+	Logs MetricType = "logs" // log timeseries type.
+
+	KubernetesResource MetricType = "kubernetes_resource" // kubernetes resource timeseries type.
 )
+
+type GetLogMetricRequest struct {
+	GetLogsRequest
+	Splits     []string         `json:"splits" jsonschema:"description=Splits will allow you to group/split metrics by an attribute. This is useful if you would like to see the breakdown of a particular metric by an attribute. For example if you want to see the breakdown of the metric by service.name you would set the splits as ['service.name']"`
+	Functions  []MetricFunction `json:"functions" jsonschema:"description=The functions to apply to the log metric. Available functions are monotonicDifference which will calculate the difference between the current and previous value of the metric (negative values will be set to 0) and valueDifference which will calculate the difference between the current and previous value of the metric or MathExpression e.g. a / 60"`
+	BucketSize int64            `json:"bucketSize" jsonschema:"description=The size of each datapoint bucket in seconds if not provided metoro will select the best bucket size for the given duration for performance and clarity"`
+}
+
+type GetKubernetesResourceRequest struct {
+	// Required: Start time of when to get the logs in seconds since epoch
+	StartTime int64 `json:"startTime"`
+	// Required: End time of when to get the logs in seconds since epoch
+	EndTime int64 `json:"endTime"`
+	//
+	//// Optional: The name of the service to get the k8s events metrics for
+	//// Acts as an additional filter
+	//ServiceNames []string `json:"serviceNames"`
+
+	// The filters to apply to the logs, so for example, if you want to get logs for a specific service
+	//you can pass in a filter like {"service_name": ["microservice_a"]}
+	Filters map[string][]string `json:"filters"`
+
+	// The exclude filters to apply to the logs, so for example, if you want to exclude logs for a specific service
+	//you can pass in a filter like {"service_name": ["microservice_a"]}
+	ExcludeFilters map[string][]string `json:"excludeFilters"`
+
+	// Regexes are used to filter k8s events based on a regex inclusively
+	Regexes []string `json:"regexes"`
+	// ExcludeRegexes are used to filter k8s events based on a regex exclusively
+	ExcludeRegexes []string `json:"excludeRegexes"`
+
+	// Environments is a list of environments to filter the k8s events by. If empty, all environments will be included
+	Environments []string `json:"environments"`
+}
+
+type GetMultiMetricRequest struct {
+	// Required: Start time of when to get the service summaries in seconds
+	StartTime int64 `json:"startTime"`
+	// Required: End time of when to get the service summaries in seconds
+	EndTime  int64                 `json:"endTime"`
+	Metrics  []SingleMetricRequest `json:"metrics" jsonschema:"required,description=Array of metrics to get the timeseries data for"`
+	Formulas []Formula             `json:"formulas" jsonschema:"description=Optional formulas to combine metrics/log metrics/trace metrics. Formula should only consist of formulaIdentifier of the metrics/logs/traces in the metrics array"`
+}
+
+type SingleMetricRequest struct {
+	Type   string                 `json:"type" jsonschema:"required,enum=metric,enum=trace,enum=logs,enum=kubernetes_resource,description=Type of metric to retrieve"`
+	Metric *GetMetricRequest      `json:"metric,omitempty" jsonschema:"description=Metric request details when type is 'metric'"`
+	Trace  *GetTraceMetricRequest `json:"trace,omitempty" jsonschema:"description=Trace metric request details when type is 'trace'"`
+	Logs   *GetLogMetricRequest   `json:"logs,omitempty" jsonschema:"description=Log metric request details when type is 'logs'"`
+	// TODO: Add kubernetes resource request
+	ShouldNotReturn   bool   `json:"shouldNotReturn" jsonschema:"description=If true result won't be returned (useful for formulas)"`
+	FormulaIdentifier string `json:"formulaIdentifier" jsonschema:"description=Identifier to reference this metric in formulas"`
+}
+
+type Formula struct {
+	Formula string `json:"formula" jsonschema:"description=Math expression combining metric results using their formula identifiers"`
+}
+
+type GetMetricAttributesRequest struct {
+	// Required: The metric name to get the summary for
+	MetricName string `json:"metricName"`
+	// Required: Start time of when to get the service summaries in seconds since epoch
+	StartTime int64 `json:"startTime"`
+	// Required: End time of when to get the service summaries in seconds since epoch
+	EndTime int64 `json:"endTime"`
+	// Environments is the environments to get the traces for. If empty, all environments will be included
+	Environments []string `json:"environments"`
+}
+
+type MultiMetricAttributeKeysRequest struct {
+	Type   string                      `json:"type"`
+	Metric *GetMetricAttributesRequest `json:"metric,omitempty"`
+	// Currently trace and logs and kubernetes resource do not have any request parameters
+	// Only metric has request parameters
+}
+
+type GetAttributeValuesRequest struct {
+	Type       MetricType                    `json:"type"`
+	Attribute  string                        `json:"attribute"`
+	Limit      *int                          `json:"limit"`
+	Metric     *GetMetricAttributesRequest   `json:"metric,omitempty"`
+	Trace      *TracesSummaryRequest         `json:"trace,omitempty"`
+	Logs       *LogSummaryRequest            `json:"logs,omitempty"`
+	Kubernetes *GetKubernetesResourceRequest `json:"kubernetes,omitempty"`
+}
