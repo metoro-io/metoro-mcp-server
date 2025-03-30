@@ -41,8 +41,10 @@ var MetoroToolsList = []MetoroTools{
 		Name: "get_timeseries_data",
 		Description: `Get one or more timeseries data for a metric or traces or logs or kubernetes resources. This tool is useful for understanding how the underlying type of data (specific/metric/trace/kubernetes resources/logs) change over time. You can also apply formulas to combine timeseries to calculate rates or ratios or differences etc. How to use this tool:
 					  First you need the type of timeseries data you are requesting for. This can be one of metric or traces or logs or kubernetes resources. If it is metrics then you need to call the get_metric_names tool to get the available metric names which can be used as MetricName argument for this tool.
-					  Then use get_attribute_keys tool to retrieve the available attribute keys and get_attribute_values to retrieve values for the attribute key that you are interested in to use in Filter/ExcludeFilter keys or Splits argument for this tool.
-					  You can also use Splits argument to group the metric data by the given metric attribute keys. Only use the attribute keys and values that are available for the MetricName that are returned from get_attribute_keys and get_attribute_values tools.`,
+					  Then use get_attribute_keys tool to retrieve the available attribute keys and get_attribute_values to retrieve values you are interested in to use in Filter/ExcludeFilter keys for this tool.
+					  You can also use Splits argument to group/split the metric data by the given metric attribute keys. Only use the attribute keys and values that are available for the MetricName that are returned from get_attribute_keys and get_attribute_values tools. If you are not getting proper results back then you might have forgotten to set the correct attribute keys and values. Try again with the correct attribute keys and values you get from get_attribute_values.
+                     Metrics of type counter (or with _total suffix) are cumulative metrics but Metoro querying engine already accounts for rate differences when returning the value so you don't need to calculate the rate/monotonic difference yourself. You can just query those metrics as they are without extra functions. If you are in doubt, use the get_metric_metadata tool to get more information (description, type, unit) about the metric and how to use it.
+`,
 		Handler: GetMultiMetricHandler,
 	},
 	{
@@ -59,11 +61,6 @@ var MetoroToolsList = []MetoroTools{
 					  Then you can call this tool to get the possible values for a given attribute key for the given type of data. If you want to get the possible values for a metric attribute key you can use the get_metric_names tool to get the available metric names which can be used as MetricName argument for this tool and then use get_attribute_keys tool to get the available attribute keys and get_attribute_values to get values for the key which can be used as Filter/ExcludeFilter keys for`,
 		Handler: GetAttributeValuesHandler,
 	},
-	//{
-	//	Name:        "get_trace_attribute_values_for_individual_attribute",
-	//	Description: "Get trace the possible values a trace attribute key can be used as a value for filtering traces",
-	//	Handler:     GetTraceAttributeValuesForIndividualAttributeHandler,
-	//},
 	{
 		Name:        "get_profiles",
 		Description: "Get cpu profiles of your services running in your Kubernetes cluster. This tool is useful for answering performance related questions for a specific service. It provides information about which functions taking time in the service.",
@@ -103,21 +100,16 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Description: "Get metric description and type and unit for a metric. This tool can be used to get detailed information about a metric including its type, unit and description. Use this tool after getting the metric name that you are interested in from the get_metric_names tool and before calling the get_timeseries_data tool to understand the metric better.",
 		Handler:     GetMetricMetadata,
 	},
-	{
-		Name:        "get_pods",
-		Description: "Get the pods that are running in your cluster. You must provide either a ServiceName to get pods for a specific service or a NodeName to get pods running on a specific node.",
-		Handler:     GetPodsHandler,
-	},
+	//{
+	//	Name:        "get_pods",
+	//	Description: "Get the list of pods that are running in your cluster. This tool is useful for getting the name of the pods. You must provide either a ServiceName to get pods for a specific service or a NodeName to get pods running on a specific node.",
+	//	Handler:     GetPodsHandler,
+	//},
 	{
 		Name:        "get_k8s_service_information",
 		Description: "Get detailed information including the YAML of a Kubernetes service. This tool is useful for understanding the configuration of a service.",
 		Handler:     GetK8sServiceInformationHandler,
 	},
-	//{
-	//	Name:        "get_log_attribute_values_for_individual_attribute",
-	//	Description: "Get possible values for a specific log attribute key which can be used for filtering logs.",
-	//	Handler:     GetLogAttributeValuesForIndividualAttributeHandler,
-	//},
 	{
 		Name:        "get_nodes",
 		Description: "Get the nodes that are running in your cluster. To use this tool, first call get_node_attributes to get the possible node attribute keys and values which can be used for filtering nodes.",
@@ -133,11 +125,11 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Description: "Get detailed node information about a specific node. This tool provides information about the node's capacity, allocatable resources, and usage, yaml, node type, OS and Kernel information.",
 		Handler:     GetNodeInfoHandler,
 	},
-	{
-		Name:        "get_service_summaries",
-		Description: "Get summaries of services/workloads running in your Kubernetes cluster. The summary includes the number of requests, errors (5xx and 4xx), P50, p95, p99 latencies. This tool is useful for understanding the performance of your services at a high level for a given relative or abosulute time range.",
-		Handler:     GetServiceSummariesHandler,
-	},
+	//{
+	//	Name:        "get_service_summaries",
+	//	Description: "Get summaries of services/workloads running in your Kubernetes cluster. The summary includes the number of requests, errors (5xx and 4xx), P50, p95, p99 latencies. This tool is useful for understanding the performance of your services at a high level for a given relative or abosulute time range.",
+	//	Handler:     GetServiceSummariesHandler,
+	//},
 	{
 		Name:        "get_alerts",
 		Description: "Get list of alerts from your Kubernetes cluster. These alerts are configured by the user in Metoro therefore it may not have full coverage for all the issues that might occur in the cluster.",

@@ -47,5 +47,17 @@ func GetPodsHandler(ctx context.Context, arguments GetPodsHandlerArgs) (*mcpgola
 		return nil, fmt.Errorf("error making Metoro call: %v", err)
 	}
 
-	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(resp)))), nil
+	response := []PodsResponse{}
+	err = json.Unmarshal(resp, &response)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshaling response: %v", err)
+	}
+
+	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprint(response))), nil
+}
+
+type PodsResponse struct {
+	Name        string `json:"name"`
+	Environment string `json:"environment"`
+	Status      string `json:"status"`
 }
