@@ -23,19 +23,14 @@ var MetoroToolsList = []MetoroTools{
 		Handler:     GetNamespacesHandler,
 	},
 	{
-		Name: "get_logs",
-		Description: `Get logs from all or specific services/hosts/pods running in your Kubernetes cluster. Results are limited to 100 logs lines. How to use this tool:
-                      First, use get_log_attributes tool to retrieve the available log attribute keys which can be used as Filter or ExcludeFilter keys for this tool.
-                      Then use get_log_attribute_values_for_individual_attribute tool to get the possible values a log attribute key can be used for filtering logs.
-                      Then you can use this tool (get_logs) to get the specific logs you are looking for.
-                      e.g. Filter use case: get_logs with filters: {key: [value]} for including specific logs. Where the key was retrieved from get_log_attributes tool and the value was retrieved from get_log_attribute_values_for_individual_attribute tool. Multiple values for a key are ORed together.
-                      If you want to filter log messages with a specific substring, you can use Regexes or ExcludeRegexes argument.`,
-		Handler: GetLogsHandler,
+		Name:        "get_logs",
+		Description: `Get logs from all or specific services/hosts/pods running in your Kubernetes cluster. Results are limited to 100 logs lines. Log lines are large so if you want to check existence use get_timeseries_data. Before using this call get_attribute_keys to get the possible log attribute keys which can be used as Filter/ExcludeFilter keys.`,
+		Handler:     GetLogsHandler,
 	},
 	{
 		Name: "get_traces",
 		Description: `Get traces from all or specific services/hosts/pods running in your Kubernetes cluster. Results are limited to 100 traces. How to use this tool:
-					  First, use get_trace_attributes tool to retrieve the available trace attribute keys which can be used as Filter/ExcludeFilter keys.
+					  First use get_trace_attributes tool to retrieve the available trace attribute keys which can be used as Filter/ExcludeFilter keys.
                       Then use get_trace_attribute_values_for_individual_attribute tool to get the possible values a trace attribute key can be for filtering traces.
                       Then you can use this tool (get_traces) to get the specific traces you are looking for. 
                       e.g. Filter use case: get_traces with filters: {key: [value]} for including specific traces. Where key was retrieved from get_trace_attributes tool and value was retrieved from get_trace_attribute_values_for_individual_attribute tool. Multiple values for a key are ORed together. 
@@ -71,14 +66,14 @@ var MetoroToolsList = []MetoroTools{
 	//},
 	{
 		Name:        "get_profiles",
-		Description: "Get profiles of your services running in your Kubernetes cluster. This tool is useful for answering performance related questions for a specific service. It provides information about which functions taking time in the service.",
+		Description: "Get cpu profiles of your services running in your Kubernetes cluster. This tool is useful for answering performance related questions for a specific service. It provides information about which functions taking time in the service.",
 		Handler:     GetProfilesHandler,
 	},
 	{
 		Name: "get_k8s_events",
 		Description: `Get the Kubernetes events from your clusters. Kubernetes events are useful for understanding what is happening in your cluster. 
 They are emitted by the Kubernetes API server when there is a change in the state of the cluster. How to use this tool:
-First, use get_k8s_events_attributes tool to retrieve the available Kubernetes event attribute keys which can be used as Filter/ExcludeFilter keys for this tool.
+First use get_k8s_events_attributes tool to retrieve the available Kubernetes event attribute keys which can be used as Filter/ExcludeFilter keys for this tool.
 Then use get_k8s_event_attribute_values_for_individual_attribute tool to get the possible values a Kubernetes event attribute key can be for filtering Kubernetes events.
 And then you can call this tool (get_k8s_events) to get the specific events you are looking for. e.g. Filter use case: get_k8s_events with filters: {key: [value]} for including specific Kubernetes events.`,
 		Handler: GetK8sEventsHandler,
@@ -90,7 +85,7 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 	},
 	{
 		Name:        "get_k8s_event_attribute_values_for_individual_attribute",
-		Description: "Get possible attribute values for a specific Kubernetes event attribute key. E.g. EventType attribute key might have values like Normal, Warning, etc.",
+		Description: "Get possible attribute values for a specific Kubernetes event attribute key. E.g. EventType attribute key might have values like Normal Warning etc.",
 		Handler:     GetK8sEventAttributeValuesForIndividualAttributeHandler,
 	},
 	{
