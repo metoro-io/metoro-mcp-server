@@ -125,11 +125,11 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Description: "Get detailed node information about a specific node. This tool provides information about the node's capacity, allocatable resources, and usage, yaml, node type, OS and Kernel information.",
 		Handler:     GetNodeInfoHandler,
 	},
-	//{
-	//	Name:        "get_service_summaries",
-	//	Description: "Get summaries of services/workloads running in your Kubernetes cluster. The summary includes the number of requests, errors (5xx and 4xx), P50, p95, p99 latencies. This tool is useful for understanding the performance of your services at a high level for a given relative or abosulute time range.",
-	//	Handler:     GetServiceSummariesHandler,
-	//},
+	{
+		Name:        "get_service_summaries",
+		Description: "Get summaries of services/workloads running in your Kubernetes cluster. The summary includes the number of requests, errors (5xx and 4xx), P50, p95, p99 latencies. This tool is useful for understanding the performance of your services at a high level for a given relative or abosulute time range.",
+		Handler:     GetServiceSummariesHandler,
+	},
 	{
 		Name:        "get_alerts",
 		Description: "Get list of alerts from your Kubernetes cluster. These alerts are configured by the user in Metoro therefore it may not have full coverage for all the issues that might occur in the cluster.",
