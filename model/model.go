@@ -60,12 +60,11 @@ const (
 )
 
 type MetricFunction struct {
-	ID string `json:"id"`
 	// The type of the function
-	FunctionType FunctionType `json:"functionType" jsonschema:"required,description=The type of the function to apply to the metric possible values are monotonicDifference / valueDifference / customMathExpression"`
-	// The payload of the function
-	// TODO: If we have more payloads this can be an interface but for now its a math expression since its the only payload.
-	FunctionPayload MathExpression `json:"functionPayload" jsonschema:"description=The payload of the customMathExpression. this is only set for customMathExpression. "`
+	FunctionType FunctionType `json:"functionType" jsonschema:"required,enum=monotonicDifference,enum=valueDifference,enum=perSecond,description=The type of the function to apply to the metric. Do not guess the function type. Use the available ones: perSecond or valueDifference or monotonicDifference."`
+	//// The payload of the function
+	//// TODO: If we have more payloads this can be an interface but for now its a math expression since its the only payload.
+	//FunctionPayload MathExpression `json:"functionPayload" jsonschema:"description=The payload of the customMathExpression. this is only set for customMathExpression. "`
 }
 
 type MathExpression struct {
@@ -76,9 +75,8 @@ type MathExpression struct {
 type FunctionType string
 
 const (
-	MonotonicDifference  FunctionType = "monotonicDifference"
-	ValueDifference      FunctionType = "valueDifference"
-	CustomMathExpression FunctionType = "customMathExpression"
+	MonotonicDifference FunctionType = "monotonicDifference"
+	ValueDifference     FunctionType = "valueDifference"
 )
 
 type GetMetricRequest struct {
