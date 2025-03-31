@@ -23,27 +23,27 @@ var MetoroToolsList = []MetoroTools{
 		Handler:     GetNamespacesHandler,
 	},
 	{
-		Name:        "get_logs",
-		Description: `Get logs from all or specific services/hosts/pods running in your Kubernetes cluster. Results are limited to 100 logs lines. Log lines are large so if you want to check existence use get_timeseries_data. Before using this call get_attribute_keys to get the possible log attribute keys which can be used as Filter/ExcludeFilter keys.`,
-		Handler:     GetLogsHandler,
+		Name: "get_logs",
+		Description: `Get individual log lines. Results are limited to 100 logs so try to use filters and regexes to narrow down what you are looking for. 
+                      Use this tool when you are interested in the contents of the log lines to get more information to answer why/what. 
+                     If you want to check existence use get_timeseries_data tool with type=logs to get count of logs.`,
+		Handler: GetLogsHandler,
 	},
 	{
 		Name: "get_traces",
-		Description: `Get traces from all or specific services/hosts/pods running in your Kubernetes cluster. Results are limited to 100 traces. How to use this tool:
-					  First use get_trace_attributes tool to retrieve the available trace attribute keys which can be used as Filter/ExcludeFilter keys.
-                      Then use get_trace_attribute_values_for_individual_attribute tool to get the possible values a trace attribute key can be for filtering traces.
-                      Then you can use this tool (get_traces) to get the specific traces you are looking for. 
-                      e.g. Filter use case: get_traces with filters: {key: [value]} for including specific traces. Where key was retrieved from get_trace_attributes tool and value was retrieved from get_trace_attribute_values_for_individual_attribute tool. Multiple values for a key are ORed together. 
-					  Regexes and ExcludeRegexes arguments can be used to filter traces endpoints that match the given regexes.`,
+		Description: `Get individual traces from your cluster. Results are limited to 100 traces so try to use filters to narrow down what you are looking for.
+					  Use this tool when you are interested in the trace attributes to get more information to answer why/what. 
+                      If you would like to check existence use get_timeseries_data tool with type=trace to get count/p50/p90/p95/p99 of traces instead of get_traces tool.
+                      `,
 		Handler: GetTracesHandler,
 	},
 	{
 		Name: "get_timeseries_data",
 		Description: `Get one or more timeseries data for a metric or traces or logs or kubernetes resources. This tool is useful for understanding how the underlying type of data (specific/metric/trace/kubernetes resources/logs) change over time. You can also apply formulas to combine timeseries to calculate rates or ratios or differences etc. How to use this tool:
-					  First you need the type of timeseries data you are requesting for. This can be one of metric or traces or logs or kubernetes resources. If it is metrics then you need to call the get_metric_names tool to get the available metric names which can be used as MetricName argument for this tool.
-					  Then use get_attribute_keys tool to retrieve the available attribute keys and get_attribute_values to retrieve values you are interested in to use in Filter/ExcludeFilter keys for this tool.
+					  First you need the type of timeseries data you are requesting for. This can be one of metric or traces or logs or kubernetes resources. If it is metrics then you HAVE TO call the get_metric_names tool to get the available metric names which can be used as MetricName argument for this tool.
+					  Then YOU HAVE TO call get_attribute_keys tool to retrieve the available attribute keys and get_attribute_values to retrieve values you are interested in to use in Filter/ExcludeFilter keys for this tool.
 					  You can also use Splits argument to group/split the metric data by the given metric attribute keys. Only use the attribute keys and values that are available for the MetricName that are returned from get_attribute_keys and get_attribute_values tools. If you are not getting proper results back then you might have forgotten to set the correct attribute keys and values. Try again with the correct attribute keys and values you get from get_attribute_values.
-                     Metrics of type counter (or with _total suffix) are cumulative metrics but Metoro querying engine already accounts for rate differences when returning the value so you don't need to calculate the rate/monotonic difference yourself. You can just query those metrics as they are without extra functions. If you are in doubt, use the get_metric_metadata tool to get more information (description, type, unit) about the metric and how to use it.
+                      Metrics of type counter (or with _total suffix) are cumulative metrics but Metoro querying engine already accounts for rate differences when returning the value so you don't need to calculate the rate/monotonic difference yourself. You can just query those metrics as they are without extra functions. If you are in doubt, use the get_metric_metadata tool to get more information (description, type, unit) about the metric and how to use it.
 `,
 		Handler: GetMultiMetricHandler,
 	},
@@ -87,7 +87,7 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 	},
 	{
 		Name:        "get_k8s_events_volume",
-		Description: "Get the timeseries data for the number of Kubernetes events in your cluster, whether its filtered by a specific attribute or not. The volume of events are split by EventType so you can see the breakdown of Warning/Normal events.",
+		Description: "Get the timeseries data for the number of Kubernetes events in your cluster whether its filtered by a specific attribute or not. The volume of events are split by EventType so you can see the breakdown of Warning/Normal events.",
 		Handler:     GetK8sEventsVolumeHandler,
 	},
 	{
@@ -106,8 +106,8 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 	//	Handler:     GetPodsHandler,
 	//},
 	{
-		Name:        "get_k8s_service_information",
-		Description: "Get detailed information including the YAML of a Kubernetes service. This tool is useful for understanding the configuration of a service.",
+		Name:        "get_service_yaml",
+		Description: "Returns environment and YAML of a kubernetes resource/service. This tool is useful for understanding the YAML configuration of a service.",
 		Handler:     GetK8sServiceInformationHandler,
 	},
 	{
