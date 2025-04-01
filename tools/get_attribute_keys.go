@@ -8,6 +8,9 @@ import (
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
+	"slices"
+	"strings"
+	"time"
 )
 
 type GetAttributeKeysHandlerArgs struct {
@@ -25,6 +28,12 @@ func GetAttributeKeysHandler(ctx context.Context, arguments GetAttributeKeysHand
 	if arguments.Type == model.Metric {
 		if arguments.MetricName == "" {
 			return nil, fmt.Errorf("metricName is required when type is 'metric'")
+		}
+
+		// Check whether the metric is valid. If not, return an error.
+		err = CheckMetric(ctx, arguments.MetricName)
+		if err != nil {
+			return nil, err
 		}
 	}
 
@@ -51,4 +60,28 @@ func GetAttributeKeysHandler(ctx context.Context, arguments GetAttributeKeysHand
 	}
 
 	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(resp)))), nil
+}
+
+func CheckMetric(ctx context.Context, metricName string) error {
+	now := time.Now()
+	hourAgo := now.Add(-30 * time.Minute)
+	request := model.FuzzyMetricsRequest{
+		StartTime:        hourAgo.Unix(),
+		EndTime:          now.Unix(),
+		MetricFuzzyMatch: "", // This will return all the metric names.
+	}
+	metricNamesResp, err := getMetricNamesMetoroCall(ctx, request)
+
+	metricNames := model.GetMetricNamesResponse{}
+	err = json.Unmarshal(metricNamesResp, &metricNames)
+	if err != nil {
+		return fmt.Errorf("error unmarshaling response: %v", err)
+	}
+
+	metricNamesStr := strings.Join(metricNames.MetricNames, ", ")
+	if !slices.Contains(metricNames.MetricNames, metricName) {
+		return fmt.Errorf("metricName '%s' is not valid. Valid metric names are: %s", metricName, metricNamesStr)
+	}
+
+	return nil
 }
