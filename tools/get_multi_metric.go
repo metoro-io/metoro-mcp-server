@@ -42,7 +42,7 @@ func GetMultiMetricHandler(ctx context.Context, arguments GetMultiMetricHandlerA
 		return nil, fmt.Errorf("error calculating time range: %v", err)
 	}
 
-	err = checkTimeseriesAttributes(ctx, arguments.Timeseries, startTime, endTime)
+	err = checkTimeseries(ctx, arguments.Timeseries, startTime, endTime)
 	if err != nil {
 		return nil, err
 	}
@@ -188,9 +188,13 @@ func CheckAttributes(ctx context.Context, requestType model.MetricType, filters 
 	return nil
 }
 
-func checkTimeseriesAttributes(ctx context.Context, timeseries []SingleMetricRequest, startTime, endTime int64) error {
+func checkTimeseries(ctx context.Context, timeseries []SingleMetricRequest, startTime, endTime int64) error {
 	for _, ts := range timeseries {
-		err := CheckAttributes(ctx, ts.Type, ts.Filters, ts.ExcludeFilters, ts.Splits, &model.GetMetricAttributesRequest{
+		err := CheckMetric(ctx, ts.MetricName)
+		if err != nil {
+			return err
+		}
+		err = CheckAttributes(ctx, ts.Type, ts.Filters, ts.ExcludeFilters, ts.Splits, &model.GetMetricAttributesRequest{
 			StartTime:  startTime,
 			EndTime:    endTime,
 			MetricName: ts.MetricName,

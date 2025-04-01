@@ -514,3 +514,7 @@ type GetAttributeKeysResponse struct {
 	// The attribute values
 	Attributes []string `json:"attributes"`
 }
+
+type GetMetricNamesResponse struct {
+	MetricNames []string `json:"metrics"`
+}
