@@ -18,8 +18,8 @@ type GetK8sEventAttributeValueHandlerArgs struct {
 	ExcludeFilters map[string][]string `json:"excludeFilters" jsonschema:"description=The exclude filters to exclude/eliminate possible values an attribute can take. Events matching the exclude filters will not be returned. For example if you want the possible values for attribute key service.name where the attribute environment is not X then you would set the ExcludeFilters as {environment: [X]}"`
 	Regexes        []string            `json:"regexes" jsonschema:"description=The regexes to apply to the event messages. Only the attribute values (for a given attribute key) of events messages that match these regexes will be returned. For example if you want the possible values for attribute key service.name where the event message contains the word 'error' you would set the regexes as ['error']"`
 	ExcludeRegexes []string            `json:"excludeRegexes" jsonschema:"description=The exclude regexes to apply to the event messages. The attribute values (for a given attribute key) of events messages that match these regexes will not be returned. For example if you want the possible values for attribute key service.name where the event message does not contain the word 'error' you would set the exclude regexes as ['error']"`
-	Environments   []string            `json:"environments" jsonschema:"description=The environments to get events from. If empty, events from all environments will be returned"`
-	Ascending      bool                `json:"ascending" jsonschema:"description=If true, events will be returned in ascending order, otherwise in descending order"`
+	Environments   []string            `json:"environments" jsonschema:"description=The environments to get events from. If empty events from all environments will be returned"`
+	Ascending      bool                `json:"ascending" jsonschema:"description=If true events will be returned in ascending order otherwise in descending order"`
 }
 
 func GetK8sEventAttributeValuesForIndividualAttributeHandler(ctx context.Context, arguments GetK8sEventAttributeValueHandlerArgs) (*mcpgolang.ToolResponse, error) {
