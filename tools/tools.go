@@ -23,11 +23,9 @@ var MetoroToolsList = []MetoroTools{
 		Handler:     GetNamespacesHandler,
 	},
 	{
-		Name: "get_logs",
-		Description: `Get individual log lines. Results are limited to 100 logs so try to use filters and regexes to narrow down what you are looking for. 
-                      Use this tool when you are interested in the contents of the log lines to get more information to answer why/what. 
-                     If you want to check existence use get_timeseries_data tool with type=logs to get count of logs.`,
-		Handler: GetLogsHandler,
+		Name:        "get_logs",
+		Description: `Get logs from all or specific services/hosts/pods. Before calling this you MUST first call get_attribute_keys and get_attribute_values. Results are limited to 100 logs lines. Log lines are large so if you want to check for trends you should use get_timeseries_data with the log type then us this after to drill in. Before using this you MUST first call get_attribute_keys to get the possible log attribute keys which can be used as Filter/ExcludeFilter keys.`,
+		Handler:     GetLogsHandler,
 	},
 	{
 		Name: "get_traces",
