@@ -24,20 +24,22 @@ var MetoroToolsList = []MetoroTools{
 	},
 	{
 		Name:        "get_logs",
-		Description: `Get logs from all or specific services/hosts/pods. Before calling this you MUST first call get_attribute_keys and get_attribute_values. Results are limited to 100 logs lines. Log lines are large so if you want to check for trends you should use get_timeseries_data with the log type then us this after to drill in. Before using this you MUST first call get_attribute_keys to get the possible log attribute keys which can be used as Filter/ExcludeFilter keys.`,
+		Description: `Get logs from all or specific services/hosts/pods. Results are limited to 100 logs lines.  Before using this you MUST first call get_attribute_keys and get_attribute_values to get the possible log attribute keys and values which can be used as Filter/ExcludeFilter keys.`,
 		Handler:     GetLogsHandler,
 	},
 	{
 		Name: "get_traces",
 		Description: `Get list of traces from your cluster. Results are limited to 100 traces so try to use filters to narrow down what you are looking for.
+                      Prior to using this tool, YOU MUST first call get_attribute_keys and subsequently get_attribute_values to get the possible trace attribute keys and values which can be used as Filter/ExcludeFilter keys.
 					  Use this tool when you are interested in the trace attributes to get more information to answer why/what. If you want more details about a specific trace use get_trace_spans to see individual span details.
                       If you would like to check existence of traces use get_timeseries_data tool with type=trace to get count/p50/p90/p95/p99 of traces instead of using get_traces tool.
+                      After calling get traces you should normally call get_trace_spans to get the spans associated with the traceId you are interested in. 
                       `,
 		Handler: GetTracesHandler,
 	},
 	{
 		Name:        "get_trace_spans",
-		Description: `Get the spans associated with a specific traceId. This allows you to view the entire trace with all its spans in a tree like structure.`,
+		Description: `Get the spans associated with a specific traceId. This allows you to view the entire trace with all its spans in a tree like structure. You should basically always use this after calling get_traces tool to get the traceId you are interested in. This tool gives you all spans in a trace.`,
 		Handler:     GetTraceSpansHandler,
 	},
 	{
@@ -46,7 +48,7 @@ var MetoroToolsList = []MetoroTools{
 					  First you need the type of timeseries data you are requesting for. This can be one of metric or traces or logs or kubernetes resources. If it is metrics then you HAVE TO call the get_metric_names tool to get the available metric names which can be used as MetricName argument for this tool.
 					  Then YOU HAVE TO call get_attribute_keys tool to retrieve the available attribute keys and get_attribute_values to retrieve values you are interested in to use in Filter/ExcludeFilter keys for this tool.
 					  You can also use Splits argument to group/split the metric data by the given metric attribute keys. Only use the attribute keys and values that are available for the MetricName that are returned from get_attribute_keys and get_attribute_values tools. If you are not getting proper results back then you might have forgotten to set the correct attribute keys and values. Try again with the correct attribute keys and values you get from get_attribute_values.
-                      Metrics of type counter (or with _total suffix) are cumulative metrics but Metoro querying engine already accounts for rate differences when returning the value so you don't need to calculate the rate/monotonic difference yourself. You can just query those metrics as they are without extra functions. If you are in doubt, use the get_metric_metadata tool to get more information (description, type, unit) about the metric and how to use it.
+                      Metrics of type counter (or with _total suffix) are cumulative metrics but Metoro querying engine already accounts for rate differences when returning the value so you don't need to calculate the rate/monotonic difference yourself. You can just query those metrics as they are without extra functions. If you are in doubt use the get_metric_metadata tool to get more information (description type unit) about the metric and how to use it.
 `,
 		Handler: GetMultiMetricHandler,
 	},
@@ -95,12 +97,12 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 	},
 	{
 		Name:        "get_metric_names",
-		Description: "Get available metric names to query. These metric names can be used as MetricName argument for get_metric, get_metric_metadata and get_timeseries_data and get_attribute_keys tools.",
+		Description: "Get available metric names to query. These metric names can be used as MetricName argument for get_metric get_metric_metadata and get_timeseries_data and get_attribute_keys tools.",
 		Handler:     GetMetricNamesHandler,
 	},
 	{
 		Name:        "get_metric_metadata",
-		Description: "Get metric description and type and unit for a metric. This tool can be used to get detailed information about a metric including its type, unit and description. Use this tool after getting the metric name that you are interested in from the get_metric_names tool and before calling the get_timeseries_data tool to understand the metric better.",
+		Description: "Get metric description and type and unit for a metric. This tool can be used to get detailed information about a metric including its type unit and description. Use this tool after getting the metric name that you are interested in from the get_metric_names tool and before calling the get_timeseries_data tool to understand the metric better.",
 		Handler:     GetMetricMetadata,
 	},
 	//{
@@ -115,7 +117,7 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 	},
 	{
 		Name:        "get_nodes",
-		Description: "Get the nodes that are running in your cluster. To use this tool, first call get_node_attributes to get the possible node attribute keys and values which can be used for filtering nodes.",
+		Description: "Get the nodes that are running in your cluster. To use this tool first call get_node_attributes to get the possible node attribute keys and values which can be used for filtering nodes.",
 		Handler:     GetNodesHandler,
 	},
 	{
@@ -125,12 +127,12 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 	},
 	{
 		Name:        "get_node_info",
-		Description: "Get detailed node information about a specific node. This tool provides information about the node's capacity, allocatable resources, and usage, yaml, node type, OS and Kernel information.",
+		Description: "Get detailed node information about a specific node. This tool provides information about the node's capacity allocatable resources and usage yaml node type OS and Kernel information.",
 		Handler:     GetNodeInfoHandler,
 	},
 	{
 		Name:        "get_service_summaries",
-		Description: "Get summaries of services/workloads running in your Kubernetes cluster. The summary includes the number of requests, errors (5xx and 4xx), P50, p95, p99 latencies. This tool is useful for understanding the performance of your services at a high level for a given relative or abosulute time range.",
+		Description: "Get summaries of services/workloads running in your Kubernetes cluster. The summary includes the number of requests errors (5xx and 4xx) P50 p95 p99 latencies. This tool is useful for understanding the performance of your services at a high level for a given relative or abosulute time range.",
 		Handler:     GetServiceSummariesHandler,
 	},
 	{
@@ -140,7 +142,7 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 	},
 	{
 		Name:        "get_alert_fires",
-		Description: "Get list of alert fires from your Kubernetes cluster. Alert fires are the instances when an alert is triggered. This tool provides information about the alert name, the time it was triggered, the time it recovered, the environment, and the service name (if available) and the alert trigger message.",
+		Description: "Get list of alert fires from your Kubernetes cluster. Alert fires are the instances when an alert is triggered. This tool provides information about the alert name the time it was triggered the time it recovered the environment and the service name (if available) and the alert trigger message.",
 		Handler:     GetAlertFiresHandler,
 	},
 	{

@@ -13,7 +13,7 @@ import (
 type GetTraceSpansHandlerArgs struct {
 	TimeConfig   utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get trace spans for. e.g. if you want to get spans for the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absolute time range by setting start_time and end_time"`
 	TraceId      string           `json:"trace_id" jsonschema:"required,description=The traceId of the trace to get the associated spans. get_traces tool will return list of traceIds which should be used for this field."`
-	Environments []string         `json:"environments" jsonschema:"description=The environments to get the spans for. If empty, all environments will be included"`
+	Environments []string         `json:"environments" jsonschema:"description=The environments to get the spans for. If empty all environments will be included"`
 }
 
 type GetSpansForTraceRequest struct {
