@@ -42,7 +42,7 @@ func GetMultiMetricHandler(ctx context.Context, arguments GetMultiMetricHandlerA
 		return nil, fmt.Errorf("error calculating time range: %v", err)
 	}
 
-	err = checkTimeseriesAttributes(ctx, arguments.Timeseries)
+	err = checkTimeseriesAttributes(ctx, arguments.Timeseries, startTime, endTime)
 	if err != nil {
 		return nil, err
 	}
@@ -143,11 +143,11 @@ func convertTimeseriesToAPITimeseries(timeseries []SingleMetricRequest, startTim
 	return result
 }
 
-func checkAttributes(ctx context.Context, requestType model.MetricType, filters map[string][]string, excludeFilters map[string][]string, splits []string, metricRequest model.GetMetricAttributesRequest) error {
+func CheckAttributes(ctx context.Context, requestType model.MetricType, filters map[string][]string, excludeFilters map[string][]string, splits []string, metricRequest *model.GetMetricAttributesRequest) error {
 	// Check whether the attributes given are valid.
 	request := model.MultiMetricAttributeKeysRequest{
 		Type:   string(requestType),
-		Metric: &metricRequest,
+		Metric: metricRequest,
 	}
 	jsonBody, err := json.Marshal(request)
 	if err != nil {
@@ -188,11 +188,11 @@ func checkAttributes(ctx context.Context, requestType model.MetricType, filters 
 	return nil
 }
 
-func checkTimeseriesAttributes(ctx context.Context, timeseries []SingleMetricRequest) error {
+func checkTimeseriesAttributes(ctx context.Context, timeseries []SingleMetricRequest, startTime, endTime int64) error {
 	for _, ts := range timeseries {
-		err := checkAttributes(ctx, ts.Type, ts.Filters, ts.ExcludeFilters, ts.Splits, model.GetMetricAttributesRequest{
-			StartTime:  0,
-			EndTime:    0,
+		err := CheckAttributes(ctx, ts.Type, ts.Filters, ts.ExcludeFilters, ts.Splits, &model.GetMetricAttributesRequest{
+			StartTime:  startTime,
+			EndTime:    endTime,
 			MetricName: ts.MetricName,
 		})
 		if err != nil {

@@ -30,6 +30,11 @@ func GetLogsHandler(ctx context.Context, arguments GetLogsHandlerArgs) (*mcpgola
 		regexes = append(regexes, arguments.Regex)
 	}
 
+	err = CheckAttributes(ctx, model.Logs, arguments.Filters, arguments.ExcludeFilters, []string{}, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	request := model.GetLogsRequest{
 		StartTime:      startTime,
 		EndTime:        endTime,

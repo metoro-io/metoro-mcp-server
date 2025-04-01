@@ -21,6 +21,13 @@ func GetAttributeKeysHandler(ctx context.Context, arguments GetAttributeKeysHand
 	if err != nil {
 		return nil, fmt.Errorf("error calculating time range: %v", err)
 	}
+
+	if arguments.Type == model.Metric {
+		if arguments.MetricName == "" {
+			return nil, fmt.Errorf("metricName is required when type is 'metric'")
+		}
+	}
+
 	metricAttr := model.GetMetricAttributesRequest{
 		StartTime:    startTime,
 		EndTime:      endTime,
