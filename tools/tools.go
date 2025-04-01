@@ -158,4 +158,9 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Description: "Get the source repository URL/path for a specific service. This tool is useful for finding where the code for a service is stored. You need to provide the service name time range and optionally specific environments to search in.",
 		Handler:     GetSourceRepositoryHandler,
 	},
+	{
+		Name:        "get_service_graph",
+		Description: "Get the service graph showing which services make calls to a given service and which services the given service makes calls to. This tool is useful for understanding service dependencies and call patterns.",
+		Handler:     GetServiceGraphHandler,
+	},
 }
