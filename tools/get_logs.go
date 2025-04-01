@@ -13,10 +13,9 @@ import (
 
 type GetLogsHandlerArgs struct {
 	TimeConfig     utils.TimeConfig    `json:"time_config" jsonschema:"required,description=The time period to get the logs for. e.g. if you want the get the logs for the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absoulute time range by setting start_time and end_time"`
-	Filters        map[string][]string `json:"filters" jsonschema:"description=Log attributes to restrict the search to. Keys are anded together and values in the keys are ORed.  e.g. {service.name: [/k8s/test/test /k8s/test/test2] namespace:[test]} will return all logs emited from (service.name = /k8s/test/test OR /k8s/test/test2) AND (namespace = test). Get the possible filter keys from the get_attribute_keys tool and possible values of a filter key from the get_attribute_values tool. If you are looking to get logs of a certain severity you should look up the log_level filter."`
-	ExcludeFilters map[string][]string `json:"excludeFilters" jsonschema:"description=Log attributes to exclude from the search. Keys are anded together and values in the keys are ORed.  e.g. {service.name: [/k8s/test/test /k8s/test/test2] namespace:[test]} will return all logs emited from NOT ((service.name = /k8s/test/test OR /k8s/test/test2) AND (namespace = test)). Get the possible filter keys from the get_attribute_keys tool and possible values of a filter key from the get_attribute_values tool. If you are looking to get logs of a certain severity you should look up the log_level filter."`
-	Regexes        []string            `json:"regexes" jsonschema:"description=Regexes to apply to the log messages. Only the logs with messages that match these regexes will be returned. Regexes are ANDed together. For example if you want to get logs with message that contains the word 'fish' and 'chips' you would set the regexes as ['fish' 'chips']. If you want to OR you should use the | operator in a single regex. regexes only match the body of the log so do not use this to match things like service names. If you want to get error logs use log_level filters instead."`
-	ExcludeRegexes []string            `json:"excludeRegexes" jsonshcema:"description=Regexes to exclude the log. Log messages that match these regexes will not be returned. Exclude regexes are ORed together. For example if you want to get logs with messages that do not contain the word 'fish' or 'chips' you would set the exclude regexes as ['fish' 'chips']. regexes only match the body of the log so do not use this to match things like service names. If you want to get error logs use log_level filters instead."`
+	Filters        map[string][]string `json:"attributeFilters" jsonschema:"description=You must use get_attribute_keys and get_attribute_values before setting this. Log attributes to restrict the search to. Keys are anded together and values in the keys are ORed.  e.g. {service.name: [/k8s/test/test /k8s/test/test2] namespace:[test]} will return all logs emited from (service.name = /k8s/test/test OR /k8s/test/test2) AND (namespace = test). Get the possible filter keys from the get_attribute_keys tool and possible values of a filter key from the get_attribute_values tool. If you are looking to get logs of a certain severity you should look up the log_level filter."`
+	ExcludeFilters map[string][]string `json:"attributeExcludeFilters" jsonschema:"description=You must use get_attribute_keys and get_attribute_values before setting this.Log attributes to exclude from the search. Keys are anded together and values in the keys are ORed.  e.g. {service.name: [/k8s/test/test /k8s/test/test2] namespace:[test]} will return all logs emited from NOT ((service.name = /k8s/test/test OR /k8s/test/test2) AND (namespace = test)). Get the possible filter keys from the get_attribute_keys tool and possible values of a filter key from the get_attribute_values tool. If you are looking to get logs of a certain severity you should look up the log_level filter."`
+	Regex          string              `json:"regex" jsonschema:"description=Regex to apply to the log search re2 format. Any match in the log message will cause it to be returned. Use the filters parameter log_level if you want to look for logs of a certain severity"`
 	Environments   []string            `json:"environments" jsonschema:"description=The environments to get logs from. If empty logs from all environments will be returned"`
 }
 
@@ -26,13 +25,17 @@ func GetLogsHandler(ctx context.Context, arguments GetLogsHandlerArgs) (*mcpgola
 		return nil, fmt.Errorf("error calculating time range: %v", err)
 	}
 
+	var regexes = []string{}
+	if arguments.Regex != "" {
+		regexes = append(regexes, arguments.Regex)
+	}
+
 	request := model.GetLogsRequest{
 		StartTime:      startTime,
 		EndTime:        endTime,
 		Filters:        arguments.Filters,
 		ExcludeFilters: arguments.ExcludeFilters,
-		Regexes:        arguments.Regexes,
-		ExcludeRegexes: arguments.ExcludeRegexes,
+		Regexes:        regexes,
 		Environments:   arguments.Environments,
 	}
 
