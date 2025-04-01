@@ -29,11 +29,16 @@ var MetoroToolsList = []MetoroTools{
 	},
 	{
 		Name: "get_traces",
-		Description: `Get individual traces from your cluster. Results are limited to 100 traces so try to use filters to narrow down what you are looking for.
-					  Use this tool when you are interested in the trace attributes to get more information to answer why/what. 
-                      If you would like to check existence use get_timeseries_data tool with type=trace to get count/p50/p90/p95/p99 of traces instead of get_traces tool.
+		Description: `Get list of traces from your cluster. Results are limited to 100 traces so try to use filters to narrow down what you are looking for.
+					  Use this tool when you are interested in the trace attributes to get more information to answer why/what. If you want more details about a specific trace use get_trace_spans to see individual span details.
+                      If you would like to check existence of traces use get_timeseries_data tool with type=trace to get count/p50/p90/p95/p99 of traces instead of using get_traces tool.
                       `,
 		Handler: GetTracesHandler,
+	},
+	{
+		Name:        "get_trace_spans",
+		Description: `Get the spans associated with a specific traceId. This allows you to view the entire trace with all its spans in a tree like structure.`,
+		Handler:     GetTraceSpansHandler,
 	},
 	{
 		Name: "get_timeseries_data",
@@ -145,11 +150,6 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 					  First use get_metric_names tool to retrieve the available metric names which can be used as MetricName argument for this tool and then use get_attribute_keys tool to retrieve the available attribute keys and get_attribute_values for getting the values for the attribute key that you are interested in to use in Filter/ExcludeFilter keys or Splits argument for MetricChartWidget argument for this tool.
 					  You can also use Splits argument to group the metric data by the given metric attribute keys. Only use the attribute keys and values that are available for the MetricName that are returned from get_attribute_keys and get_attribute_values tools.`,
 		Handler: CreateDashboardHandler,
-	},
-	{
-		Name:        "get_trace_spans",
-		Description: `Get the spans associated with a specific traceId. This allows you to view the entire trace in a tree like structure.`,
-		Handler:     GetTraceSpansHandler,
 	},
 	{
 		Name:        "get_source_repository",
