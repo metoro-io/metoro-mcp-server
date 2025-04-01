@@ -11,7 +11,7 @@ import (
 )
 
 type GetAttributeValuesHandlerArgs struct {
-	Type           model.MetricType    `json:"type" jsonschema:"required,description=The type of telemetry data to get the attribute keys and values for. Either 'logs' or 'trace' or 'metric' or 'kubernetes_resource'"`
+	Type           model.MetricType    `json:"type" jsonschema:"required,description=The type of telemetry data to get the attribute keys and values for. Either 'logs' or 'trace' or 'metric'."`
 	TimeConfig     utils.TimeConfig    `json:"time_config" jsonschema:"required,description=The time period to use while getting the possible values of log attributes. e.g. if you want to get values for the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absoulute time range by setting start_time and end_time"`
 	Attribute      string              `json:"attribute" jsonschema:"required,description=The attribute key to get the possible values for. Possible values for attribute should be obtained from get_attribute_keys tool call for the same type"`
 	MetricName     string              `json:"metricName" jsonschema:"description=REQUIRED IF THE TYPE IS 'metric'. The name of the metric to get the possible attribute keys and values."`
@@ -24,6 +24,12 @@ func GetAttributeValuesHandler(ctx context.Context, arguments GetAttributeValues
 	if err != nil {
 		return nil, fmt.Errorf("error calculating time range: %v", err)
 	}
+
+	err = CheckAttributes(ctx, arguments.Type, arguments.Filters, arguments.ExcludeFilters, []string{}, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	request := model.GetAttributeValuesRequest{
 		Type:      arguments.Type,
 		Attribute: arguments.Attribute,
@@ -31,6 +37,10 @@ func GetAttributeValuesHandler(ctx context.Context, arguments GetAttributeValues
 
 	switch arguments.Type {
 	case model.Logs:
+		err = CheckAttributes(ctx, arguments.Type, arguments.Filters, arguments.ExcludeFilters, []string{}, nil)
+		if err != nil {
+			return nil, err
+		}
 		modelRequest := model.LogSummaryRequest{
 			StartTime:      startTime,
 			EndTime:        endTime,
@@ -40,6 +50,10 @@ func GetAttributeValuesHandler(ctx context.Context, arguments GetAttributeValues
 		request.Logs = &modelRequest
 		break
 	case model.Trace:
+		err = CheckAttributes(ctx, arguments.Type, arguments.Filters, arguments.ExcludeFilters, []string{}, nil)
+		if err != nil {
+			return nil, err
+		}
 		modelRequest := model.TracesSummaryRequest{
 			StartTime:      startTime,
 			EndTime:        endTime,
@@ -49,6 +63,14 @@ func GetAttributeValuesHandler(ctx context.Context, arguments GetAttributeValues
 		request.Trace = &modelRequest
 		break
 	case model.Metric:
+		err = CheckAttributes(ctx, arguments.Type, arguments.Filters, arguments.ExcludeFilters, []string{}, &model.GetMetricAttributesRequest{
+			StartTime:  startTime,
+			EndTime:    endTime,
+			MetricName: arguments.MetricName,
+		})
+		if err != nil {
+			return nil, err
+		}
 		modelRequest := model.GetMetricAttributesRequest{
 			StartTime:    startTime,
 			EndTime:      endTime,
@@ -57,15 +79,16 @@ func GetAttributeValuesHandler(ctx context.Context, arguments GetAttributeValues
 		}
 		request.Metric = &modelRequest
 		break
-	case model.KubernetesResource:
-		modelRequest := model.GetKubernetesResourceRequest{
-			StartTime:      startTime,
-			EndTime:        endTime,
-			Filters:        arguments.Filters,
-			ExcludeFilters: arguments.Filters,
-		}
-		request.Kubernetes = &modelRequest
-		break
+	//case model.KubernetesResource:
+	//
+	//	modelRequest := model.GetKubernetesResourceRequest{
+	//		StartTime:      startTime,
+	//		EndTime:        endTime,
+	//		Filters:        arguments.Filters,
+	//		ExcludeFilters: arguments.Filters,
+	//	}
+	//	request.Kubernetes = &modelRequest
+	//	break
 	default:
 		return nil, fmt.Errorf("invalid type: %v", arguments.Type)
 	}
