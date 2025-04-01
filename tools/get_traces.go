@@ -29,9 +29,10 @@ func GetTracesHandler(ctx context.Context, arguments GetTracesHandlerArgs) (*mcp
 	}
 
 	request := model.GetTracesRequest{
-		StartTime: startTime,
-		EndTime:   endTime,
-		Filters:   arguments.Filters,
+		StartTime:      startTime,
+		EndTime:        endTime,
+		Filters:        arguments.Filters,
+		ExcludeFilters: arguments.ExcludeFilters,
 	}
 
 	body, err := getTracesMetoroCall(ctx, request)
