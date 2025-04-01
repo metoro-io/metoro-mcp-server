@@ -13,7 +13,7 @@ import (
 type GetServiceGraphHandlerArgs struct {
 	TimeConfig   utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get the service graph for. e.g. if you want to get the graph for the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absoulute time range by setting start_time and end_time"`
 	ServiceName  string           `json:"serviceName" jsonschema:"required,description=The name of the service to get the graph for"`
-	Environments []string         `json:"environments" jsonschema:"description=The environments to get the service graph for. If empty, all environments will be used."`
+	Environments []string         `json:"environments" jsonschema:"description=The environments to get the service graph for. If empty all environments will be used."`
 }
 
 type GetServiceGraphRequest struct {
