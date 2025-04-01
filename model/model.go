@@ -422,7 +422,7 @@ const (
 
 	Logs MetricType = "logs" // log timeseries type.
 
-	KubernetesResource MetricType = "kubernetes_resource" // kubernetes resource timeseries type.
+	//KubernetesResource MetricType = "kubernetes_resource" // kubernetes resource timeseries type.
 )
 
 type GetLogMetricRequest struct {
