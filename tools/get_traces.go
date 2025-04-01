@@ -22,6 +22,12 @@ func GetTracesHandler(ctx context.Context, arguments GetTracesHandlerArgs) (*mcp
 	if err != nil {
 		return nil, fmt.Errorf("error calculating time range: %v", err)
 	}
+
+	err = CheckAttributes(ctx, model.Trace, arguments.Filters, arguments.ExcludeFilters, []string{}, nil)
+	if err != nil {
+		return nil, err
+	}
+
 	request := model.GetTracesRequest{
 		StartTime:      startTime,
 		EndTime:        endTime,

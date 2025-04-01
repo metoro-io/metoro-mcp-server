@@ -91,11 +91,6 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Handler:     GetK8sEventAttributeValuesForIndividualAttributeHandler,
 	},
 	{
-		Name:        "get_k8s_events_volume",
-		Description: "Get the timeseries data for the number of Kubernetes events in your cluster whether its filtered by a specific attribute or not. The volume of events are split by EventType so you can see the breakdown of Warning/Normal events.",
-		Handler:     GetK8sEventsVolumeHandler,
-	},
-	{
 		Name:        "get_metric_names",
 		Description: "Get available metric names to query. These metric names can be used as MetricName argument for get_metric get_metric_metadata and get_timeseries_data and get_attribute_keys tools.",
 		Handler:     GetMetricNamesHandler,

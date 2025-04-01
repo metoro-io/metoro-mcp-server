@@ -509,3 +509,8 @@ type GetAttributeValuesRequest struct {
 	Logs       *LogSummaryRequest            `json:"logs,omitempty"`
 	Kubernetes *GetKubernetesResourceRequest `json:"kubernetes,omitempty"`
 }
+
+type GetAttributeKeysResponse struct {
+	// The attribute values
+	Attributes []string `json:"attributes"`
+}
