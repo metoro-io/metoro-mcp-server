@@ -29,9 +29,9 @@ var MetoroToolsList = []MetoroTools{
 	},
 	{
 		Name: "get_traces",
-		Description: `Get list of traces from your cluster that matches . Results are limited to 100 traces so try to use filters to narrow down what you are looking for.
+		Description: `Get list of traces from your cluster. Results are limited to 100 traces so try to use filters to narrow down what you are looking for.
 					  Use this tool when you are interested in the trace attributes to get more information to answer why/what. If you want more details about a specific trace use get_trace_spans to see individual span details.
-                      If you would like to check existence of certain traces use get_timeseries_data tool with type=trace to get count/p50/p90/p95/p99 of traces instead of using get_traces tool.
+                      If you would like to check existence of traces use get_timeseries_data tool with type=trace to get count/p50/p90/p95/p99 of traces instead of using get_traces tool.
                       `,
 		Handler: GetTracesHandler,
 	},
