@@ -190,6 +190,9 @@ func CheckAttributes(ctx context.Context, requestType model.MetricType, filters 
 
 func checkTimeseries(ctx context.Context, timeseries []SingleMetricRequest, startTime, endTime int64) error {
 	for _, ts := range timeseries {
+		if ts.Type != model.Metric {
+			continue
+		}
 		err := CheckMetric(ctx, ts.MetricName)
 		if err != nil {
 			return err
