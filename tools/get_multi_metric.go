@@ -25,6 +25,7 @@ type SingleMetricRequest struct {
 	Type              model.MetricType       `json:"type" jsonschema:"required,enum=metric,enum=trace,enum=logs,enum=kubernetes_resource,description=Type of timeseries data to retrieve"`
 	MetricName        string                 `json:"metricName" jsonschema:"description=THIS IS ONLY REQUIRED IF THE type is 'metric'.The name of the metric to use for getting the timeseries data for type 'metric'. If metric name ends with _total metoro already accounts for rate differences when returning the value so you don't need to calculate the rate yourself."`
 	Aggregation       model.Aggregation      `json:"aggregation" jsonschema:"required,enum=sum,enum=count,enum=min,enum=max,enum=avg,enum=p50,enum=p90,enum=p95,enum=p99,description=The aggregation to apply to the timeseries at the datapoint bucket size level. The aggregation will be applied to every datapoint bucket. For example if the bucket size is 1 minute and the aggregation is sum then the sum of all datapoints in a minute will be returned. Do not guess the aggregations. Use the available ones. For traces you can use count p50 p90 p95 p99. for logs its always count. For metrics you can use sum min max avg"`
+	JsonPath          *string                `json:"jsonPath" jsonschema:"description=THIS IS ONLY BE SET IF THE type is 'kubernetes_resource' and the aggregate is not count. The json path to use to get the value from the kubernetes resource to plot. for example if this was spec.replicas then the value we return would be aggregate(spec.replicas)"`
 	Filters           map[string][]string    `json:"filters" jsonschema:"description=Filters to apply to the timeseries. Only the timeseries that match these filters will be returned. You MUST call get_attribute_keys and get_attribute_values tools to get the valid filter keys and values. e.g. {service_name: [/k8s/namespaceX/serviceX]} should return timeseries for serviceX in namespaceX. This is just and example. Do not guess the attribute keys and values."`
 	ExcludeFilters    map[string][]string    `json:"excludeFilters" jsonschema:"description=Filters to exclude the timeseries data. Timeseries matching the exclude filters will not be returned. You MUST call get_attribute_keys and get_attribute_values tools to get the valid filter keys and values. e.g. {service_name: [/k8s/namespaceX/serviceX]} should exclude timeseries from serviceX in namespaceX. This is just and example. Do not guess the attribute keys and values"`
 	Splits            []string               `json:"splits" jsonschema:"description=Array of attribute keys to split/group by the timeseries data by. Splits will allow you to group timeseries data by an attribute. This is useful if you would like to see the breakdown of a particular timeseries by an attribute. Get the attributes that you can pass into as Splits from the get_attribute_keys tool. DO NOT GUESS THE ATTRIBUTES."`
@@ -133,10 +134,19 @@ func convertTimeseriesToAPITimeseries(timeseries []SingleMetricRequest, startTim
 				BucketSize: ts.BucketSize,
 				//Functions:  ts.Functions,
 			}
+		case model.KubernetesResource:
+			apiRequest.KubernetesResource = &model.GetKubernetesResourceRequest{
+				StartTime:      startTime,
+				EndTime:        endTime,
+				Filters:        ts.Filters,
+				ExcludeFilters: ts.ExcludeFilters,
+				Splits:         ts.Splits,
+				BucketSize:     ts.BucketSize,
+				Functions:      ts.Functions,
+				JsonPath:       ts.JsonPath,
+				Aggregation:    ts.Aggregation,
+			}
 		}
-
-		// TODO: Add the kubernetes resources here.
-
 		result[i] = apiRequest
 	}
 
