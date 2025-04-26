@@ -475,7 +475,7 @@ type SingleMetricRequest struct {
 	Metric             *GetMetricRequest             `json:"metric,omitempty" jsonschema:"description=Metric request details when type is 'metric'"`
 	Trace              *GetTraceMetricRequest        `json:"trace,omitempty" jsonschema:"description=Trace metric request details when type is 'trace'"`
 	Logs               *GetLogMetricRequest          `json:"logs,omitempty" jsonschema:"description=Log metric request details when type is 'logs'"`
-	KubernetesResource *GetKubernetesResourceRequest `json:"kubernetesResource,omitempty" jsonschema:"description=Kubernetes resource request details when type is 'kubernetes_resource'"`
+	KubernetesResource *GetKubernetesResourceRequest `json:"kubernetes,omitempty" jsonschema:"description=Kubernetes resource request details when type is 'kubernetes_resource'"`
 	ShouldNotReturn    bool                          `json:"shouldNotReturn" jsonschema:"description=If true result won't be returned (useful for formulas)"`
 	FormulaIdentifier  string                        `json:"formulaIdentifier" jsonschema:"description=Identifier to reference this metric in formulas"`
 }
