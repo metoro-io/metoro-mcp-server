@@ -422,7 +422,7 @@ const (
 
 	Logs MetricType = "logs" // log timeseries type.
 
-	//KubernetesResource MetricType = "kubernetes_resource" // kubernetes resource timeseries type.
+	KubernetesResource MetricType = "kubernetes_resource" // kubernetes resource timeseries type.
 )
 
 type GetLogMetricRequest struct {
@@ -433,30 +433,32 @@ type GetLogMetricRequest struct {
 }
 
 type GetKubernetesResourceRequest struct {
-	// Required: Start time of when to get the logs in seconds since epoch
+	// Required: Start time of when to get the service summaries in seconds since epoch
 	StartTime int64 `json:"startTime"`
-	// Required: End time of when to get the logs in seconds since epoch
+	// Required: End time of when to get the service summaries in seconds since epoch
 	EndTime int64 `json:"endTime"`
-	//
-	//// Optional: The name of the service to get the k8s events metrics for
-	//// Acts as an additional filter
-	//ServiceNames []string `json:"serviceNames"`
-
-	// The filters to apply to the logs, so for example, if you want to get logs for a specific service
-	//you can pass in a filter like {"service_name": ["microservice_a"]}
+	// The filters to apply to the kubernetes summary, so for example, if you want to get kubernetess for a specific service
+	// you can pass in a filter like {"service.name": ["microservice_a"]}
 	Filters map[string][]string `json:"filters"`
-
-	// The exclude filters to apply to the logs, so for example, if you want to exclude logs for a specific service
-	//you can pass in a filter like {"service_name": ["microservice_a"]}
+	// ExcludeFilters are filters that should be excluded from the kubernetes summary
+	// For example, if you want to get kubernetess for all services except microservice_a you can pass in
+	// {"service_name": ["microservice_a"]}
 	ExcludeFilters map[string][]string `json:"excludeFilters"`
-
-	// Regexes are used to filter k8s events based on a regex inclusively
-	Regexes []string `json:"regexes"`
-	// ExcludeRegexes are used to filter k8s events based on a regex exclusively
-	ExcludeRegexes []string `json:"excludeRegexes"`
-
-	// Environments is a list of environments to filter the k8s events by. If empty, all environments will be included
+	// Splts is a list of attributes to split the metrics by, for example, if you want to split the metrics by service
+	// you can pass in a list like ["service_name"]
+	Splits []string `json:"splits"`
+	// The cluster/environments to get the kubernetes metrics for. If empty, all clusters will be included
 	Environments []string `json:"environments"`
+	// Functions is the list of functions to apply to the metric, in the same order that they appear in this array!!
+	Functions []MetricFunction `json:"functions"`
+	// LimitResults is a flag to indicate if the results should be limited.
+	LimitResults bool `json:"limitResults"`
+	// BucketSize is the size of each datapoint bucket in seconds
+	BucketSize int64 `json:"bucketSize"`
+	// Aggregation is the operation to apply to the metrics, for example, if you want to sum the metrics you can pass in "sum"
+	Aggregation Aggregation `json:"aggregation"`
+	// JsonPath is a path to pull the json value from the metric
+	JsonPath *string `json:"jsonPath"`
 }
 
 type GetMultiMetricRequest struct {
@@ -469,13 +471,13 @@ type GetMultiMetricRequest struct {
 }
 
 type SingleMetricRequest struct {
-	Type   string                 `json:"type" jsonschema:"required,enum=metric,enum=trace,enum=logs,enum=kubernetes_resource,description=Type of metric to retrieve"`
-	Metric *GetMetricRequest      `json:"metric,omitempty" jsonschema:"description=Metric request details when type is 'metric'"`
-	Trace  *GetTraceMetricRequest `json:"trace,omitempty" jsonschema:"description=Trace metric request details when type is 'trace'"`
-	Logs   *GetLogMetricRequest   `json:"logs,omitempty" jsonschema:"description=Log metric request details when type is 'logs'"`
-	// TODO: Add kubernetes resource request
-	ShouldNotReturn   bool   `json:"shouldNotReturn" jsonschema:"description=If true result won't be returned (useful for formulas)"`
-	FormulaIdentifier string `json:"formulaIdentifier" jsonschema:"description=Identifier to reference this metric in formulas"`
+	Type               string                        `json:"type" jsonschema:"required,enum=metric,enum=trace,enum=logs,enum=kubernetes_resource,description=Type of metric to retrieve"`
+	Metric             *GetMetricRequest             `json:"metric,omitempty" jsonschema:"description=Metric request details when type is 'metric'"`
+	Trace              *GetTraceMetricRequest        `json:"trace,omitempty" jsonschema:"description=Trace metric request details when type is 'trace'"`
+	Logs               *GetLogMetricRequest          `json:"logs,omitempty" jsonschema:"description=Log metric request details when type is 'logs'"`
+	KubernetesResource *GetKubernetesResourceRequest `json:"kubernetesResource,omitempty" jsonschema:"description=Kubernetes resource request details when type is 'kubernetes_resource'"`
+	ShouldNotReturn    bool                          `json:"shouldNotReturn" jsonschema:"description=If true result won't be returned (useful for formulas)"`
+	FormulaIdentifier  string                        `json:"formulaIdentifier" jsonschema:"description=Identifier to reference this metric in formulas"`
 }
 
 type Formula struct {
