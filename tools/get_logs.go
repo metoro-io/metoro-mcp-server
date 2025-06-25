@@ -34,6 +34,7 @@ func GetLogsHandler(ctx context.Context, arguments GetLogsHandlerArgs) (*mcpgola
 	if err != nil {
 		return nil, err
 	}
+	limit := 20
 
 	request := model.GetLogsRequest{
 		StartTime:      startTime,
@@ -42,6 +43,7 @@ func GetLogsHandler(ctx context.Context, arguments GetLogsHandlerArgs) (*mcpgola
 		ExcludeFilters: arguments.ExcludeFilters,
 		Regexes:        regexes,
 		Environments:   arguments.Environments,
+		ExportLimit:    &limit,
 	}
 
 	resp, err := getLogsMetoroCall(ctx, request)

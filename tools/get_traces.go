@@ -28,11 +28,14 @@ func GetTracesHandler(ctx context.Context, arguments GetTracesHandlerArgs) (*mcp
 		return nil, err
 	}
 
+	limit := 20
+
 	request := model.GetTracesRequest{
 		StartTime:      startTime,
 		EndTime:        endTime,
 		Filters:        arguments.Filters,
 		ExcludeFilters: arguments.ExcludeFilters,
+		Limit:          &limit,
 	}
 
 	body, err := getTracesMetoroCall(ctx, request)
