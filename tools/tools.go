@@ -163,4 +163,9 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Description: "Convert a Unix timestamp (in seconds or milliseconds) to RFC3339 format. The tool automatically detects whether the timestamp is in seconds or milliseconds based on its magnitude.",
 		Handler:     UnixToRFC3339Handler,
 	},
+	{
+		Name:        "get_pod_by_ip",
+		Description: "Get pod information by IP address. This tool finds pods that had a specific IP address during a given time range in a specific environment. Useful for debugging network issues or tracking pod history.",
+		Handler:     GetPodByIpHandler,
+	},
 }
