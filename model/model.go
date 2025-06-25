@@ -25,6 +25,7 @@ type GetLogsRequest struct {
 	Ascending      bool     `json:"ascending"`
 	// The cluster/environments to get the logs for. If empty, all clusters will be included
 	Environments []string `json:"environments"`
+	ExportLimit  *int     `json:"exportLimit,omitempty"` // Optional limit on the number of logs to export, defaults to 100 if not specified
 }
 
 type GetTracesRequest struct {
@@ -38,6 +39,7 @@ type GetTracesRequest struct {
 	ExcludeRegexes []string            `json:"excludeRegexes"`
 	Ascending      bool                `json:"ascending"`
 	Environments   []string            `json:"environments"`
+	Limit          *int                `json:"limit,omitempty"` // Optional limit on the number of traces to return
 }
 
 type Aggregation string

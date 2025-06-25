@@ -24,12 +24,12 @@ var MetoroToolsList = []MetoroTools{
 	},
 	{
 		Name:        "get_logs",
-		Description: `Get logs from all or specific services/hosts/pods. Results are limited to 100 logs lines.  Before using this you MUST first call get_attribute_keys and get_attribute_values to get the possible log attribute keys and values which can be used as Filter/ExcludeFilter keys.`,
+		Description: `Get logs from all or specific services/hosts/pods. Results are limited to 20 logs lines.  Before using this you MUST first call get_attribute_keys and get_attribute_values to get the possible log attribute keys and values which can be used as Filter/ExcludeFilter keys.`,
 		Handler:     GetLogsHandler,
 	},
 	{
 		Name: "get_traces",
-		Description: `Get list of traces from your cluster. Results are limited to 100 traces so try to use filters to narrow down what you are looking for.
+		Description: `Get list of traces from your cluster. Results are limited to 20 traces so try to use filters to narrow down what you are looking for.
                       Prior to using this tool, YOU MUST first call get_attribute_keys and subsequently get_attribute_values to get the possible trace attribute keys and values which can be used as Filter/ExcludeFilter keys.
 					  Use this tool when you are interested in the trace attributes to get more information to answer why/what. If you want more details about a specific trace use get_trace_spans to see individual span details.
                       If you would like to check existence of traces use get_timeseries_data tool with type=trace to get count/p50/p90/p95/p99 of traces instead of using get_traces tool.
@@ -157,5 +157,15 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Name:        "get_service_graph",
 		Description: "Get the service graph showing which services make calls to a given service and which services the given service makes calls to. This tool is useful for understanding service dependencies and call patterns.",
 		Handler:     GetServiceGraphHandler,
+	},
+	{
+		Name:        "unix_to_rfc3339",
+		Description: "Convert a Unix timestamp (in seconds or milliseconds) to RFC3339 format. The tool automatically detects whether the timestamp is in seconds or milliseconds based on its magnitude.",
+		Handler:     UnixToRFC3339Handler,
+	},
+	{
+		Name:        "get_pod_by_ip",
+		Description: "Get pod information by IP address. This tool finds pods that had a specific IP address during a given time range in a specific environment. Useful for debugging network issues or tracking pod history.",
+		Handler:     GetPodByIpHandler,
 	},
 }
