@@ -158,4 +158,9 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Description: "Get the service graph showing which services make calls to a given service and which services the given service makes calls to. This tool is useful for understanding service dependencies and call patterns.",
 		Handler:     GetServiceGraphHandler,
 	},
+	{
+		Name:        "unix_to_rfc3339",
+		Description: "Convert a Unix timestamp (in seconds or milliseconds) to RFC3339 format. The tool automatically detects whether the timestamp is in seconds or milliseconds based on its magnitude.",
+		Handler:     UnixToRFC3339Handler,
+	},
 }
