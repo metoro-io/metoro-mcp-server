@@ -168,4 +168,9 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Description: "Get pod information by IP address. This tool finds pods that had a specific IP address during a given time range in a specific environment. Useful for debugging network issues or tracking pod history.",
 		Handler:     GetPodByIpHandler,
 	},
+	{
+		Name:        "create_investigation",
+		Description: "Create a new investigation to document and track an issue or incident. Investigations include a title, markdown content, optional tags, and optional issue time range.",
+		Handler:     CreateInvestigationHandler,
+	},
 }
