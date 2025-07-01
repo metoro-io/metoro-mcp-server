@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
@@ -12,22 +13,28 @@ import (
 )
 
 type CreateInvestigationHandlerArgs struct {
-	Title           string  `json:"title" jsonschema:"required,description=Title of the investigation"`
-	Markdown        string  `json:"markdown" jsonschema:"required,description=Markdown content of the investigation"`
-	IssueStartTime  *int64  `json:"issueStartTime,omitempty" jsonschema:"description=Optional start time of the issue in seconds since epoch"`
-	IssueEndTime    *int64  `json:"issueEndTime,omitempty" jsonschema:"description=Optional end time of the issue in seconds since epoch"`
-	ChatHistoryUUID *string `json:"chatHistoryUuid,omitempty" jsonschema:"description=Optional chat history UUID to associate with this investigation"`
+	Title           string           `json:"title" jsonschema:"required,description=Title of the investigation"`
+	Markdown        string           `json:"markdown" jsonschema:"required,description=Markdown content of the investigation"`
+	TimeConfig      utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get the pods for. e.g. if you want the get the pods for the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absolute time range by setting start_time and end_time"`
+	ChatHistoryUUID *string          `json:"chatHistoryUuid,omitempty" jsonschema:"description=Optional chat history UUID to associate with this investigation"`
 }
 
 func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigationHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	// Create the request body
+	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error calculating time range: %v", err)
+	}
+
 	falsePtr := false
 	reviewRequiredPtr := "ReviewRequired"
+	start := time.Unix(startTime, 0)
+	end := time.Unix(endTime, 0)
 	request := model.CreateInvestigationRequest{
 		Title:                arguments.Title,
 		Markdown:             arguments.Markdown,
-		IssueStartTime:       arguments.IssueStartTime,
-		IssueEndTime:         arguments.IssueEndTime,
+		IssueStartTime:       &start,
+		IssueEndTime:         &end,
 		ChatHistoryUUID:      arguments.ChatHistoryUUID,
 		IsVisible:            &falsePtr,
 		MetoroApprovalStatus: &reviewRequiredPtr,
