@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 // TODO: This file should be replaced if we can import the types from Metoro repo directly.
 // These are just duplicates at the moment. If updated in Metoro repository, it should also be updated here!
 
@@ -528,8 +530,8 @@ type CreateInvestigationRequest struct {
 	Title           string            `json:"title" binding:"required"`
 	Markdown        string            `json:"markdown" binding:"required"`
 	Tags            map[string]string `json:"tags,omitempty"`
-	IssueStartTime  *int64            `json:"issueStartTime,omitempty"`
-	IssueEndTime    *int64            `json:"issueEndTime,omitempty"`
+	IssueStartTime  *time.Time        `json:"issueStartTime,omitempty"`
+	IssueEndTime    *time.Time        `json:"issueEndTime,omitempty"`
 	ChatHistoryUUID *string           `json:"chatHistoryUuid,omitempty"`
 	// Optional, these ideally should only set by the AI.
 	IsVisible            *bool   `json:"isVisible,omitempty"`
