@@ -73,7 +73,7 @@ func MakeMetoroAPIRequest(method, endpoint string, body io.Reader, apiRequiremen
 	}
 
 	// Check the response status code
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
