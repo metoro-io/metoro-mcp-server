@@ -522,3 +522,16 @@ type GetAttributeKeysResponse struct {
 type GetMetricNamesResponse struct {
 	MetricNames []string `json:"metrics"`
 }
+
+// Investigation related types
+type CreateInvestigationRequest struct {
+	Title           string            `json:"title" binding:"required"`
+	Markdown        string            `json:"markdown" binding:"required"`
+	Tags            map[string]string `json:"tags,omitempty"`
+	IssueStartTime  *int64            `json:"issueStartTime,omitempty"`
+	IssueEndTime    *int64            `json:"issueEndTime,omitempty"`
+	ChatHistoryUUID *string           `json:"chatHistoryUuid,omitempty"`
+	// Optional, these ideally should only set by the AI.
+	IsVisible            *bool   `json:"isVisible,omitempty"`
+	MetoroApprovalStatus *string `json:"metoroApprovalStatus,omitempty"`
+}
