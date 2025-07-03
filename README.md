@@ -11,6 +11,7 @@
 ![GitHub license](https://img.shields.io/github/license/metoro-io/metoro-mcp-server)
 ![GitHub contributors](https://img.shields.io/github/contributors/metoro-io/metoro-mcp-server)
 ![GitHub last commit](https://img.shields.io/github/last-commit/metoro-io/metoro-mcp-server)
+[![smithery badge](https://smithery.ai/badge/metoro-mcp-server)](https://smithery.ai/server/metoro-mcp-server)
 [![GoDoc](https://pkg.go.dev/badge/github.com/metoro-io/metoro-mcp-server.svg)](https://pkg.go.dev/github.com/metoro-io/metoro-mcp-server)
 [![Go Report Card](https://goreportcard.com/badge/github.com/metoro-io/metoro-mcp-server)](https://goreportcard.com/report/github.com/metoro-io/metoro-mcp-server)
 ![Tests](https://github.com/metoro-io/metoro-mcp-server/actions/workflows/go-test.yml/badge.svg)
@@ -42,6 +43,14 @@ https://github.com/user-attachments/assets/b3f21e9a-45b8-4c17-8d8c-cff560d8694f
 3. Clone the repository: `git clone https://github.com/metoro-io/metoro-mcp-server.git`
 4. Navigate to the repository directory: `cd metoro-mcp-server`
 5. Build the server executable: `go build -o metoro-mcp-server`
+
+### Installing via Smithery
+
+To install the Metoro MCP Protocol for Claude Desktop automatically via [Smithery](https://smithery.ai/server/metoro-mcp-server):
+
+```bash
+npx -y @smithery/cli install metoro-mcp-server --client claude
+```
 
 ### If you already have a Metoro Account:
 Copy your auth token from your Metoro account in [Settings](https://us-east.metoro.io/settings) -> Users Settings. 
