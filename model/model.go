@@ -534,6 +534,7 @@ type CreateInvestigationRequest struct {
 	IssueEndTime    *time.Time        `json:"issueEndTime,omitempty"`
 	ChatHistoryUUID *string           `json:"chatHistoryUuid,omitempty"`
 	// Optional, these ideally should only set by the AI.
-	IsVisible            *bool   `json:"isVisible,omitempty"`
-	MetoroApprovalStatus *string `json:"metoroApprovalStatus,omitempty"`
+	IsVisible               *bool   `json:"isVisible,omitempty"`
+	MetoroApprovalStatus    *string `json:"metoroApprovalStatus,omitempty"`
+	ParentInvestigationUUID *string `json:"parentInvestigationUuid,omitempty"`
 }
