@@ -173,4 +173,9 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Description: "Create a new investigation to document and track an issue or incident. Investigations include a title, markdown content, optional tags, and optional issue time range.",
 		Handler:     CreateInvestigationHandler,
 	},
+	{
+		Name:        "list_investigations",
+		Description: "List investigations with optional filtering by tags and pagination. Returns a list of investigations including their title, markdown content, tags, creation/update times, and issue time ranges.",
+		Handler:     ListInvestigationsHandler,
+	},
 }
