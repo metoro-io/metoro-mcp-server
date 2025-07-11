@@ -50,7 +50,12 @@ func GetLogsHandler(ctx context.Context, arguments GetLogsHandlerArgs) (*mcpgola
 	if err != nil {
 		return nil, fmt.Errorf("error getting logs: %v", err)
 	}
-	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(resp)))), nil
+	respTrimmed, err := trimLogsResponse(resp)
+	if err != nil {
+		return nil, fmt.Errorf("error trimming logs: %v", err)
+	}
+
+	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(respTrimmed)))), nil
 }
 
 func getLogsMetoroCall(ctx context.Context, request model.GetLogsRequest) ([]byte, error) {
@@ -59,4 +64,23 @@ func getLogsMetoroCall(ctx context.Context, request model.GetLogsRequest) ([]byt
 		return nil, fmt.Errorf("error marshaling logs request: %v", err)
 	}
 	return utils.MakeMetoroAPIRequest("POST", "logs", bytes.NewBuffer(requestBody), utils.GetAPIRequirementsFromRequest(ctx))
+}
+
+func trimLogsResponse(response []byte) ([]byte, error) {
+	var logsResponse model.GetLogsResponse
+	err := json.Unmarshal(response, &logsResponse)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshaling logs response: %v", err)
+	}
+
+	// Trim every log entry to only include the first 1000 characters of the message
+	// This is to prevent excessively long log messages from blowing up the context.
+	logLineLengthLimit := 1000
+	for i := range logsResponse.Logs {
+		if len(logsResponse.Logs[i].Message) > logLineLengthLimit {
+			logsResponse.Logs[i].Message = logsResponse.Logs[i].Message[:logLineLengthLimit]
+		}
+	}
+
+	return json.Marshal(logsResponse)
 }
