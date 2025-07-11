@@ -42,7 +42,14 @@ func GetTracesHandler(ctx context.Context, arguments GetTracesHandlerArgs) (*mcp
 	if err != nil {
 		return nil, fmt.Errorf("error getting traces: %v", err)
 	}
-	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
+	
+	// Add human readable duration to the response
+	bodyWithDuration, err := addHumanReadableDuration(body)
+	if err != nil {
+		return nil, fmt.Errorf("error adding human readable duration: %v", err)
+	}
+	
+	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(bodyWithDuration)))), nil
 }
 
 func getTracesMetoroCall(ctx context.Context, request model.GetTracesRequest) ([]byte, error) {
@@ -51,4 +58,43 @@ func getTracesMetoroCall(ctx context.Context, request model.GetTracesRequest) ([
 		return nil, fmt.Errorf("error marshaling traces request: %v", err)
 	}
 	return utils.MakeMetoroAPIRequest("POST", "traces", bytes.NewBuffer(requestBody), utils.GetAPIRequirementsFromRequest(ctx))
+}
+
+func addHumanReadableDuration(response []byte) ([]byte, error) {
+	var tracesResponse model.GetTracesResponse
+	err := json.Unmarshal(response, &tracesResponse)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshaling get traces response: %v", err)
+	}
+
+	// Add human readable duration to each trace
+	for i := range tracesResponse.Traces {
+		trace := &tracesResponse.Traces[i]
+		durationNs := trace.Duration
+		
+		// Convert duration to human readable format
+		var humanReadable string
+		switch {
+		case durationNs < 1000: // Less than 1 microsecond
+			humanReadable = fmt.Sprintf("%d nanoseconds", durationNs)
+		case durationNs < 1000000: // Less than 1 millisecond
+			humanReadable = fmt.Sprintf("%.2f microseconds", float64(durationNs)/1000)
+		case durationNs < 1000000000: // Less than 1 second
+			humanReadable = fmt.Sprintf("%.2f milliseconds", float64(durationNs)/1000000)
+		case durationNs < 60000000000: // Less than 1 minute
+			humanReadable = fmt.Sprintf("%.2f seconds", float64(durationNs)/1000000000)
+		default: // 1 minute or more
+			minutes := durationNs / 60000000000
+			seconds := (durationNs % 60000000000) / 1000000000
+			humanReadable = fmt.Sprintf("%d minutes %.2f seconds", minutes, float64(seconds))
+		}
+		
+		// Add human readable duration to span attributes
+		if trace.SpanAttributes == nil {
+			trace.SpanAttributes = make(map[string]string)
+		}
+		trace.SpanAttributes["humanReadableDuration"] = humanReadable
+	}
+
+	return json.Marshal(tracesResponse)
 }

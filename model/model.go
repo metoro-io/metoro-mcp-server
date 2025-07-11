@@ -560,3 +560,47 @@ type GetLogsResponse struct {
 	// The logs that match the filters
 	Logs []Log `json:"logs"`
 }
+
+type Link struct {
+	// The trace id of the linked trace
+	TraceId string `json:"traceId"`
+	// The span id of the linked trace
+	SpanId string `json:"spanId"`
+	// Attributes of the link
+	Attributes map[string]string `json:"attributes"`
+}
+type TraceEl struct {
+	// The id of the trace
+	TraceId string `json:"traceId"`
+	// Status Code of the trace
+	StatusCode string `json:"statusCode"`
+	// The time that the trace was emitted in milliseconds since the epoch
+	Time int64 `json:"time"`
+	// The attributes of the trace
+	SpanAttributes map[string]string `json:"spanAttributes"`
+	// The attributes of the resource that emitted the trace
+	ResourceAttributes map[string]string `json:"resourceAttributes"`
+	// Service name
+	ServiceName string `json:"serviceName"`
+	// Display Service name
+	DisplayServiceName string `json:"displayServiceName"`
+	// Client name
+	ClientName string `json:"clientName"`
+	// Display Client name
+	DisplayClientName string `json:"displayClientName"`
+	// Span Id
+	SpanId string `json:"spanId"`
+	// Span Name
+	SpanName string `json:"spanName"`
+	// The duration of the trace
+	Duration int64 `json:"duration"`
+	// The parent span id
+	ParentSpanId string `json:"parentSpanId"`
+	// Links
+	Links []Link `json:"links"`
+}
+
+type GetTracesResponse struct {
+	// The traces that match the filters
+	Traces []TraceEl `json:"traces"`
+}
