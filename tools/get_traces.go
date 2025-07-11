@@ -42,13 +42,13 @@ func GetTracesHandler(ctx context.Context, arguments GetTracesHandlerArgs) (*mcp
 	if err != nil {
 		return nil, fmt.Errorf("error getting traces: %v", err)
 	}
-	
+
 	// Add human readable duration to the response
 	bodyWithDuration, err := addHumanReadableDuration(body)
 	if err != nil {
 		return nil, fmt.Errorf("error adding human readable duration: %v", err)
 	}
-	
+
 	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(bodyWithDuration)))), nil
 }
 
@@ -71,7 +71,7 @@ func addHumanReadableDuration(response []byte) ([]byte, error) {
 	for i := range tracesResponse.Traces {
 		trace := &tracesResponse.Traces[i]
 		durationNs := trace.Duration
-		
+
 		// Convert duration to human readable format
 		var humanReadable string
 		switch {
@@ -88,12 +88,9 @@ func addHumanReadableDuration(response []byte) ([]byte, error) {
 			seconds := (durationNs % 60000000000) / 1000000000
 			humanReadable = fmt.Sprintf("%d minutes %.2f seconds", minutes, float64(seconds))
 		}
-		
+
 		// Add human readable duration to span attributes
-		if trace.SpanAttributes == nil {
-			trace.SpanAttributes = make(map[string]string)
-		}
-		trace.SpanAttributes["humanReadableDuration"] = humanReadable
+		trace.DurationReadable = humanReadable
 	}
 
 	return json.Marshal(tracesResponse)

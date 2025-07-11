@@ -594,6 +594,8 @@ type TraceEl struct {
 	SpanName string `json:"spanName"`
 	// The duration of the trace
 	Duration int64 `json:"duration"`
+	// Human readable duration, e.g. "1.2s" or "500ms"
+	DurationReadable string `json:"durationReadable"`
 	// The parent span id
 	ParentSpanId string `json:"parentSpanId"`
 	// Links
