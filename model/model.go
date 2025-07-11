@@ -538,3 +538,25 @@ type CreateInvestigationRequest struct {
 	MetoroApprovalStatus    *string `json:"metoroApprovalStatus,omitempty"`
 	ParentInvestigationUUID *string `json:"parentInvestigationUuid,omitempty"`
 }
+
+type Log struct {
+	// The time that the log line was emitted in milliseconds since the epoch
+	Time int64 `json:"time"`
+	// The severity of the log line
+	Severity string `json:"severity"`
+	// The log message
+	Message string `json:"message"`
+	// The attributes of the log line
+	LogAttributes map[string]string `json:"logAttributes"`
+	// The attributes of the resource that emitted the log line
+	ResourceAttributes map[string]string `json:"resourceAttributes"`
+	// Service name
+	ServiceName string `json:"serviceName"`
+	// Environment
+	Environment string `json:"environment"`
+}
+
+type GetLogsResponse struct {
+	// The logs that match the filters
+	Logs []Log `json:"logs"`
+}
