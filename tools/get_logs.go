@@ -73,9 +73,9 @@ func trimLogsResponse(response []byte) ([]byte, error) {
 		return nil, fmt.Errorf("error unmarshaling logs response: %v", err)
 	}
 
-	// Trim every log entry to only include the first 1000 characters of the message
+	// Trim every log entry to only include the first 2000 characters of the message
 	// This is to prevent excessively long log messages from blowing up the context.
-	logLineLengthLimit := 1000
+	logLineLengthLimit := 2000
 	for i := range logsResponse.Logs {
 		if len(logsResponse.Logs[i].Message) > logLineLengthLimit {
 			logsResponse.Logs[i].Message = logsResponse.Logs[i].Message[:logLineLengthLimit]
