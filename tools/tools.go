@@ -33,8 +33,7 @@ var MetoroToolsList = []MetoroTools{
                       Prior to using this tool, YOU MUST first call get_attribute_keys and subsequently get_attribute_values to get the possible trace attribute keys and values which can be used as Filter/ExcludeFilter keys.
 					  Use this tool when you are interested in the trace attributes to get more information to answer why/what. If you want more details about a specific trace use get_trace_spans to see individual span details.
                       If you would like to check existence of traces use get_timeseries_data tool with type=trace to get count/p50/p90/p95/p99 of traces instead of using get_traces tool.
-                      After calling get traces you should normally call get_trace_spans to get the spans associated with the traceId you are interested in. 
-                      `,
+                      After calling get traces you should normally call get_trace_spans to get the spans associated with the traceId you are interested in. When reading duration of a trace use the durationReadable field.`,
 		Handler: GetTracesHandler,
 	},
 	{
