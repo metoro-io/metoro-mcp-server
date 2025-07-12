@@ -19,7 +19,15 @@ type GetVersionForServiceHandlerArgs struct {
 }
 
 type GetVersionForServiceResponse struct {
-	ContainerVersions map[string]string `json:"container_versions"`
+	ContainerVersions map[string]map[string]string `json:"container_versions"`
+}
+
+type K8sResourceSummaryResponse struct {
+	K8sResourceSummary []struct {
+		Environment  string `json:"environment"`
+		Kind         string `json:"kind"`
+		ResourceYaml string `json:"resourceYaml"`
+	} `json:"k8sResourceSummary"`
 }
 
 func GetVersionForServiceHandler(ctx context.Context, arguments GetVersionForServiceHandlerArgs) (*mcpgolang.ToolResponse, error) {
@@ -43,25 +51,41 @@ func GetVersionForServiceHandler(ctx context.Context, arguments GetVersionForSer
 		return nil, fmt.Errorf("error making Metoro call: %v", err)
 	}
 
-	// Parse the YAML response
-	var yamlData map[string]interface{}
-	err = yaml.Unmarshal(resp, &yamlData)
+	// Parse the JSON response
+	var summaryResponse K8sResourceSummaryResponse
+	err = json.Unmarshal(resp, &summaryResponse)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing YAML response: %v", err)
+		return nil, fmt.Errorf("error parsing JSON response: %v", err)
 	}
 
-	// Extract container IDs and images
-	containerVersions := make(map[string]string)
+	// Extract container versions from each environment
+	containerVersions := make(map[string]map[string]string)
 
-	// Check for spec.template.spec.containers (Deployment/StatefulSet)
-	if spec, ok := yamlData["spec"].(map[string]interface{}); ok {
-		if template, ok := spec["template"].(map[string]interface{}); ok {
-			if templateSpec, ok := template["spec"].(map[string]interface{}); ok {
-				extractContainers(templateSpec, containerVersions)
-			}
+	for _, resource := range summaryResponse.K8sResourceSummary {
+		// Parse the YAML for each resource
+		var yamlData map[string]interface{}
+		err = yaml.Unmarshal([]byte(resource.ResourceYaml), &yamlData)
+		if err != nil {
+			continue // Skip if we can't parse this resource
 		}
-		// Also check spec.containers directly (DaemonSet)
-		extractContainers(spec, containerVersions)
+
+		// Extract containers for this environment
+		envContainers := make(map[string]string)
+
+		// Check for spec.template.spec.containers (Deployment/StatefulSet)
+		if spec, ok := yamlData["spec"].(map[string]interface{}); ok {
+			if template, ok := spec["template"].(map[string]interface{}); ok {
+				if templateSpec, ok := template["spec"].(map[string]interface{}); ok {
+					extractContainers(templateSpec, envContainers)
+				}
+			}
+			// Also check spec.containers directly (DaemonSet)
+			extractContainers(spec, envContainers)
+		}
+
+		if len(envContainers) > 0 {
+			containerVersions[resource.Environment] = envContainers
+		}
 	}
 
 	response := GetVersionForServiceResponse{
