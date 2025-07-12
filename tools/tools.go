@@ -42,6 +42,12 @@ var MetoroToolsList = []MetoroTools{
 		Handler:     GetTraceSpansHandler,
 	},
 	{
+		Name: "get_traces_distribution",
+		Description: `Get distribution of traces from your cluster. Uses the same arguments as get_traces but returns distribution data instead of individual traces.
+                      Prior to using this tool YOU MUST first call get_attribute_keys and subsequently get_attribute_values to get the possible trace attribute keys and values which can be used as Filter/ExcludeFilter keys.`,
+		Handler: GetTracesDistributionHandler,
+	},
+	{
 		Name: "get_timeseries_data",
 		Description: `Get one or more timeseries data for a metric or traces or logs or kubernetes resources. This tool is useful for understanding how the underlying type of data (specific/metric/trace/kubernetes resources/logs) change over time. You can also apply formulas to combine timeseries to calculate rates or ratios or differences etc. How to use this tool:
 					  First you need the type of timeseries data you are requesting for. This can be one of metric or traces or logs or kubernetes resources. If it is metrics then you HAVE TO call the get_metric_names tool to get the available metric names which can be used as MetricName argument for this tool.
