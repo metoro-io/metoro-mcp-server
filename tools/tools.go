@@ -42,10 +42,10 @@ var MetoroToolsList = []MetoroTools{
 		Handler:     GetTraceSpansHandler,
 	},
 	{
-		Name:        "get_traces_distribution",
+		Name: "get_traces_distribution",
 		Description: `Get distribution of traces from your cluster. Uses the same arguments as get_traces but returns distribution data instead of individual traces.
-                      Prior to using this tool, YOU MUST first call get_attribute_keys and subsequently get_attribute_values to get the possible trace attribute keys and values which can be used as Filter/ExcludeFilter keys.`,
-		Handler:     GetTracesDistributionHandler,
+                      Prior to using this tool YOU MUST first call get_attribute_keys and subsequently get_attribute_values to get the possible trace attribute keys and values which can be used as Filter/ExcludeFilter keys.`,
+		Handler: GetTracesDistributionHandler,
 	},
 	{
 		Name: "get_timeseries_data",
