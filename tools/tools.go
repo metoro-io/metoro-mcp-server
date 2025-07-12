@@ -110,6 +110,11 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Handler:     GetK8sServiceInformationHandler,
 	},
 	{
+		Name:        "get_version_for_service",
+		Description: "Get container IDs and their image versions for a specific service. This tool extracts container names and their image versions from the service YAML configuration.",
+		Handler:     GetVersionForServiceHandler,
+	},
+	{
 		Name:        "get_nodes",
 		Description: "Get the nodes that are running in your cluster. To use this tool first call get_node_attributes to get the possible node attribute keys and values which can be used for filtering nodes.",
 		Handler:     GetNodesHandler,
