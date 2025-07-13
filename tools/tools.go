@@ -43,7 +43,7 @@ var MetoroToolsList = []MetoroTools{
 	},
 	{
 		Name:        "get_traces_distribution",
-		Description: `Gets the most common attribute - value pairs for the traces matching the filters. The provided filters are the same as the filters used in the get_traces tool. You should use this tool to understand if there are any common attributes in traces that you are interested in. For example, if you have some failing traces, you should use this tool and it might tell you that they are all on a specific path or coming from a specific pod or environment. This is a very useful tool and should often be used before calling get_traces.`,
+		Description: `Gets the most common attribute - value pairs for the traces matching the filters. The provided filters are the same as the filters used in the get_traces tool. You should use this tool to understand if there are any common attributes in traces that you are interested in. For example if you have some failing traces you should use this tool and it might tell you that they are all on a specific path or coming from a specific pod or environment. This is a very useful tool and should often be used before calling get_traces.`,
 		Handler:     GetTracesDistributionHandler,
 	},
 	{
