@@ -65,21 +65,43 @@ func TestCalculateTimeRange(t *testing.T) {
 			wantErr: true,
 			errMsg:  "invalid time window: invalid",
 		},
+		{
+			name: "relative - exceeds 30 days",
+			config: TimeConfig{
+				Type:       RelativeTimeRange,
+				TimePeriod: intPtr(31),
+				TimeWindow: timeWindowPtr(Days),
+			},
+			wantErr: true,
+			errMsg:  "time range cannot exceed 30 days",
+		},
+		{
+			name: "relative - exactly 30 days",
+			config: TimeConfig{
+				Type:       RelativeTimeRange,
+				TimePeriod: intPtr(30),
+				TimeWindow: timeWindowPtr(Days),
+			},
+			wantPeriod: func() *time.Duration {
+				d := 30 * 24 * time.Hour
+				return &d
+			}(),
+		},
 
 		// Absolute time tests
 		{
 			name: "absolute - valid time range",
 			config: TimeConfig{
 				Type:      AbsoluteTimeRange,
-				StartTime: strPtr("2024-12-12T14:00:00Z"),
-				EndTime:   strPtr("2024-12-12T15:00:00Z"),
+				StartTime: strPtr(time.Now().Add(-24 * time.Hour).Format(time.RFC3339)),
+				EndTime:   strPtr(time.Now().Add(-23 * time.Hour).Format(time.RFC3339)),
 			},
 			wantStartTime: func() *time.Time {
-				t, _ := time.Parse(time.RFC3339, "2024-12-12T14:00:00Z")
+				t := time.Now().Add(-24 * time.Hour)
 				return &t
 			}(),
 			wantEndTime: func() *time.Time {
-				t, _ := time.Parse(time.RFC3339, "2024-12-12T15:00:00Z")
+				t := time.Now().Add(-23 * time.Hour)
 				return &t
 			}(),
 		},
@@ -111,6 +133,32 @@ func TestCalculateTimeRange(t *testing.T) {
 			},
 			wantErr: true,
 			errMsg:  "end_time cannot be before start_time",
+		},
+		{
+			name: "absolute - exceeds 30 days",
+			config: TimeConfig{
+				Type:      AbsoluteTimeRange,
+				StartTime: strPtr(time.Now().Add(-31 * 24 * time.Hour).Format(time.RFC3339)),
+				EndTime:   strPtr(time.Now().Format(time.RFC3339)),
+			},
+			wantErr: true,
+			errMsg:  "time range cannot exceed 30 days",
+		},
+		{
+			name: "absolute - exactly 30 days ago",
+			config: TimeConfig{
+				Type:      AbsoluteTimeRange,
+				StartTime: strPtr(time.Now().Add(-30*24*time.Hour + 1*time.Hour).Format(time.RFC3339)),
+				EndTime:   strPtr(time.Now().Add(-29 * 24 * time.Hour).Format(time.RFC3339)),
+			},
+			wantStartTime: func() *time.Time {
+				t := time.Now().Add(-30*24*time.Hour + 1*time.Hour)
+				return &t
+			}(),
+			wantEndTime: func() *time.Time {
+				t := time.Now().Add(-29 * 24 * time.Hour)
+				return &t
+			}(),
 		},
 
 		// Invalid type test
@@ -163,11 +211,27 @@ func TestCalculateTimeRange(t *testing.T) {
 
 			// For absolute time tests
 			if tt.wantStartTime != nil && tt.wantEndTime != nil {
-				if startTime != tt.wantStartTime.Unix() {
-					t.Errorf("CalculateTimeRange() startTime = %v, want %v", startTime, tt.wantStartTime.Unix())
-				}
-				if endTime != tt.wantEndTime.Unix() {
-					t.Errorf("CalculateTimeRange() endTime = %v, want %v", endTime, tt.wantEndTime.Unix())
+				// For dynamic times (using time.Now()), check time range validity and approximate values
+				if strings.Contains(tt.name, "30 days ago") || strings.Contains(tt.name, "valid time range") {
+					// Just check the time range is valid
+					if endTime < startTime {
+						t.Errorf("CalculateTimeRange() endTime < startTime")
+					}
+					// Check approximate values (within 2 seconds tolerance)
+					if diff := abs(startTime - tt.wantStartTime.Unix()); diff > 2 {
+						t.Errorf("CalculateTimeRange() startTime difference too large: %v seconds", diff)
+					}
+					if diff := abs(endTime - tt.wantEndTime.Unix()); diff > 2 {
+						t.Errorf("CalculateTimeRange() endTime difference too large: %v seconds", diff)
+					}
+				} else {
+					// For static times, check exact match
+					if startTime != tt.wantStartTime.Unix() {
+						t.Errorf("CalculateTimeRange() startTime = %v, want %v", startTime, tt.wantStartTime.Unix())
+					}
+					if endTime != tt.wantEndTime.Unix() {
+						t.Errorf("CalculateTimeRange() endTime = %v, want %v", endTime, tt.wantEndTime.Unix())
+					}
 				}
 			}
 		})
