@@ -29,7 +29,7 @@ type TimeConfig struct {
 	Type TimeRangeType `json:"type" jsonschema:"required,enum=relative,enum=absolute,description=Type of time range. Must be either 'relative' or 'absolute'"`
 
 	// Fields for relative time range
-	TimePeriod *int       `json:"time_period,omitempty" jsonschema:"description=For relative time range: the number of time units to look back"`
+	TimePeriod *int        `json:"time_period,omitempty" jsonschema:"description=For relative time range: the number of time units to look back"`
 	TimeWindow *TimeWindow `json:"time_window,omitempty" jsonschema:"description=For relative time range: the unit of time (Minutes, Hours, Days)"`
 
 	// Fields for absolute time range
@@ -40,6 +40,7 @@ type TimeConfig struct {
 // CalculateTimeRange returns start and end timestamps based on the time configuration
 func CalculateTimeRange(config TimeConfig) (startTime, endTime int64, err error) {
 	now := time.Now()
+	thirtyDaysAgo := now.Add(-30 * 24 * time.Hour)
 
 	switch config.Type {
 	case RelativeTimeRange:
@@ -62,6 +63,12 @@ func CalculateTimeRange(config TimeConfig) (startTime, endTime int64, err error)
 		}
 
 		startTimeObj := now.Add(-duration)
+
+		// Check if the start time is more than 30 days ago
+		if startTimeObj.Before(thirtyDaysAgo) {
+			return 0, 0, fmt.Errorf("time range cannot exceed 30 days ago, please adjust the time_period or time_window")
+		}
+
 		return startTimeObj.Unix(), now.Unix(), nil
 
 	case AbsoluteTimeRange:
@@ -81,6 +88,11 @@ func CalculateTimeRange(config TimeConfig) (startTime, endTime int64, err error)
 
 		if endTimeObj.Before(startTimeObj) {
 			return 0, 0, fmt.Errorf("end_time cannot be before start_time")
+		}
+
+		// Check if the start time is more than 30 days ago
+		if startTimeObj.Before(thirtyDaysAgo) {
+			return 0, 0, fmt.Errorf("time range cannot exceed 30 days")
 		}
 
 		return startTimeObj.Unix(), endTimeObj.Unix(), nil
