@@ -24,11 +24,6 @@ func GetAttributeValuesHandler(ctx context.Context, arguments GetAttributeValues
 		return nil, fmt.Errorf("error calculating time range: %v", err)
 	}
 
-	err = CheckAttributes(ctx, arguments.Type, arguments.Filters, map[string][]string{}, []string{}, nil)
-	if err != nil {
-		return nil, err
-	}
-
 	request := model.GetAttributeValuesRequest{
 		Type:      arguments.Type,
 		Attribute: arguments.Attribute,
