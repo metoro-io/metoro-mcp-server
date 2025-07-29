@@ -537,6 +537,7 @@ type CreateInvestigationRequest struct {
 	IsVisible               *bool   `json:"isVisible,omitempty"`
 	MetoroApprovalStatus    *string `json:"metoroApprovalStatus,omitempty"`
 	ParentInvestigationUUID *string `json:"parentInvestigationUuid,omitempty"`
+	InProgress              *bool   `json:"inProgress,omitempty"`
 }
 
 type Log struct {
