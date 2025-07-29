@@ -12,7 +12,8 @@ import (
 	"github.com/metoro-io/metoro-mcp-server/utils"
 )
 
-type CreateInvestigationHandlerArgs struct {
+type UpdateInvestigationHandlerArgs struct {
+	InvestigationUUID       string           `json:"investigationUuid" jsonschema:"required,description=UUID of the investigation to update"`
 	Title                   string           `json:"title" jsonschema:"required,description=Title of the investigation"`
 	Markdown                string           `json:"markdown" jsonschema:"required,description=Markdown content of the investigation"`
 	InProgress              *bool            `json:"inProgress" jsonschema:"description=Whether the investigation is in progress or not. Defaults to false"`
@@ -21,7 +22,7 @@ type CreateInvestigationHandlerArgs struct {
 	ParentInvestigationUUID *string          `json:"parentInvestigationUuid,omitempty" jsonschema:"description=Optional parent investigation UUID to associate with this investigation. Set this if this is a recurrence of an existing investigation"`
 }
 
-func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigationHandlerArgs) (*mcpgolang.ToolResponse, error) {
+func UpdateInvestigationHandler(ctx context.Context, arguments UpdateInvestigationHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	// Create the request body
 	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
 	if err != nil {
@@ -49,10 +50,11 @@ func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigati
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	// Make the API request
-	responseBody, err := utils.MakeMetoroAPIRequest("POST", "investigation", bytes.NewBuffer(requestBody), utils.GetAPIRequirementsFromRequest(ctx))
+	// Make the API request - using PUT method for update
+	endpoint := fmt.Sprintf("investigation?uuid=%s", arguments.InvestigationUUID)
+	responseBody, err := utils.MakeMetoroAPIRequest("PUT", endpoint, bytes.NewBuffer(requestBody), utils.GetAPIRequirementsFromRequest(ctx))
 	if err != nil {
-		return nil, fmt.Errorf("failed to create investigation: %w", err)
+		return nil, fmt.Errorf("failed to update investigation: %w", err)
 	}
 
 	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(string(responseBody))), nil

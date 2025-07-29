@@ -189,6 +189,11 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Handler:     CreateInvestigationHandler,
 	},
 	{
+		Name:        "update_investigation",
+		Description: "Update an existing investigation by its UUID. Allows updating the title, markdown content, time range, and other properties of an investigation.",
+		Handler:     UpdateInvestigationHandler,
+	},
+	{
 		Name:        "list_investigations",
 		Description: "List investigations with optional filtering by tags and pagination. Returns a list of investigations including their title, markdown content, tags, creation/update times, and issue time ranges.",
 		Handler:     ListInvestigationsHandler,
