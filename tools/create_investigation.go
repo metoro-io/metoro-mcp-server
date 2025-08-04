@@ -35,7 +35,7 @@ func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigati
 	reviewRequiredPtr := "ReviewRequired"
 	start := time.Unix(startTime, 0)
 	end := time.Unix(endTime, 0)
-	tags := map[string]string{}
+	tags := make(map[string]string)
 	if arguments.ServiceName != nil {
 		tags["service.name"] = *arguments.ServiceName
 	}
