@@ -16,6 +16,7 @@ type CreateInvestigationHandlerArgs struct {
 	Title                   string           `json:"title" jsonschema:"required,description=Title of the investigation"`
 	Summary                 string           `json:"summary" jsonschema:"description=Summary of the investigation - should be at most 3 sentences"`
 	RecommendedActions      *[]string        `json:"recommendedActions,omitempty" jsonschema:"description=Optional recommended actions to take to remedy the issue. Should be concise - each item should be a single sentence."`
+	ServiceName             *string          `json:"serviceName,omitempty" jsonschema:"description=Optional root cause service name to associate with this investigation."`
 	Markdown                string           `json:"markdown" jsonschema:"required,description=Markdown content of the investigation"`
 	InProgress              *bool            `json:"inProgress" jsonschema:"description=Whether the investigation is in progress or not. Defaults to false"`
 	TimeConfig              utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get the pods for. e.g. if you want the get the pods for the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absolute time range by setting start_time and end_time"`
@@ -34,11 +35,16 @@ func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigati
 	reviewRequiredPtr := "ReviewRequired"
 	start := time.Unix(startTime, 0)
 	end := time.Unix(endTime, 0)
+	tags := make(map[string]string)
+	if arguments.ServiceName != nil {
+		tags["service"] = *arguments.ServiceName
+	}
 	request := model.CreateInvestigationRequest{
 		Title:                   arguments.Title,
 		Summary:                 arguments.Summary,
 		RecommendedActions:      arguments.RecommendedActions,
 		Markdown:                arguments.Markdown,
+		Tags:                    tags,
 		IssueStartTime:          &start,
 		IssueEndTime:            &end,
 		ChatHistoryUUID:         arguments.ChatHistoryUUID,
