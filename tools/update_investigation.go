@@ -39,7 +39,7 @@ func UpdateInvestigationHandler(ctx context.Context, arguments UpdateInvestigati
 
 	tags := make(map[string]string)
 	if arguments.ServiceName != nil {
-		tags["service.name"] = *arguments.ServiceName
+		tags["service"] = *arguments.ServiceName
 	}
 
 	request := model.CreateInvestigationRequest{

@@ -37,7 +37,7 @@ func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigati
 	end := time.Unix(endTime, 0)
 	tags := make(map[string]string)
 	if arguments.ServiceName != nil {
-		tags["service.name"] = *arguments.ServiceName
+		tags["service"] = *arguments.ServiceName
 	}
 	request := model.CreateInvestigationRequest{
 		Title:                   arguments.Title,
