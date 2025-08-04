@@ -36,12 +36,18 @@ func UpdateInvestigationHandler(ctx context.Context, arguments UpdateInvestigati
 	reviewRequiredPtr := "ReviewRequired"
 	start := time.Unix(startTime, 0)
 	end := time.Unix(endTime, 0)
+
+	tags := map[string]string{}
+	if arguments.ServiceName != nil {
+		tags["service.name"] = *arguments.ServiceName
+	}
+
 	request := model.CreateInvestigationRequest{
 		Title:                   arguments.Title,
 		Summary:                 arguments.Summary,
 		RecommendedActions:      arguments.RecommendedActions,
 		Markdown:                arguments.Markdown,
-		ServiceName:             arguments.ServiceName,
+		Tags:                    tags,
 		IssueStartTime:          &start,
 		IssueEndTime:            &end,
 		ChatHistoryUUID:         arguments.ChatHistoryUUID,
