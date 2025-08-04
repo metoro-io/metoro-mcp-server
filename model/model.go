@@ -531,6 +531,7 @@ type CreateInvestigationRequest struct {
 	Summary            string            `json:"summary" binding:"required"`
 	RecommendedActions *[]string         `json:"recommendedActions,omitempty"`
 	Markdown           string            `json:"markdown" binding:"required"`
+	ServiceName        *string           `json:"serviceName,omitempty"`
 	Tags               map[string]string `json:"tags,omitempty"`
 	IssueStartTime     *time.Time        `json:"issueStartTime,omitempty"`
 	IssueEndTime       *time.Time        `json:"issueEndTime,omitempty"`

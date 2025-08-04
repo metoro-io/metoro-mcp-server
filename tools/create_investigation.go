@@ -16,6 +16,7 @@ type CreateInvestigationHandlerArgs struct {
 	Title                   string           `json:"title" jsonschema:"required,description=Title of the investigation"`
 	Summary                 string           `json:"summary" jsonschema:"description=Summary of the investigation - should be at most 3 sentences"`
 	RecommendedActions      *[]string        `json:"recommendedActions,omitempty" jsonschema:"description=Optional recommended actions to take to remedy the issue. Should be concise - each item should be a single sentence."`
+	ServiceName             *string          `json:"serviceName,omitempty" jsonschema:"description=Optional service name to associate with this investigation. If you are investigating an issue in a specific service you should set this. If set the investigation will be associated with the service. "`
 	Markdown                string           `json:"markdown" jsonschema:"required,description=Markdown content of the investigation"`
 	InProgress              *bool            `json:"inProgress" jsonschema:"description=Whether the investigation is in progress or not. Defaults to false"`
 	TimeConfig              utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get the pods for. e.g. if you want the get the pods for the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absolute time range by setting start_time and end_time"`
@@ -39,6 +40,7 @@ func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigati
 		Summary:                 arguments.Summary,
 		RecommendedActions:      arguments.RecommendedActions,
 		Markdown:                arguments.Markdown,
+		ServiceName:             arguments.ServiceName,
 		IssueStartTime:          &start,
 		IssueEndTime:            &end,
 		ChatHistoryUUID:         arguments.ChatHistoryUUID,
