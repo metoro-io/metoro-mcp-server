@@ -527,12 +527,14 @@ type GetMetricNamesResponse struct {
 
 // Investigation related types
 type CreateInvestigationRequest struct {
-	Title           string            `json:"title" binding:"required"`
-	Markdown        string            `json:"markdown" binding:"required"`
-	Tags            map[string]string `json:"tags,omitempty"`
-	IssueStartTime  *time.Time        `json:"issueStartTime,omitempty"`
-	IssueEndTime    *time.Time        `json:"issueEndTime,omitempty"`
-	ChatHistoryUUID *string           `json:"chatHistoryUuid,omitempty"`
+	Title              string            `json:"title" binding:"required"`
+	Summary            string            `json:"summary" binding:"required"`
+	RecommendedActions *[]string         `json:"recommendedActions,omitempty"`
+	Markdown           string            `json:"markdown" binding:"required"`
+	Tags               map[string]string `json:"tags,omitempty"`
+	IssueStartTime     *time.Time        `json:"issueStartTime,omitempty"`
+	IssueEndTime       *time.Time        `json:"issueEndTime,omitempty"`
+	ChatHistoryUUID    *string           `json:"chatHistoryUuid,omitempty"`
 	// Optional, these ideally should only set by the AI.
 	IsVisible               *bool   `json:"isVisible,omitempty"`
 	MetoroApprovalStatus    *string `json:"metoroApprovalStatus,omitempty"`
