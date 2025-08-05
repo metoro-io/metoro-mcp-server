@@ -31,7 +31,7 @@ func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigati
 		return nil, fmt.Errorf("error calculating time range: %v", err)
 	}
 
-	falsePtr := false
+	truePtr := true
 	reviewRequiredPtr := "ReviewRequired"
 	start := time.Unix(startTime, 0)
 	end := time.Unix(endTime, 0)
@@ -48,7 +48,7 @@ func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigati
 		IssueStartTime:          &start,
 		IssueEndTime:            &end,
 		ChatHistoryUUID:         arguments.ChatHistoryUUID,
-		IsVisible:               &falsePtr,
+		IsVisible:               &truePtr,
 		InProgress:              arguments.InProgress,
 		MetoroApprovalStatus:    &reviewRequiredPtr,
 		ParentInvestigationUUID: arguments.ParentInvestigationUUID,
