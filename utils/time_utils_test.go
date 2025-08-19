@@ -1,12 +1,15 @@
 package utils
 
 import (
+	"strings"
 	"testing"
 	"time"
-	"strings"
 )
 
 func TestCalculateTimeRange(t *testing.T) {
+	// Set IS_PROD for tests that need to validate 30-day window
+	t.Setenv("IS_PROD", "true")
+	
 	// Helper function to create pointers
 	strPtr := func(s string) *string { return &s }
 	intPtr := func(i int) *int { return &i }

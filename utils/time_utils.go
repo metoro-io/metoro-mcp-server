@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 )
@@ -64,8 +65,8 @@ func CalculateTimeRange(config TimeConfig) (startTime, endTime int64, err error)
 
 		startTimeObj := now.Add(-duration)
 
-		// Check if the start time is more than 30 days ago
-		if startTimeObj.Before(thirtyDaysAgo) {
+		// Check if the start time is more than 30 days ago in Prod.
+		if os.Getenv("IS_PROD") == "true" && startTimeObj.Before(thirtyDaysAgo) {
 			return 0, 0, fmt.Errorf("time range cannot exceed 30 days ago, please adjust the time_period or time_window")
 		}
 
@@ -91,7 +92,7 @@ func CalculateTimeRange(config TimeConfig) (startTime, endTime int64, err error)
 		}
 
 		// Check if the start time is more than 30 days ago
-		if startTimeObj.Before(thirtyDaysAgo) {
+		if os.Getenv("IS_PROD") == "true" && startTimeObj.Before(thirtyDaysAgo) {
 			return 0, 0, fmt.Errorf("time range cannot exceed 30 days")
 		}
 
