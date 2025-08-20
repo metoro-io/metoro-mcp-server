@@ -20,15 +20,17 @@ type ListInvestigationsHandlerArgs struct {
 func ListInvestigationsHandler(ctx context.Context, arguments ListInvestigationsHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	// Create the request body
 	request := struct {
-		Limit           int               `json:"limit,omitempty"`
-		Offset          int               `json:"offset,omitempty"`
-		Tags            map[string]string `json:"tags,omitempty"`
-		IncludeResolved bool              `json:"includeResolved,omitempty"`
+		Limit             int               `json:"limit,omitempty"`
+		Offset            int               `json:"offset,omitempty"`
+		Tags              map[string]string `json:"tags,omitempty"`
+		IncludeResolved   bool              `json:"includeResolved,omitempty"`
+		ExcludeInProgress bool              `json:"excludeInProgress,omitempty"`
 	}{
-		Limit:           arguments.Limit,
-		Offset:          arguments.Offset,
-		Tags:            arguments.Tags,
-		IncludeResolved: arguments.IncludeResolved,
+		Limit:             arguments.Limit,
+		Offset:            arguments.Offset,
+		Tags:              arguments.Tags,
+		IncludeResolved:   arguments.IncludeResolved,
+		ExcludeInProgress: true, // Always exclude in-progress investigations as the AI only wants to see the past investigations.
 	}
 
 	requestBody, err := json.Marshal(request)
