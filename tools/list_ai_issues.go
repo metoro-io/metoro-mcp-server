@@ -8,7 +8,10 @@ import (
 	"github.com/metoro-io/metoro-mcp-server/utils"
 )
 
-func ListAIIssuesHandler(ctx context.Context) (*mcpgolang.ToolResponse, error) {
+type ListAIIssueHandlerArgs struct {
+}
+
+func ListAIIssuesHandler(ctx context.Context, arguments ListAIIssueHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	responseBody, err := utils.MakeMetoroAPIRequest("GET", "aiIssues", nil, utils.GetAPIRequirementsFromRequest(ctx))
 	if err != nil {
 		return nil, fmt.Errorf("failed to list AI issues: %w", err)
