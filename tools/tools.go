@@ -164,6 +164,12 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Handler: CreateDashboardHandler,
 	},
 	{
+		Name: "create_alert",
+		Description: `Create an alert with the described metrics. This tool is useful for creating an alert with the timeseries data that you are interested in. How to use this tool:
+					 NEVER GUESS the attribute keys and values that will be used for filtering or splits. Always use trace_querier or log_querier or metric_querier to understand the available attribute keys and values for the type of data/timeseries you are interested in. Ask these tools for the available attribute keys and values and metric names etc before using this tool.`,
+		Handler: CreateAlertHandler,
+	},
+	{
 		Name:        "get_source_repository",
 		Description: "Get the source repository URL/path for a specific service. This tool is useful for finding where the code for a service is stored. You need to provide the service name time range and optionally specific environments to search in.",
 		Handler:     GetSourceRepositoryHandler,
