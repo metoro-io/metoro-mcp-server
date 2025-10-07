@@ -550,6 +550,7 @@ type CreateAIIssueRequest struct {
 type UpdateAIIssueRequest struct {
 	Title       *string `json:"title,omitempty"`
 	Description *string `json:"description,omitempty"`
+	Open        *bool   `json:"open,omitempty"`
 }
 
 type AIIssue struct {
@@ -557,6 +558,7 @@ type AIIssue struct {
 	OrganizationUUID string    `json:"organizationUuid"`
 	Title            string    `json:"title"`
 	Description      string    `json:"description"`
+	Open             bool      `json:"open"`
 	CreatedAt        time.Time `json:"createdAt"`
 	UpdatedAt        time.Time `json:"updatedAt"`
 }
