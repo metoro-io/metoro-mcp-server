@@ -550,6 +550,7 @@ type CreateAIIssueRequest struct {
 type UpdateAIIssueRequest struct {
 	Title       *string `json:"title,omitempty"`
 	Description *string `json:"description,omitempty"`
+	Open        *bool   `json:"open,omitempty"`
 }
 
 type AIIssue struct {
@@ -557,6 +558,7 @@ type AIIssue struct {
 	OrganizationUUID string    `json:"organizationUuid"`
 	Title            string    `json:"title"`
 	Description      string    `json:"description"`
+	Open             bool      `json:"open"`
 	CreatedAt        time.Time `json:"createdAt"`
 	UpdatedAt        time.Time `json:"updatedAt"`
 }
@@ -567,6 +569,23 @@ type ListAIIssuesResponse struct {
 
 type GetAIIssueResponse struct {
 	Issue AIIssue `json:"issue"`
+}
+
+type AIIssueEvent struct {
+	UUID              string     `json:"uuid"`
+	IssueUUID         string     `json:"issueUuid"`
+	Type              string     `json:"type"`
+	CommitSHA         *string    `json:"commitSha,omitempty"`
+	VCSLink           *string    `json:"vcsLink,omitempty"`
+	MetoroLink        *string    `json:"metoroLink,omitempty"`
+	Version           *string    `json:"version,omitempty"`
+	InvestigationUUID *string    `json:"investigationUuid,omitempty"`
+	OccurrenceTime    *time.Time `json:"occurrenceTime,omitempty"`
+	CreatedAt         time.Time  `json:"createdAt"`
+}
+
+type ListAIIssueEventsResponse struct {
+	Events []AIIssueEvent `json:"events"`
 }
 
 type Log struct {
