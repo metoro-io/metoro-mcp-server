@@ -218,4 +218,9 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Description: "List all AI issues for the organization. Useful for discovering available issue UUIDs and their metadata.",
 		Handler:     ListAIIssuesHandler,
 	},
+	{
+		Name:        "list_ai_issue_events",
+		Description: "List timeline events for a specific AI issue, including commits, releases, and investigations associated with that issue.",
+		Handler:     ListAIIssueEventsHandler,
+	},
 }

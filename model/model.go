@@ -571,6 +571,23 @@ type GetAIIssueResponse struct {
 	Issue AIIssue `json:"issue"`
 }
 
+type AIIssueEvent struct {
+	UUID              string     `json:"uuid"`
+	IssueUUID         string     `json:"issueUuid"`
+	Type              string     `json:"type"`
+	CommitSHA         *string    `json:"commitSha,omitempty"`
+	VCSLink           *string    `json:"vcsLink,omitempty"`
+	MetoroLink        *string    `json:"metoroLink,omitempty"`
+	Version           *string    `json:"version,omitempty"`
+	InvestigationUUID *string    `json:"investigationUuid,omitempty"`
+	OccurrenceTime    *time.Time `json:"occurrenceTime,omitempty"`
+	CreatedAt         time.Time  `json:"createdAt"`
+}
+
+type ListAIIssueEventsResponse struct {
+	Events []AIIssueEvent `json:"events"`
+}
+
 type Log struct {
 	// The time that the log line was emitted in milliseconds since the epoch
 	Time int64 `json:"time"`
