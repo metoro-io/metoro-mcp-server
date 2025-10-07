@@ -617,100 +617,11 @@ type GetTracesResponse struct {
 	Traces []TraceEl `json:"traces"`
 }
 
-// / Alerting related types
-
-type AlertType string
-
-const (
-	AlertTypeMultiMetric AlertType = "MultiMetric"
-)
-
-type MultiMetricFilters struct {
-	MetricSpecifiers []SingleTimeseriesRequest `json:"metricSpecifiers"`
-	Formula          *Formula                  `json:"formula"`
+type MetricSpecifiersRequest struct {
+	MetricSpecifiers []SingleTimeseriesRequest `json:"metricSpecifiers" binding:"required"`
+	Formulas         []Formula                 `json:"formulas"`
 }
 
-type StaticAlarmCondition string
-
-const (
-	GreaterThan        StaticAlarmCondition = "GreaterThan"
-	LessThan           StaticAlarmCondition = "LessThan"
-	GreaterThanOrEqual StaticAlarmCondition = "GreaterThanOrEqual"
-	LessThanOrEqual    StaticAlarmCondition = "LessThanOrEqual"
-)
-
-type AlarmCondition struct {
-	Condition StaticAlarmCondition `json:"condition"`
-	Threshold float64              `json:"threshold"`
-}
-
-type MonitorEvaluationType string
-
-const (
-	MetricMonitorEventStaticThreshold     MonitorEvaluationType = "static"
-	MetricMonitorEventAnomaly             MonitorEvaluationType = "anomaly"
-	MetricMonitorEventAggregateEvaluation MonitorEvaluationType = "aggregate"
-)
-
-type MonitorEvaluationPayload struct {
-	// Static threshold evaluation fields
-	StaticMonitorEvaluationPayload
-	// Aggregate evaluation fields
-	MetricAggregateParams
-}
-
-type MetricAggregateParams struct {
-	EvaluationFunction Aggregation `json:"evaluationFunction,omitempty"`
-	EvaluationSplits   []string    `json:"evaluationSplits,omitempty"`
-	Window             int64       `json:"window,omitempty"`
-	WindowUnit         WindowUnit  `json:"windowUnit,omitempty"`
-	JsonPath           *string     `json:"jsonPath,omitempty"`
-}
-
-type StaticMonitorEvaluationPayload struct {
-	//DatapointsToAlarm refers to the number of data points within the evaluation period that must exceed the defined threshold to trigger the alarm.
-	DatapointsToAlarm int64 `json:"datapointsToAlarm,omitempty"`
-	//EvaluationWindow represents the number of recent data points analyzed to determine the alarm's state.
-	EvaluationWindow int64 `json:"evaluationWindow,omitempty"`
-	// MissingDatapointBehavior represents the behavior of the alarm when a data point is missing.
-	MissingDatapointBehavior MissingDatapointBehavior `json:"missingDatapointBehavior,omitempty"`
-}
-
-type MissingDatapointBehavior string
-
-const (
-	MissingDatapointBreaching    MissingDatapointBehavior = "breaching"
-	MissingDatapointNotBreaching MissingDatapointBehavior = "not_breaching"
-)
-
-type WindowUnit string
-
-const (
-	WindowUnitMinutes WindowUnit = "minutes"
-	WindowUnitHours   WindowUnit = "hours"
-	WindowUnitDays    WindowUnit = "days"
-)
-
-type MonitorEvaluation struct {
-	MonitorEvaluationType   MonitorEvaluationType    `json:"monitorEvaluationType"`
-	MonitorEvalutionPayload MonitorEvaluationPayload `json:"monitorEvalutionPayload"`
-}
-
-type MultiMetricAlert struct {
-	Filters           MultiMetricFilters `json:"filters"`
-	MonitorEvaluation MonitorEvaluation  `json:"monitorEvaluation"`
-	AlarmCondition    AlarmCondition     `json:"alarmCondition"`
-}
-
-type Alert struct {
-	UUID             string            `json:"uuid"`
-	AlertType        AlertType         `json:"type"`
-	Name             string            `json:"name"`
-	Description      string            `json:"description"`
-	MultiMetricAlert *MultiMetricAlert `json:"multiMetricAlert"`
-	// Destinations     []AlertDestination `json:"destinations"`
-}
-
-type SetAlertRequest struct {
-	Alert Alert `json:"alert"`
+type MetricSpecifierToMetoroQLResponse struct {
+	Queries []string `json:"queries"`
 }

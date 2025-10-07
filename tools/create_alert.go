@@ -5,8 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
-	"github.com/google/uuid"
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
 	"github.com/metoro-io/metoro-mcp-server/utils"
@@ -29,7 +27,7 @@ func CreateAlertHandler(ctx context.Context, arguments CreateAlertHandlerArgs) (
 		return nil, fmt.Errorf("error creating alert properties: %v", err)
 	}
 
-	newAlertRequest := model.SetAlertRequest{
+	newAlertRequest := model.CreateUpdateAlertRequest{
 		Alert: alert,
 	}
 
@@ -40,39 +38,44 @@ func CreateAlertHandler(ctx context.Context, arguments CreateAlertHandlerArgs) (
 	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(resp)))), nil
 }
 
-func createAlertFromTimeseries(ctx context.Context, alertName, alertDescription string, timeseries []model.SingleTimeseriesRequest, formula model.Formula, condition model.StaticAlarmCondition, threshold float64, datapointsToAlarm int64, evaluationWindow int64) (model.Alert, error) {
-	alert := model.Alert{
-		UUID:        uuid.NewString(),
-		Name:        alertName,
-		Description: alertDescription,
-		MultiMetricAlert: &model.MultiMetricAlert{
-			Filters: model.MultiMetricFilters{
-				MetricSpecifiers: timeseries,
-				Formula:          &formula,
-			},
-			MonitorEvaluation: model.MonitorEvaluation{
-				MonitorEvaluationType: model.MetricMonitorEventStaticThreshold,
-				MonitorEvalutionPayload: model.MonitorEvaluationPayload{
-					StaticMonitorEvaluationPayload: model.StaticMonitorEvaluationPayload{
-						DatapointsToAlarm:        datapointsToAlarm,
-						EvaluationWindow:         evaluationWindow,
-						MissingDatapointBehavior: model.MissingDatapointNotBreaching,
-					},
-				},
-			},
-			AlarmCondition: model.AlarmCondition{
-				Condition: condition,
-				Threshold: threshold,
-			},
-		},
+// TODO: Implement the conversion logic.
+func createAlertFromTimeseries(ctx context.Context, alertName, alertDescription string, timeseries []model.SingleTimeseriesRequest, formula model.Formula, condition string, threshold float64, datapointsToAlarm int64, evaluationWindow int64) (model.Alert, error) {
+	metoroQlQueries, err := convertMetricSpecifierToMetoroQL(ctx, timeseries, []model.Formula{formula})
+	if err != nil {
+		return model.Alert{}, fmt.Errorf("error converting metric specifiers to MetoroQL: %v", err)
 	}
-	return alert, nil
+	alert := model.Alert{
+		// TODO: Fill the alert wit the details.
+	}
 }
 
-func setAlertMetoroCall(ctx context.Context, request model.SetAlertRequest) ([]byte, error) {
+func convertMetricSpecifierToMetoroQL(ctx context.Context, metricSpecs []model.SingleTimeseriesRequest, formulas []model.Formula) ([]string, error) {
+	req := model.MetricSpecifiersRequest{
+		MetricSpecifiers: metricSpecs,
+		Formulas:         formulas,
+	}
+	requestBody, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling MetricSpecifiersRequest: %v", err)
+	}
+	resp, err := utils.MakeMetoroAPIRequest("POST", "/metoroql/convert/metricSpecifierToMetoroql", bytes.NewBuffer(requestBody), utils.GetAPIRequirementsFromRequest(ctx))
+	if err != nil {
+		return nil, fmt.Errorf("error making MetoroQL conversion request: %v", err)
+	}
+	var metoroQLQueriesResp model.MetricSpecifierToMetoroQLResponse
+	if err := json.Unmarshal(resp, &metoroQLQueriesResp); err != nil {
+		return nil, fmt.Errorf("error unmarshaling MetoroQL conversion response: %v", err)
+	}
+	if len(metoroQLQueriesResp.Queries) == 0 {
+		return nil, fmt.Errorf("no MetoroQL queries returned from conversion")
+	}
+	return metoroQLQueriesResp.Queries, nil
+}
+
+func setAlertMetoroCall(ctx context.Context, request model.CreateUpdateAlertRequest) ([]byte, error) {
 	requestBody, err := json.Marshal(request)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling alert request: %v", err)
 	}
-	return utils.MakeMetoroAPIRequest("POST", "alert", bytes.NewBuffer(requestBody), utils.GetAPIRequirementsFromRequest(ctx))
+	return utils.MakeMetoroAPIRequest("POST", "alerts/update", bytes.NewBuffer(requestBody), utils.GetAPIRequirementsFromRequest(ctx))
 }
