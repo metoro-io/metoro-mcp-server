@@ -165,10 +165,8 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 	},
 	{
 		Name: "create_alert",
-		Description: `Create an alert with the described metrics. This tool is useful for creating an alert with the timeseries data that you are interested in.
-											  How to use this tool:
-					  First use the following tools to use the right metrics names or trace/log attribute key/values: get_metric_names tool and get_attribute_keys tool and get_attribute_values tool.
-					  You can also use Splits argument to group the timeseries data by the given attribute keys. This will generate more than one timeseries to alert on instead of one. Each timeseries is evaluated separately. Only use the attribute keys and values that are available (that are returned from get_attribute_keys and get_attribute_values tools.)`,
+		Description: `Create an alert with the described metrics. This tool is useful for creating an alert with the timeseries data that you are interested in. How to use this tool:
+					 NEVER GUESS the attribute keys and values that will be used for filtering or splits. Always use trace_querier or log_querier or metric_querier to understand the available attribute keys and values for the type of data/timeseries you are interested in. Ask these tools for the available attribute keys and values and metric names etc before using this tool.`,
 		Handler: CreateAlertHandler,
 	},
 	{

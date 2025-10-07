@@ -183,20 +183,30 @@ func CheckAttributes(ctx context.Context, requestType model.MetricType, filters 
 
 func checkTimeseries(ctx context.Context, timeseries []model.SingleTimeseriesRequest, startTime, endTime int64) error {
 	for _, ts := range timeseries {
-		if ts.Type != model.Metric {
-			continue
-		}
-		err := CheckMetric(ctx, ts.MetricName)
-		if err != nil {
-			return err
-		}
-		err = CheckAttributes(ctx, ts.Type, ts.Filters, ts.ExcludeFilters, ts.Splits, &model.GetMetricAttributesRequest{
-			StartTime:  startTime,
-			EndTime:    endTime,
-			MetricName: ts.MetricName,
-		})
-		if err != nil {
-			return err
+		switch ts.Type {
+		case model.Metric:
+			err := CheckMetric(ctx, ts.MetricName)
+			if err != nil {
+				return err
+			}
+			err = CheckAttributes(ctx, ts.Type, ts.Filters, ts.ExcludeFilters, ts.Splits, &model.GetMetricAttributesRequest{
+				StartTime:  startTime,
+				EndTime:    endTime,
+				MetricName: ts.MetricName,
+			})
+			if err != nil {
+				return err
+			}
+		case model.Trace:
+			err := CheckAttributes(ctx, ts.Type, ts.Filters, ts.ExcludeFilters, ts.Splits, nil)
+			if err != nil {
+				return err
+			}
+		case model.Logs:
+			err := CheckAttributes(ctx, ts.Type, ts.Filters, ts.ExcludeFilters, ts.Splits, nil)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
