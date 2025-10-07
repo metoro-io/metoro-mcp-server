@@ -198,4 +198,24 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Description: "List investigations with optional filtering by tags and pagination. Returns a list of investigations including their title, markdown content, tags, creation/update times, and issue time ranges.",
 		Handler:     ListInvestigationsHandler,
 	},
+	{
+		Name:        "create_ai_issue",
+		Description: "Create a new AI issue record with a title and markdown description. Use this to capture issues that investigations can reference via issue UUID.",
+		Handler:     CreateAIIssueHandler,
+	},
+	{
+		Name:        "update_ai_issue",
+		Description: "Update an existing AI issue by UUID. Allows changing the issue title and description.",
+		Handler:     UpdateAIIssueHandler,
+	},
+	{
+		Name:        "get_ai_issue",
+		Description: "Fetch a single AI issue by UUID to view its current title, description, and metadata.",
+		Handler:     GetAIIssueHandler,
+	},
+	{
+		Name:        "list_ai_issues",
+		Description: "List all AI issues for the organization. Useful for discovering available issue UUIDs and their metadata.",
+		Handler:     ListAIIssuesHandler,
+	},
 }

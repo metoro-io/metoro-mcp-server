@@ -536,10 +536,37 @@ type CreateInvestigationRequest struct {
 	IssueEndTime       *time.Time        `json:"issueEndTime,omitempty"`
 	ChatHistoryUUID    *string           `json:"chatHistoryUuid,omitempty"`
 	// Optional, these ideally should only set by the AI.
-	IsVisible               *bool   `json:"isVisible,omitempty"`
-	MetoroApprovalStatus    *string `json:"metoroApprovalStatus,omitempty"`
-	ParentInvestigationUUID *string `json:"parentInvestigationUuid,omitempty"`
-	InProgress              *bool   `json:"inProgress,omitempty"`
+	IsVisible            *bool   `json:"isVisible,omitempty"`
+	MetoroApprovalStatus *string `json:"metoroApprovalStatus,omitempty"`
+	IssueUUID            *string `json:"issueUuid,omitempty"`
+	InProgress           *bool   `json:"inProgress,omitempty"`
+}
+
+type CreateAIIssueRequest struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
+type UpdateAIIssueRequest struct {
+	Title       *string `json:"title,omitempty"`
+	Description *string `json:"description,omitempty"`
+}
+
+type AIIssue struct {
+	UUID             string    `json:"uuid"`
+	OrganizationUUID string    `json:"organizationUuid"`
+	Title            string    `json:"title"`
+	Description      string    `json:"description"`
+	CreatedAt        time.Time `json:"createdAt"`
+	UpdatedAt        time.Time `json:"updatedAt"`
+}
+
+type ListAIIssuesResponse struct {
+	Issues []AIIssue `json:"issues"`
+}
+
+type GetAIIssueResponse struct {
+	Issue AIIssue `json:"issue"`
 }
 
 type Log struct {
