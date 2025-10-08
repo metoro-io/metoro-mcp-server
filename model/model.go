@@ -562,6 +562,8 @@ type CreateInvestigationRequest struct {
 	MetoroApprovalStatus *string `json:"metoroApprovalStatus,omitempty"`
 	IssueUUID            *string `json:"issueUuid,omitempty"`
 	InProgress           *bool   `json:"inProgress,omitempty"`
+	AlertFireUUID        *string `json:"alertFireUuid,omitempty"`
+	AlertUUID            *string `json:"alertUuid,omitempty"`
 }
 
 type UpdateInvestigationRequest struct {

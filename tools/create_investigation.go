@@ -22,6 +22,8 @@ type CreateInvestigationHandlerArgs struct {
 	TimeConfig         utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get the pods for. e.g. if you want the get the pods for the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absolute time range by setting start_time and end_time"`
 	ChatHistoryUUID    *string          `json:"chatHistoryUuid,omitempty" jsonschema:"description=Optional chat history UUID to associate with this investigation"`
 	IssueUUID          *string          `json:"issueUuid,omitempty" jsonschema:"description=Optional related AI issue UUID for this investigation"`
+	AlertFireUUID      *string          `json:"alertFireUuid,omitempty" jsonschema:"description=Optional alert fire UUID to associate with this investigation"`
+	AlertUUID          *string          `json:"alertUuid,omitempty" jsonschema:"description=Optional alert UUID to associate with this investigation"`
 }
 
 func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigationHandlerArgs) (*mcpgolang.ToolResponse, error) {
@@ -52,6 +54,8 @@ func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigati
 		InProgress:           arguments.InProgress,
 		MetoroApprovalStatus: &reviewRequiredPtr,
 		IssueUUID:            arguments.IssueUUID,
+		AlertFireUUID:        arguments.AlertFireUUID,
+		AlertUUID:            arguments.AlertUUID,
 	}
 
 	requestBody, err := json.Marshal(request)
