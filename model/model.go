@@ -564,6 +564,22 @@ type CreateInvestigationRequest struct {
 	InProgress           *bool   `json:"inProgress,omitempty"`
 }
 
+type UpdateInvestigationRequest struct {
+	Title                   *string            `json:"title,omitempty"`
+	Summary                 *string            `json:"summary,omitempty"`
+	Markdown                *string            `json:"markdown,omitempty"`
+	Tags                    *map[string]string `json:"tags,omitempty"`
+	IssueStartTime          *time.Time         `json:"issueStartTime,omitempty"`
+	IssueEndTime            *time.Time         `json:"issueEndTime,omitempty"`
+	IssueUUID               *string            `json:"issueUuid,omitempty"`
+	ParentInvestigationUUID *string            `json:"parentInvestigationUuid,omitempty"`
+	IsVisible               *bool              `json:"isVisible,omitempty"`
+	MetoroApprovalStatus    *string            `json:"metoroApprovalStatus,omitempty"`
+	ChatHistoryUUID         *string            `json:"chatHistoryUuid,omitempty"`
+	RecommendedActions      *[]string          `json:"recommendedActions,omitempty"`
+	InProgress              *bool              `json:"inProgress,omitempty"`
+}
+
 type CreateAIIssueRequest struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`

@@ -42,12 +42,16 @@ func UpdateInvestigationHandler(ctx context.Context, arguments UpdateInvestigati
 		tags["service"] = *arguments.ServiceName
 	}
 
-	request := model.CreateInvestigationRequest{
-		Title:                arguments.Title,
-		Summary:              arguments.Summary,
-		RecommendedActions:   arguments.RecommendedActions,
-		Markdown:             arguments.Markdown,
-		Tags:                 tags,
+	title := arguments.Title
+	summary := arguments.Summary
+	markdown := arguments.Markdown
+	tagsPtr := tags
+
+	request := model.UpdateInvestigationRequest{
+		Title:                &title,
+		Summary:              &summary,
+		Markdown:             &markdown,
+		Tags:                 &tagsPtr,
 		IssueStartTime:       &start,
 		IssueEndTime:         &end,
 		ChatHistoryUUID:      arguments.ChatHistoryUUID,
@@ -55,6 +59,7 @@ func UpdateInvestigationHandler(ctx context.Context, arguments UpdateInvestigati
 		InProgress:           arguments.InProgress,
 		MetoroApprovalStatus: &reviewRequiredPtr,
 		IssueUUID:            arguments.IssueUUID,
+		RecommendedActions:   arguments.RecommendedActions,
 	}
 
 	requestBody, err := json.Marshal(request)
