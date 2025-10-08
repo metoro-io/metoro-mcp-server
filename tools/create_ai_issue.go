@@ -14,12 +14,14 @@ import (
 type CreateAIIssueHandlerArgs struct {
 	Title       string `json:"title" jsonschema:"required,description=Title of the AI issue"`
 	Description string `json:"description" jsonschema:"required,description=Detailed description of the AI issue"`
+	Summary     string `json:"summary" jsonschema:"required,description=One sentence summary of the AI issue"`
 }
 
 func CreateAIIssueHandler(ctx context.Context, arguments CreateAIIssueHandlerArgs) (*mcpgolang.ToolResponse, error) {
 	request := model.CreateAIIssueRequest{
 		Title:       arguments.Title,
 		Description: arguments.Description,
+		Summary:     arguments.Summary,
 	}
 
 	requestBody, err := json.Marshal(request)

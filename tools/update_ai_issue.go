@@ -15,17 +15,19 @@ type UpdateAIIssueHandlerArgs struct {
 	IssueUUID   string  `json:"issueUuid" jsonschema:"required,description=UUID of the AI issue to update"`
 	Title       *string `json:"title,omitempty" jsonschema:"description=Optional new title for the AI issue"`
 	Description *string `json:"description,omitempty" jsonschema:"description=Optional new description for the AI issue"`
+	Summary     *string `json:"summary,omitempty" jsonschema:"description=Optional new summary for the AI issue"`
 	Open        *bool   `json:"open,omitempty" jsonschema:"description=Optional flag to set whether the AI issue is open (true) or resolved (false)"`
 }
 
 func UpdateAIIssueHandler(ctx context.Context, arguments UpdateAIIssueHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	if arguments.Title == nil && arguments.Description == nil && arguments.Open == nil {
-		return nil, fmt.Errorf("at least one of title, description, or open must be provided to update an AI issue")
+	if arguments.Title == nil && arguments.Description == nil && arguments.Summary == nil && arguments.Open == nil {
+		return nil, fmt.Errorf("at least one of title, description, summary, or open must be provided to update an AI issue")
 	}
 
 	request := model.UpdateAIIssueRequest{
 		Title:       arguments.Title,
 		Description: arguments.Description,
+		Summary:     arguments.Summary,
 		Open:        arguments.Open,
 	}
 
