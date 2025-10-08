@@ -604,6 +604,8 @@ type AIIssueEvent struct {
 	VCSLink           *string    `json:"vcsLink,omitempty"`
 	MetoroLink        *string    `json:"metoroLink,omitempty"`
 	Version           *string    `json:"version,omitempty"`
+	Environment       *string    `json:"environment,omitempty"`
+	Description       *string    `json:"description,omitempty"`
 	InvestigationUUID *string    `json:"investigationUuid,omitempty"`
 	OccurrenceTime    *time.Time `json:"occurrenceTime,omitempty"`
 	CreatedAt         time.Time  `json:"createdAt"`
