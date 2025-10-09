@@ -33,6 +33,11 @@ func GetProfilesHandler(ctx context.Context, arguments GetProfileHandlerArgs) (*
 	if err != nil {
 		return nil, fmt.Errorf("error getting profiles: %v", err)
 	}
+
+	if len(body) > 200000 {
+		return nil, fmt.Errorf("response too large, please refine your query to get a smaller response")
+	}
+
 	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
 }
 
