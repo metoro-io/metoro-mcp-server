@@ -229,4 +229,9 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Description: "List timeline events for a specific AI issue, including commits, releases, and investigations associated with that issue.",
 		Handler:     ListAIIssueEventsHandler,
 	},
+	{
+		Name:        "report_deployment_verdict",
+		Description: "Report the health verdict of a deployment after investigation. Call this tool at the end of a deployment health check to record whether the deployment is healthy, degraded, or failed. A failed verdict will trigger an @here alert in Slack.",
+		Handler:     ReportDeploymentVerdictHandler,
+	},
 }
