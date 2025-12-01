@@ -565,6 +565,7 @@ type CreateInvestigationRequest struct {
 	InProgress           *bool   `json:"inProgress,omitempty"`
 	AlertFireUUID        *string `json:"alertFireUuid,omitempty"`
 	AlertUUID            *string `json:"alertUuid,omitempty"`
+	DeploymentEventUUID  *string `json:"deploymentEventUuid,omitempty"`
 }
 
 type UpdateInvestigationRequest struct {
@@ -581,6 +582,7 @@ type UpdateInvestigationRequest struct {
 	ChatHistoryUUID         *string            `json:"chatHistoryUuid,omitempty"`
 	RecommendedActions      *[]string          `json:"recommendedActions,omitempty"`
 	InProgress              *bool              `json:"inProgress,omitempty"`
+	DeploymentEventUUID     *string            `json:"deploymentEventUuid,omitempty"`
 }
 
 type CreateAIIssueRequest struct {

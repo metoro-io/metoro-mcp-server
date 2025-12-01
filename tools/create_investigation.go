@@ -13,17 +13,18 @@ import (
 )
 
 type CreateInvestigationHandlerArgs struct {
-	Title              string           `json:"title" jsonschema:"required,description=Title of the investigation"`
-	Summary            string           `json:"summary" jsonschema:"description=Summary of the investigation - should be at most 3 sentences"`
-	RecommendedActions *[]string        `json:"recommendedActions,omitempty" jsonschema:"description=Optional recommended actions to take to remedy the issue. Should be concise - each item should be a single sentence."`
-	ServiceName        *string          `json:"serviceName,omitempty" jsonschema:"description=Optional root cause service name to associate with this investigation."`
-	Markdown           string           `json:"markdown" jsonschema:"required,description=Markdown content of the investigation"`
-	InProgress         *bool            `json:"inProgress" jsonschema:"description=Whether the investigation is in progress or not. Defaults to false"`
-	TimeConfig         utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get the pods for. e.g. if you want the get the pods for the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absolute time range by setting start_time and end_time"`
-	ChatHistoryUUID    *string          `json:"chatHistoryUuid,omitempty" jsonschema:"description=Optional chat history UUID to associate with this investigation"`
-	IssueUUID          *string          `json:"issueUuid,omitempty" jsonschema:"description=Optional related AI issue UUID for this investigation"`
-	AlertFireUUID      *string          `json:"alertFireUuid,omitempty" jsonschema:"description=Optional alert fire UUID to associate with this investigation"`
-	AlertUUID          *string          `json:"alertUuid,omitempty" jsonschema:"description=Optional alert UUID to associate with this investigation"`
+	Title               string           `json:"title" jsonschema:"required,description=Title of the investigation"`
+	Summary             string           `json:"summary" jsonschema:"description=Summary of the investigation - should be at most 3 sentences"`
+	RecommendedActions  *[]string        `json:"recommendedActions,omitempty" jsonschema:"description=Optional recommended actions to take to remedy the issue. Should be concise - each item should be a single sentence."`
+	ServiceName         *string          `json:"serviceName,omitempty" jsonschema:"description=Optional root cause service name to associate with this investigation."`
+	Markdown            string           `json:"markdown" jsonschema:"required,description=Markdown content of the investigation"`
+	InProgress          *bool            `json:"inProgress" jsonschema:"description=Whether the investigation is in progress or not. Defaults to false"`
+	TimeConfig          utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get the pods for. e.g. if you want the get the pods for the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absolute time range by setting start_time and end_time"`
+	ChatHistoryUUID     *string          `json:"chatHistoryUuid,omitempty" jsonschema:"description=Optional chat history UUID to associate with this investigation"`
+	IssueUUID           *string          `json:"issueUuid,omitempty" jsonschema:"description=Optional related AI issue UUID for this investigation"`
+	AlertFireUUID       *string          `json:"alertFireUuid,omitempty" jsonschema:"description=Optional alert fire UUID to associate with this investigation"`
+	AlertUUID           *string          `json:"alertUuid,omitempty" jsonschema:"description=Optional alert UUID to associate with this investigation"`
+	DeploymentEventUUID *string          `json:"deploymentEventUuid,omitempty" jsonschema:"description=Optional deployment event UUID to associate with this investigation for notification threading"`
 }
 
 func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigationHandlerArgs) (*mcpgolang.ToolResponse, error) {
@@ -56,6 +57,7 @@ func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigati
 		IssueUUID:            arguments.IssueUUID,
 		AlertFireUUID:        arguments.AlertFireUUID,
 		AlertUUID:            arguments.AlertUUID,
+		DeploymentEventUUID:  arguments.DeploymentEventUUID,
 	}
 
 	requestBody, err := json.Marshal(request)
