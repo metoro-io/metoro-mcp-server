@@ -12,6 +12,7 @@ import (
 
 type ReportDeploymentVerdictHandlerArgs struct {
 	DeploymentEventUUID string `json:"deployment_event_uuid" jsonschema:"required,description=The UUID of the deployment event being evaluated. This should be provided in the context of the deployment investigation."`
+	InvestigationUUID   string `json:"investigation_uuid" jsonschema:"required,description=The UUID of the investigation. This is used to link the verdict notification to the investigation."`
 	ServiceName         string `json:"service_name" jsonschema:"required,description=Name of the service that was deployed"`
 	Environment         string `json:"environment" jsonschema:"required,description=Environment where deployment occurred"`
 	Namespace           string `json:"namespace" jsonschema:"required,description=Kubernetes namespace"`
@@ -22,6 +23,7 @@ type ReportDeploymentVerdictHandlerArgs struct {
 
 type CreateDeploymentVerdictRequest struct {
 	DeploymentEventUUID string `json:"deployment_event_uuid"`
+	InvestigationUUID   string `json:"investigation_uuid"`
 	ServiceName         string `json:"service_name"`
 	Environment         string `json:"environment"`
 	Namespace           string `json:"namespace"`
@@ -39,6 +41,7 @@ func ReportDeploymentVerdictHandler(ctx context.Context, arguments ReportDeploym
 	// Create the request body
 	request := CreateDeploymentVerdictRequest{
 		DeploymentEventUUID: arguments.DeploymentEventUUID,
+		InvestigationUUID:   arguments.InvestigationUUID,
 		ServiceName:         arguments.ServiceName,
 		Environment:         arguments.Environment,
 		Namespace:           arguments.Namespace,
