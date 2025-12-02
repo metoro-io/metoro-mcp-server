@@ -18,6 +18,8 @@ type UpdateInvestigationHandlerArgs struct {
 	Summary             string           `json:"summary" jsonschema:"description=Summary of the investigation - should be at most 3 sentences"`
 	RecommendedActions  *[]string        `json:"recommendedActions,omitempty" jsonschema:"description=Optional recommended actions to take to remedy the issue. Should be concise - each item should be a single sentence."`
 	ServiceName         *string          `json:"serviceName,omitempty" jsonschema:"description=Optional root cause service name to associate with this investigation."`
+	Environment         *string          `json:"environment,omitempty" jsonschema:"description=Optional environment to associate with this investigation (e.g. production or staging)."`
+	Namespace           *string          `json:"namespace,omitempty" jsonschema:"description=Optional Kubernetes namespace to associate with this investigation."`
 	Markdown            string           `json:"markdown" jsonschema:"required,description=Markdown content of the investigation"`
 	InProgress          *bool            `json:"inProgress" jsonschema:"description=Whether the investigation is in progress or not. Defaults to false"`
 	TimeConfig          utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get the pods for. e.g. if you want the get the pods for the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absolute time range by setting start_time and end_time"`
@@ -62,6 +64,9 @@ func UpdateInvestigationHandler(ctx context.Context, arguments UpdateInvestigati
 		IssueUUID:            arguments.IssueUUID,
 		RecommendedActions:   arguments.RecommendedActions,
 		DeploymentEventUUID:  arguments.DeploymentEventUUID,
+		Environment:          arguments.Environment,
+		Namespace:            arguments.Namespace,
+		ServiceName:          arguments.ServiceName,
 	}
 
 	requestBody, err := json.Marshal(request)
