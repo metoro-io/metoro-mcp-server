@@ -566,6 +566,9 @@ type CreateInvestigationRequest struct {
 	AlertFireUUID        *string `json:"alertFireUuid,omitempty"`
 	AlertUUID            *string `json:"alertUuid,omitempty"`
 	DeploymentEventUUID  *string `json:"deploymentEventUuid,omitempty"`
+	Environment          *string `json:"environment,omitempty"`
+	Namespace            *string `json:"namespace,omitempty"`
+	ServiceName          *string `json:"serviceName,omitempty"`
 }
 
 type UpdateInvestigationRequest struct {
@@ -583,6 +586,9 @@ type UpdateInvestigationRequest struct {
 	RecommendedActions      *[]string          `json:"recommendedActions,omitempty"`
 	InProgress              *bool              `json:"inProgress,omitempty"`
 	DeploymentEventUUID     *string            `json:"deploymentEventUuid,omitempty"`
+	Environment             *string            `json:"environment,omitempty"`
+	Namespace               *string            `json:"namespace,omitempty"`
+	ServiceName             *string            `json:"serviceName,omitempty"`
 }
 
 type CreateAIIssueRequest struct {
