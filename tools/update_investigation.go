@@ -25,7 +25,8 @@ type UpdateInvestigationHandlerArgs struct {
 	TimeConfig          utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get the pods for. e.g. if you want the get the pods for the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absolute time range by setting start_time and end_time"`
 	ChatHistoryUUID     *string          `json:"chatHistoryUuid,omitempty" jsonschema:"description=Optional chat history UUID to associate with this investigation"`
 	IssueUUID           *string          `json:"issueUuid,omitempty" jsonschema:"description=Optional related AI issue UUID for this investigation"`
-	DeploymentEventUUID *string          `json:"deploymentEventUuid,omitempty" jsonschema:"description=Optional deployment event UUID to associate with this investigation for notification threading"`
+	DeploymentEventUUID     *string          `json:"deploymentEventUuid,omitempty" jsonschema:"description=Optional deployment event UUID to associate with this investigation for notification threading"`
+	PotentialIssueEventUUID *string          `json:"potentialIssueEventUuid,omitempty" jsonschema:"description=Optional potential issue event UUID to associate with this investigation for notification threading"`
 }
 
 func UpdateInvestigationHandler(ctx context.Context, arguments UpdateInvestigationHandlerArgs) (*mcpgolang.ToolResponse, error) {
@@ -61,12 +62,13 @@ func UpdateInvestigationHandler(ctx context.Context, arguments UpdateInvestigati
 		IsVisible:            &falsePtr,
 		InProgress:           arguments.InProgress,
 		MetoroApprovalStatus: &reviewRequiredPtr,
-		IssueUUID:            arguments.IssueUUID,
-		RecommendedActions:   arguments.RecommendedActions,
-		DeploymentEventUUID:  arguments.DeploymentEventUUID,
-		Environment:          arguments.Environment,
-		Namespace:            arguments.Namespace,
-		ServiceName:          arguments.ServiceName,
+		IssueUUID:               arguments.IssueUUID,
+		RecommendedActions:      arguments.RecommendedActions,
+		DeploymentEventUUID:     arguments.DeploymentEventUUID,
+		PotentialIssueEventUUID: arguments.PotentialIssueEventUUID,
+		Environment:             arguments.Environment,
+		Namespace:               arguments.Namespace,
+		ServiceName:             arguments.ServiceName,
 	}
 
 	requestBody, err := json.Marshal(request)

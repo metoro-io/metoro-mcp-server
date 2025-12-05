@@ -26,7 +26,8 @@ type CreateInvestigationHandlerArgs struct {
 	IssueUUID           *string          `json:"issueUuid,omitempty" jsonschema:"description=Optional related AI issue UUID for this investigation"`
 	AlertFireUUID       *string          `json:"alertFireUuid,omitempty" jsonschema:"description=Optional alert fire UUID to associate with this investigation"`
 	AlertUUID           *string          `json:"alertUuid,omitempty" jsonschema:"description=Optional alert UUID to associate with this investigation"`
-	DeploymentEventUUID *string          `json:"deploymentEventUuid,omitempty" jsonschema:"description=Optional deployment event UUID to associate with this investigation for notification threading"`
+	DeploymentEventUUID     *string          `json:"deploymentEventUuid,omitempty" jsonschema:"description=Optional deployment event UUID to associate with this investigation for notification threading"`
+	PotentialIssueEventUUID *string          `json:"potentialIssueEventUuid,omitempty" jsonschema:"description=Optional potential issue event UUID to associate with this investigation for notification threading"`
 }
 
 func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigationHandlerArgs) (*mcpgolang.ToolResponse, error) {
@@ -57,12 +58,13 @@ func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigati
 		InProgress:           arguments.InProgress,
 		MetoroApprovalStatus: &reviewRequiredPtr,
 		IssueUUID:            arguments.IssueUUID,
-		AlertFireUUID:        arguments.AlertFireUUID,
-		AlertUUID:            arguments.AlertUUID,
-		DeploymentEventUUID:  arguments.DeploymentEventUUID,
-		Environment:          arguments.Environment,
-		Namespace:            arguments.Namespace,
-		ServiceName:          arguments.ServiceName,
+		AlertFireUUID:           arguments.AlertFireUUID,
+		AlertUUID:               arguments.AlertUUID,
+		DeploymentEventUUID:     arguments.DeploymentEventUUID,
+		PotentialIssueEventUUID: arguments.PotentialIssueEventUUID,
+		Environment:             arguments.Environment,
+		Namespace:               arguments.Namespace,
+		ServiceName:             arguments.ServiceName,
 	}
 
 	requestBody, err := json.Marshal(request)
