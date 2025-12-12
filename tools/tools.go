@@ -28,6 +28,11 @@ var MetoroToolsList = []MetoroTools{
 		Handler:     GetLogsHandler,
 	},
 	{
+		Name:        "get_log_context",
+		Description: "Get log lines before and after a specific log line from a container. This is useful to understand the full context around a log entry of interest - what happened before and after. Requires the exact timestamp, container ID, and service name of the log line you want context for.",
+		Handler:     GetLogContextHandler,
+	},
+	{
 		Name: "get_traces",
 		Description: `Get list of traces from your cluster. Results are limited to 20 traces so try to use filters to narrow down what you are looking for.
                       Prior to using this tool, YOU MUST first call get_attribute_keys and subsequently get_attribute_values to get the possible trace attribute keys and values which can be used as Filter/ExcludeFilter keys.
