@@ -5,6 +5,39 @@ import "time"
 // TODO: This file should be replaced if we can import the types from Metoro repo directly.
 // These are just duplicates at the moment. If updated in Metoro repository, it should also be updated here!
 
+// Filter represents a single filter with a key and multiple values.
+// This type is used in MCP tool schemas to avoid the additionalProperties issue with OpenAI.
+// Values for the same key are ORed together.
+type Filter struct {
+	Key    string   `json:"key" jsonschema:"required,description=The attribute key to filter on such as service.name or http.status_code"`
+	Values []string `json:"values" jsonschema:"required,description=The values to match for this key. Multiple values are ORed together."`
+}
+
+// FiltersToMap converts a slice of Filter to the map format expected by the Metoro API.
+func FiltersToMap(filters []Filter) map[string][]string {
+	if len(filters) == 0 {
+		return nil
+	}
+	result := make(map[string][]string)
+	for _, f := range filters {
+		result[f.Key] = f.Values
+	}
+	return result
+}
+
+// MapToFilters converts a map format to a slice of Filter.
+// This is used when converting from internal API types to MCP tool types.
+func MapToFilters(m map[string][]string) []Filter {
+	if len(m) == 0 {
+		return nil
+	}
+	result := make([]Filter, 0, len(m))
+	for k, v := range m {
+		result = append(result, Filter{Key: k, Values: v})
+	}
+	return result
+}
+
 type GetLogsRequest struct {
 	// Required: Start time of when to get the logs in seconds since epoch
 	StartTime int64 `json:"startTime"`
@@ -476,19 +509,19 @@ type SingleMetricRequest struct {
 
 // TODO: Add kubernetes resource request type attributes.
 type SingleTimeseriesRequest struct {
-	Type              MetricType          `json:"type" jsonschema:"required,enum=metric,enum=trace,enum=logs,enum=kubernetes_resource,description=Type of timeseries data to retrieve. YOU MUST SET THIS TO ONE OF THE AVAILABLE TYPES."`
-	MetricName        string              `json:"metricName" jsonschema:"description=THIS IS ONLY REQUIRED IF THE type is 'metric'.The name of the metric to use for getting the timeseries data for type 'metric'. If metric name ends with _total metoro already accounts for rate differences when returning the value so you don't need to calculate the rate yourself."`
-	Aggregation       Aggregation         `json:"aggregation" jsonschema:"required,enum=sum,enum=count,enum=min,enum=max,enum=avg,enum=p50,enum=p90,enum=p95,enum=p99,description=The aggregation to apply to the timeseries at the datapoint bucket size level. The aggregation will be applied to every datapoint bucket. For example if the bucket size is 1 minute and the aggregation is sum then the sum of all datapoints in a minute will be returned. Do not guess the aggregations. Use the available ones. For traces you can use count p50 p90 p95 p99. for logs its always count. For metrics you can use sum min max avg"`
-	JsonPath          *string             `json:"jsonPath" jsonschema:"description=THIS IS ONLY BE SET IF THE type is 'kubernetes_resource' and the aggregate is not count. The json path to use to get the value from the kubernetes resource to plot. for example if this was spec.replicas then the value we return would be aggregate(spec.replicas)"`
-	Filters           map[string][]string `json:"filters" jsonschema:"description=Filters to apply to the timeseries. Only the timeseries that match these filters will be returned. You MUST call get_attribute_keys and get_attribute_values tools to get the valid filter keys and values. e.g. {service_name: [/k8s/namespaceX/serviceX]} should return timeseries for serviceX in namespaceX. This is just and example. Do not guess the attribute keys and values."`
-	ExcludeFilters    map[string][]string `json:"excludeFilters" jsonschema:"description=Filters to exclude the timeseries data. Timeseries matching the exclude filters will not be returned. You MUST call get_attribute_keys and get_attribute_values tools to get the valid filter keys and values. e.g. {service_name: [/k8s/namespaceX/serviceX]} should exclude timeseries from serviceX in namespaceX. This is just and example. Do not guess the attribute keys and values"`
-	Splits            []string            `json:"splits" jsonschema:"description=Array of attribute keys to split/group by the timeseries data by. Splits will allow you to group timeseries data by an attribute. This is useful if you would like to see the breakdown of a particular timeseries by an attribute. Get the attributes that you can pass into as Splits from the get_attribute_keys tool. DO NOT GUESS THE ATTRIBUTES."`
-	Regexes           []string            `json:"regexes" jsonschema:"description=This should only be set if the type is 'logs'. Regexes are evaluated against the log message/body. Only the timeseries (logs) data that match these regexes will be returned. Regexes are ANDed together. For example if you want to get log count with message that contains the words 'fish' and 'chips' you would set the regexes as ['fish' 'chips']"`
-	ExcludeRegexes    []string            `json:"excludeRegexes" jsonschema:"description=This should only be set if the type is 'logs'. Exclude regexes are evaluated against the log message/body. Log timeseries data that match these regexes will not be returned. Exclude regexes are ORed together. For example if you want to get timeseries data with messages that do not contain the word 'fish' or 'chips' you would set the exclude regexes as ['fish' 'chips']"`
-	BucketSize        int64               `json:"bucketSize" jsonschema:"description=The size of each datapoint bucket in seconds if not provided metoro will select the best bucket size for the given duration for performance and clarity"`
-	Functions         []MetricFunction    `json:"functions" jsonschema:"description=Array of functions to apply to the timeseries data in the order as it appears in the array. Functions will be applied to the timeseries data after the aggregation. For example if the aggregation is sum and the function is perSecond then the perSecond of the sum will be returned. Do not guess the functions. Use the available ones. For traces you can use rate. For logs you can use count. For metrics you can use rate sum min max avg. For kubernetes resources you can use rate sum min max avg"`
-	ShouldNotReturn   bool                `json:"shouldNotReturn" jsonschema:"description=If true result won't be returned (useful for formulas). Only set this to true if you only want to see the combination of timeseries via defining formulas and if you dont want to see the individual timeseries data.'"`
-	FormulaIdentifier string              `json:"formulaIdentifier" jsonschema:"description=Identifier to reference this metric in formulas. These must be unique for timeseries that you are requesting the first timeseries must be 'a' the second 'b' and so on. If you are not using formulas you can leave this empty. If you are using formulas then you must set this to a unique identifier for each timeseries. For example if you have 3 timeseries and you want to use them in a formula then you would set the first timeseries to 'a' the second to 'b' and the third to 'c'. You can then use these identifiers in the formulas.'"`
+	Type              MetricType       `json:"type" jsonschema:"required,enum=metric,enum=trace,enum=logs,enum=kubernetes_resource,description=Type of timeseries data to retrieve. YOU MUST SET THIS TO ONE OF THE AVAILABLE TYPES."`
+	MetricName        string           `json:"metricName" jsonschema:"description=THIS IS ONLY REQUIRED IF THE type is 'metric'.The name of the metric to use for getting the timeseries data for type 'metric'. If metric name ends with _total metoro already accounts for rate differences when returning the value so you don't need to calculate the rate yourself."`
+	Aggregation       Aggregation      `json:"aggregation" jsonschema:"required,enum=sum,enum=count,enum=min,enum=max,enum=avg,enum=p50,enum=p90,enum=p95,enum=p99,description=The aggregation to apply to the timeseries at the datapoint bucket size level. The aggregation will be applied to every datapoint bucket. For example if the bucket size is 1 minute and the aggregation is sum then the sum of all datapoints in a minute will be returned. Do not guess the aggregations. Use the available ones. For traces you can use count p50 p90 p95 p99. for logs its always count. For metrics you can use sum min max avg"`
+	JsonPath          *string          `json:"jsonPath" jsonschema:"description=THIS IS ONLY BE SET IF THE type is 'kubernetes_resource' and the aggregate is not count. The json path to use to get the value from the kubernetes resource to plot. for example if this was spec.replicas then the value we return would be aggregate(spec.replicas)"`
+	Filters           []Filter         `json:"filters" jsonschema:"description=Filters to apply to the timeseries. Only the timeseries that match these filters will be returned. You MUST call get_attribute_keys and get_attribute_values tools to get the valid filter keys and values. Example: [{key: 'service.name', values: ['/k8s/namespaceX/serviceX']}]. Do not guess the attribute keys and values."`
+	ExcludeFilters    []Filter         `json:"excludeFilters" jsonschema:"description=Filters to exclude the timeseries data. Timeseries matching the exclude filters will not be returned. You MUST call get_attribute_keys and get_attribute_values tools to get the valid filter keys and values. Example: [{key: 'service.name', values: ['/k8s/namespaceX/serviceX']}]. Do not guess the attribute keys and values"`
+	Splits            []string         `json:"splits" jsonschema:"description=Array of attribute keys to split/group by the timeseries data by. Splits will allow you to group timeseries data by an attribute. This is useful if you would like to see the breakdown of a particular timeseries by an attribute. Get the attributes that you can pass into as Splits from the get_attribute_keys tool. DO NOT GUESS THE ATTRIBUTES."`
+	Regexes           []string         `json:"regexes" jsonschema:"description=This should only be set if the type is 'logs'. Regexes are evaluated against the log message/body. Only the timeseries (logs) data that match these regexes will be returned. Regexes are ANDed together. For example if you want to get log count with message that contains the words 'fish' and 'chips' you would set the regexes as ['fish' 'chips']"`
+	ExcludeRegexes    []string         `json:"excludeRegexes" jsonschema:"description=This should only be set if the type is 'logs'. Exclude regexes are evaluated against the log message/body. Log timeseries data that match these regexes will not be returned. Exclude regexes are ORed together. For example if you want to get timeseries data with messages that do not contain the word 'fish' or 'chips' you would set the exclude regexes as ['fish' 'chips']"`
+	BucketSize        int64            `json:"bucketSize" jsonschema:"description=The size of each datapoint bucket in seconds if not provided metoro will select the best bucket size for the given duration for performance and clarity"`
+	Functions         []MetricFunction `json:"functions" jsonschema:"description=Array of functions to apply to the timeseries data in the order as it appears in the array. Functions will be applied to the timeseries data after the aggregation. For example if the aggregation is sum and the function is perSecond then the perSecond of the sum will be returned. Do not guess the functions. Use the available ones. For traces you can use rate. For logs you can use count. For metrics you can use rate sum min max avg. For kubernetes resources you can use rate sum min max avg"`
+	ShouldNotReturn   bool             `json:"shouldNotReturn" jsonschema:"description=If true result won't be returned (useful for formulas). Only set this to true if you only want to see the combination of timeseries via defining formulas and if you dont want to see the individual timeseries data.'"`
+	FormulaIdentifier string           `json:"formulaIdentifier" jsonschema:"description=Identifier to reference this metric in formulas. These must be unique for timeseries that you are requesting the first timeseries must be 'a' the second 'b' and so on. If you are not using formulas you can leave this empty. If you are using formulas then you must set this to a unique identifier for each timeseries. For example if you have 3 timeseries and you want to use them in a formula then you would set the first timeseries to 'a' the second to 'b' and the third to 'c'. You can then use these identifiers in the formulas.'"`
 }
 
 type MetricSpecifier struct {
@@ -559,12 +592,12 @@ type CreateInvestigationRequest struct {
 	IssueEndTime       *time.Time        `json:"issueEndTime,omitempty"`
 	ChatHistoryUUID    *string           `json:"chatHistoryUuid,omitempty"`
 	// Optional, these ideally should only set by the AI.
-	IsVisible            *bool   `json:"isVisible,omitempty"`
-	MetoroApprovalStatus *string `json:"metoroApprovalStatus,omitempty"`
-	IssueUUID            *string `json:"issueUuid,omitempty"`
-	InProgress           *bool   `json:"inProgress,omitempty"`
-	AlertFireUUID        *string `json:"alertFireUuid,omitempty"`
-	AlertUUID            *string `json:"alertUuid,omitempty"`
+	IsVisible               *bool   `json:"isVisible,omitempty"`
+	MetoroApprovalStatus    *string `json:"metoroApprovalStatus,omitempty"`
+	IssueUUID               *string `json:"issueUuid,omitempty"`
+	InProgress              *bool   `json:"inProgress,omitempty"`
+	AlertFireUUID           *string `json:"alertFireUuid,omitempty"`
+	AlertUUID               *string `json:"alertUuid,omitempty"`
 	DeploymentEventUUID     *string `json:"deploymentEventUuid,omitempty"`
 	PotentialIssueEventUUID *string `json:"potentialIssueEventUuid,omitempty"`
 	Environment             *string `json:"environment,omitempty"`
