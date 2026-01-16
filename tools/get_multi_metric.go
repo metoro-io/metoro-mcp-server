@@ -61,6 +61,10 @@ func convertTimeseriesToAPITimeseries(timeseries []model.SingleTimeseriesRequest
 	result := make([]model.SingleMetricRequest, len(timeseries))
 
 	for i, ts := range timeseries {
+		// Convert Filter slice to map format for internal API
+		filters := model.FiltersToMap(ts.Filters)
+		excludeFilters := model.FiltersToMap(ts.ExcludeFilters)
+
 		apiRequest := model.SingleMetricRequest{
 			Type:              string(ts.Type),
 			ShouldNotReturn:   ts.ShouldNotReturn,
@@ -73,8 +77,8 @@ func convertTimeseriesToAPITimeseries(timeseries []model.SingleTimeseriesRequest
 				StartTime:      startTime,
 				EndTime:        endTime,
 				MetricName:     ts.MetricName,
-				Filters:        ts.Filters,
-				ExcludeFilters: ts.ExcludeFilters,
+				Filters:        filters,
+				ExcludeFilters: excludeFilters,
 				Splits:         ts.Splits,
 				Aggregation:    ts.Aggregation,
 				Functions:      ts.Functions,
@@ -87,8 +91,8 @@ func convertTimeseriesToAPITimeseries(timeseries []model.SingleTimeseriesRequest
 			apiRequest.Trace = &model.GetTraceMetricRequest{
 				StartTime:      startTime,
 				EndTime:        endTime,
-				Filters:        ts.Filters,
-				ExcludeFilters: ts.ExcludeFilters,
+				Filters:        filters,
+				ExcludeFilters: excludeFilters,
 				Splits:         ts.Splits,
 				Aggregate:      ts.Aggregation,
 				BucketSize:     ts.BucketSize,
@@ -106,8 +110,8 @@ func convertTimeseriesToAPITimeseries(timeseries []model.SingleTimeseriesRequest
 				GetLogsRequest: model.GetLogsRequest{
 					StartTime:      startTime,
 					EndTime:        endTime,
-					Filters:        ts.Filters,
-					ExcludeFilters: ts.ExcludeFilters,
+					Filters:        filters,
+					ExcludeFilters: excludeFilters,
 					Regexes:        ts.Regexes,
 					ExcludeRegexes: ts.ExcludeRegexes,
 					//Environments:   ts.Environments,
@@ -121,8 +125,8 @@ func convertTimeseriesToAPITimeseries(timeseries []model.SingleTimeseriesRequest
 			apiRequest.KubernetesResource = &model.GetKubernetesResourceRequest{
 				StartTime:      startTime,
 				EndTime:        endTime,
-				Filters:        ts.Filters,
-				ExcludeFilters: ts.ExcludeFilters,
+				Filters:        filters,
+				ExcludeFilters: excludeFilters,
 				Splits:         ts.Splits,
 				BucketSize:     ts.BucketSize,
 				Functions:      ts.Functions,
@@ -183,13 +187,17 @@ func CheckAttributes(ctx context.Context, requestType model.MetricType, filters 
 
 func checkTimeseries(ctx context.Context, timeseries []model.SingleTimeseriesRequest, startTime, endTime int64) error {
 	for _, ts := range timeseries {
+		// Convert Filter slice to map format for CheckAttributes
+		filters := model.FiltersToMap(ts.Filters)
+		excludeFilters := model.FiltersToMap(ts.ExcludeFilters)
+
 		switch ts.Type {
 		case model.Metric:
 			err := CheckMetric(ctx, ts.MetricName)
 			if err != nil {
 				return err
 			}
-			err = CheckAttributes(ctx, ts.Type, ts.Filters, ts.ExcludeFilters, ts.Splits, &model.GetMetricAttributesRequest{
+			err = CheckAttributes(ctx, ts.Type, filters, excludeFilters, ts.Splits, &model.GetMetricAttributesRequest{
 				StartTime:  startTime,
 				EndTime:    endTime,
 				MetricName: ts.MetricName,
@@ -198,12 +206,12 @@ func checkTimeseries(ctx context.Context, timeseries []model.SingleTimeseriesReq
 				return err
 			}
 		case model.Trace:
-			err := CheckAttributes(ctx, ts.Type, ts.Filters, ts.ExcludeFilters, ts.Splits, nil)
+			err := CheckAttributes(ctx, ts.Type, filters, excludeFilters, ts.Splits, nil)
 			if err != nil {
 				return err
 			}
 		case model.Logs:
-			err := CheckAttributes(ctx, ts.Type, ts.Filters, ts.ExcludeFilters, ts.Splits, nil)
+			err := CheckAttributes(ctx, ts.Type, filters, excludeFilters, ts.Splits, nil)
 			if err != nil {
 				return err
 			}

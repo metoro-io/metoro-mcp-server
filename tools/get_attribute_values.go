@@ -11,11 +11,11 @@ import (
 )
 
 type GetAttributeValuesHandlerArgs struct {
-	Type       model.MetricType    `json:"type" jsonschema:"required,description=The type of telemetry data to get the attribute keys and values for. Either 'logs' or 'trace' or 'metric' or 'kubernetes_resource'"`
-	TimeConfig utils.TimeConfig    `json:"time_config" jsonschema:"required,description=The time period to use while getting the possible values of log attributes. e.g. if you want to get values for the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absoulute time range by setting start_time and end_time"`
-	Attribute  string              `json:"attribute" jsonschema:"required,description=The attribute key to get the possible values for. Possible values for attribute should be obtained from get_attribute_keys tool call for the same type"`
-	MetricName string              `json:"metricName" jsonschema:"description=REQUIRED IF THE TYPE IS 'metric'. The name of the metric to get the possible attribute keys and values."`
-	Filters    map[string][]string `json:"filters" jsonschema:"description=The filters to apply before getting the possible values. For example if you want to get the possible values for an attribute key where the environment is X you would set the Filters as {environment: [X]}"`
+	Type       model.MetricType `json:"type" jsonschema:"required,description=The type of telemetry data to get the attribute keys and values for. Either 'logs' or 'trace' or 'metric' or 'kubernetes_resource'"`
+	TimeConfig utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to use while getting the possible values of log attributes. e.g. if you want to get values for the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absoulute time range by setting start_time and end_time"`
+	Attribute  string           `json:"attribute" jsonschema:"required,description=The attribute key to get the possible values for. Possible values for attribute should be obtained from get_attribute_keys tool call for the same type"`
+	MetricName string           `json:"metricName" jsonschema:"description=REQUIRED IF THE TYPE IS 'metric'. The name of the metric to get the possible attribute keys and values."`
+	Filters    []model.Filter   `json:"filters" jsonschema:"description=The filters to apply before getting the possible values. For example if you want to get the possible values for an attribute key where the environment is X you would set the Filters as [{key: 'environment' values: ['X']}]"`
 }
 
 func GetAttributeValuesHandler(ctx context.Context, arguments GetAttributeValuesHandlerArgs) (*mcpgolang.ToolResponse, error) {
@@ -24,6 +24,9 @@ func GetAttributeValuesHandler(ctx context.Context, arguments GetAttributeValues
 		return nil, fmt.Errorf("error calculating time range: %v", err)
 	}
 
+	// Convert Filter slice to map format for internal API
+	filters := model.FiltersToMap(arguments.Filters)
+
 	request := model.GetAttributeValuesRequest{
 		Type:      arguments.Type,
 		Attribute: arguments.Attribute,
@@ -31,31 +34,31 @@ func GetAttributeValuesHandler(ctx context.Context, arguments GetAttributeValues
 
 	switch arguments.Type {
 	case model.Logs:
-		err = CheckAttributes(ctx, arguments.Type, arguments.Filters, map[string][]string{}, []string{}, nil)
+		err = CheckAttributes(ctx, arguments.Type, filters, map[string][]string{}, []string{}, nil)
 		if err != nil {
 			return nil, err
 		}
 		modelRequest := model.LogSummaryRequest{
 			StartTime: startTime,
 			EndTime:   endTime,
-			Filters:   arguments.Filters,
+			Filters:   filters,
 		}
 		request.Logs = &modelRequest
 		break
 	case model.Trace:
-		err = CheckAttributes(ctx, arguments.Type, arguments.Filters, map[string][]string{}, []string{}, nil)
+		err = CheckAttributes(ctx, arguments.Type, filters, map[string][]string{}, []string{}, nil)
 		if err != nil {
 			return nil, err
 		}
 		modelRequest := model.TracesSummaryRequest{
 			StartTime: startTime,
 			EndTime:   endTime,
-			Filters:   arguments.Filters,
+			Filters:   filters,
 		}
 		request.Trace = &modelRequest
 		break
 	case model.Metric:
-		err = CheckAttributes(ctx, arguments.Type, arguments.Filters, map[string][]string{}, []string{}, &model.GetMetricAttributesRequest{
+		err = CheckAttributes(ctx, arguments.Type, filters, map[string][]string{}, []string{}, &model.GetMetricAttributesRequest{
 			StartTime:  startTime,
 			EndTime:    endTime,
 			MetricName: arguments.MetricName,
@@ -67,7 +70,7 @@ func GetAttributeValuesHandler(ctx context.Context, arguments GetAttributeValues
 			StartTime:    startTime,
 			EndTime:      endTime,
 			MetricName:   arguments.MetricName,
-			Environments: arguments.Filters["environment"],
+			Environments: filters["environment"],
 		}
 		request.Metric = &modelRequest
 		break
