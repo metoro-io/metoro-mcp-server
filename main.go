@@ -23,7 +23,7 @@ func main() {
 
 	// Add tools
 	for _, tool := range tools.MetoroToolsList {
-		err := mcpServer.RegisterTool(tool.Name, tool.Description, tool.Handler)
+		err := mcpServer.RegisterTool(tool.Name, tool.Description, tool.WrappedHandler())
 		if err != nil {
 			panic(err)
 		}

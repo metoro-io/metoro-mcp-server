@@ -1,9 +1,10 @@
 package tools
 
 type MetoroTools struct {
-	Name        string
-	Description string
-	Handler     any
+	Name          string
+	Description   string
+	Handler       any
+	ResponseGuard ToolResponseGuard
 }
 
 var MetoroToolsList = []MetoroTools{
@@ -23,14 +24,16 @@ var MetoroToolsList = []MetoroTools{
 		Handler:     GetNamespacesHandler,
 	},
 	{
-		Name:        "get_logs",
-		Description: `Get logs from all or specific services/hosts/pods. Results are limited to 20 logs lines.  Before using this you MUST first call get_attribute_keys and get_attribute_values to get the possible log attribute keys and values which can be used as Filter/ExcludeFilter keys.`,
-		Handler:     GetLogsHandler,
+		Name:          "get_logs",
+		Description:   `Get logs from all or specific services/hosts/pods. Results are limited to 20 logs lines.  Before using this you MUST first call get_attribute_keys and get_attribute_values to get the possible log attribute keys and values which can be used as Filter/ExcludeFilter keys.`,
+		Handler:       GetLogsHandler,
+		ResponseGuard: LogsToolResponseGuard,
 	},
 	{
-		Name:        "get_log_context",
-		Description: "Get log lines before and after a specific log line from a container. This is useful to understand the full context around a log entry of interest - what happened before and after. Requires the exact timestamp, container ID, and service name of the log line you want context for.",
-		Handler:     GetLogContextHandler,
+		Name:          "get_log_context",
+		Description:   "Get log lines before and after a specific log line from a container. This is useful to understand the full context around a log entry of interest - what happened before and after. Requires the exact timestamp, container ID, and service name of the log line you want context for.",
+		Handler:       GetLogContextHandler,
+		ResponseGuard: LogsToolResponseGuard,
 	},
 	{
 		Name: "get_traces",
