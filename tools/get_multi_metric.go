@@ -84,7 +84,8 @@ func convertTimeseriesToAPITimeseries(timeseries []model.SingleTimeseriesRequest
 				Functions:      ts.Functions,
 				//Functions:      ts.Metric.Functions,
 				//LimitResults:   ts.Metric.LimitResults,
-				BucketSize: ts.BucketSize,
+				LimitResults: true,
+				BucketSize:   ts.BucketSize,
 			}
 
 		case model.Trace:
@@ -97,6 +98,7 @@ func convertTimeseriesToAPITimeseries(timeseries []model.SingleTimeseriesRequest
 				Aggregate:      ts.Aggregation,
 				BucketSize:     ts.BucketSize,
 				Functions:      ts.Functions,
+				LimitResults:   true,
 				//ServiceNames:   ts.ServiceNames,
 				//Regexes:        ts.Regexes,
 				//ExcludeRegexes: ts.ExcludeRegexes,
