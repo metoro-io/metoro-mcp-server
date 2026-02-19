@@ -12,7 +12,7 @@ import (
 )
 
 type GetK8sGetHandlerArgs struct {
-	TimeConfig         utils.TimeConfig `json:"time_config" jsonschema:"required,description=Time settings for this query. End time is used as the point in time"`
+	TimeConfig         utils.TimeConfig `json:"time_config" jsonschema:"required,description=Time settings for this query. End time is used as the point in time to get the resource"`
 	Environment        string           `json:"environment" jsonschema:"description=Optional environment filter for this query"`
 	Namespace          string           `json:"namespace" jsonschema:"description=Optional namespace filter for this query"`
 	ResourceAPIVersion string           `json:"resource_api_version" jsonschema:"required,description=API version of the kubernetes resource such as v1 or apps v1"`
