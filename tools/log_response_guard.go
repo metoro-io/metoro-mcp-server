@@ -16,6 +16,12 @@ const (
 	truncatedValueSuffix         = "... [truncated]"
 )
 
+var strictLogAttributeKeys = map[string]struct{}{
+	"errorverbose": {},
+	"stacktrace":   {},
+	"error":        {},
+}
+
 var LogsToolResponseGuard = NewToolResponseGuard(trimLargeLogFieldsInToolResponse, ToolResponseGuardOptions{})
 
 func trimLargeLogFieldsInToolResponse(_ string, response *mcpgolang.ToolResponse) (*mcpgolang.ToolResponse, error) {
@@ -80,7 +86,7 @@ func trimLogAttributeValues(attributes map[string]string) bool {
 	changed := false
 	for key, value := range attributes {
 		limit := logAttributeValueLengthLimit
-		if isStackTraceAttribute(key) {
+		if isStrictlyTrimmedLogAttribute(key) {
 			limit = stackTraceValueLengthLimit
 		}
 
@@ -94,11 +100,10 @@ func trimLogAttributeValues(attributes map[string]string) bool {
 	return changed
 }
 
-func isStackTraceAttribute(attributeKey string) bool {
-	key := strings.ToLower(attributeKey)
-	return strings.Contains(key, "stacktrace") ||
-		strings.Contains(key, "stack_trace") ||
-		strings.Contains(key, "exception.stack")
+func isStrictlyTrimmedLogAttribute(attributeKey string) bool {
+	key := strings.ToLower(strings.TrimSpace(attributeKey))
+	_, ok := strictLogAttributeKeys[key]
+	return ok
 }
 
 func truncateWithSuffix(value string, limit int) (string, bool) {

@@ -16,7 +16,7 @@ import (
 const (
 	toolResponseMaxTokensEnvVar      = "METORO_TOOL_RESPONSE_MAX_TOKENS"
 	defaultToolResponseMaxTokens     = 12000
-	toolResponseTooLargeErrorMessage = "Tool response was too large to return, try more filtering/smaller time window"
+	toolResponseTooLargeErrorMessage = "Tool response was too large to return, try more filtering/smaller time window or a different tool"
 )
 
 type ToolResponseGuard func(toolName string, response *mcpgolang.ToolResponse) (*mcpgolang.ToolResponse, error)
