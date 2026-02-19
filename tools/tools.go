@@ -109,6 +109,21 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 		Handler:     GetK8sEventAttributeValuesForIndividualAttributeHandler,
 	},
 	{
+		Name:        "get_k8s_list",
+		Description: "List kubernetes resources for a resource kind and api version at a point in time or over a time range. Use this tool to find resource identity details and lifecycle timestamps.",
+		Handler:     GetK8sListHandler,
+	},
+	{
+		Name:        "get_k8s_get",
+		Description: "Get one kubernetes resource snapshot at a point in time. Use this tool when you need the resource payload in yaml or json.",
+		Handler:     GetK8sGetHandler,
+	},
+	{
+		Name:        "get_k8s_get_events",
+		Description: "Get events for one kubernetes resource over a time range. Use uid when names are reused across resource lifecycles.",
+		Handler:     GetK8sGetEventsHandler,
+	},
+	{
 		Name:        "get_metric_names",
 		Description: "Get available metric names to query. These metric names can be used as MetricName argument for get_metric get_metric_metadata and get_timeseries_data and get_attribute_keys tools.",
 		Handler:     GetMetricNamesHandler,
