@@ -62,7 +62,8 @@ var MetoroToolsList = []MetoroTools{
 	},
 	{
 		Name: "get_timeseries_data",
-		Description: `Get one or more timeseries data for a metric or traces or logs or kubernetes resources. This tool is useful for understanding how the underlying type of data (specific/metric/trace/kubernetes resources/logs) change over time. You can also apply formulas to combine timeseries to calculate rates or ratios or differences etc. How to use this tool:
+		Description: `Get one or more timeseries data for a metric or traces or logs or kubernetes resources. This tool is useful for understanding how the underlying type of data (specific/metric/trace/kubernetes resources/logs) change over time. You can also apply formulas to combine timeseries to calculate rates or ratios or differences etc. Use the optional title argument to briefly explain what is being queried.
+					  How to use this tool:
 					  First you need the type of timeseries data you are requesting for. This can be one of metric or traces or logs or kubernetes resources. If it is metrics then you HAVE TO call the get_metric_names tool to get the available metric names which can be used as MetricName argument for this tool.
 					  Then YOU HAVE TO call get_attribute_keys tool to retrieve the available attribute keys and get_attribute_values to retrieve values you are interested in to use in Filter/ExcludeFilter keys for this tool.
 					  You can also use Splits argument to group/split the metric data by the given metric attribute keys. Only use the attribute keys and values that are available for the MetricName that are returned from get_attribute_keys and get_attribute_values tools. If you are not getting proper results back then you might have forgotten to set the correct attribute keys and values. Try again with the correct attribute keys and values you get from get_attribute_values.
