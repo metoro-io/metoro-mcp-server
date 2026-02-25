@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"time"
 
 	mcpgolang "github.com/metoro-io/mcp-golang"
 	"github.com/metoro-io/metoro-mcp-server/model"
@@ -13,15 +12,19 @@ import (
 )
 
 type GetMetricNamesHandlerArgs struct {
-	Environments []string `json:"environments" jsonschema:"description=Environments to get metrics names from. If empty all environments will be used."`
+	TimeConfig   utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get metric names for. e.g. if you want to get metric names from the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absolute time range by setting start_time and end_time"`
+	Environments []string         `json:"environments" jsonschema:"description=Environments to get metrics names from. If empty all environments will be used."`
 }
 
 func GetMetricNamesHandler(ctx context.Context, arguments GetMetricNamesHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	now := time.Now()
-	hourAgo := now.Add(-1 * time.Hour)
+	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error calculating time range: %v", err)
+	}
+
 	request := model.FuzzyMetricsRequest{
-		StartTime:        hourAgo.Unix(),
-		EndTime:          now.Unix(),
+		StartTime:        startTime,
+		EndTime:          endTime,
 		MetricFuzzyMatch: "", // This will return all the metric names.
 		Environments:     arguments.Environments,
 	}

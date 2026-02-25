@@ -196,7 +196,7 @@ func checkTimeseries(ctx context.Context, timeseries []model.SingleTimeseriesReq
 
 		switch ts.Type {
 		case model.Metric:
-			err := CheckMetric(ctx, ts.MetricName)
+			err := CheckMetric(ctx, ts.MetricName, startTime, endTime)
 			if err != nil {
 				return err
 			}
