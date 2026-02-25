@@ -10,7 +10,6 @@ import (
 	"github.com/metoro-io/metoro-mcp-server/utils"
 	"slices"
 	"strings"
-	"time"
 )
 
 type GetAttributeKeysHandlerArgs struct {
@@ -31,7 +30,7 @@ func GetAttributeKeysHandler(ctx context.Context, arguments GetAttributeKeysHand
 		}
 
 		// Check whether the metric is valid. If not, return an error.
-		err = CheckMetric(ctx, arguments.MetricName)
+		err = CheckMetric(ctx, arguments.MetricName, startTime, endTime)
 		if err != nil {
 			return nil, err
 		}
@@ -62,12 +61,10 @@ func GetAttributeKeysHandler(ctx context.Context, arguments GetAttributeKeysHand
 	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(resp)))), nil
 }
 
-func CheckMetric(ctx context.Context, metricName string) error {
-	now := time.Now()
-	hourAgo := now.Add(-30 * time.Minute)
+func CheckMetric(ctx context.Context, metricName string, startTime, endTime int64) error {
 	request := model.FuzzyMetricsRequest{
-		StartTime:        hourAgo.Unix(),
-		EndTime:          now.Unix(),
+		StartTime:        startTime,
+		EndTime:          endTime,
 		MetricFuzzyMatch: "", // This will return all the metric names.
 	}
 	metricNamesResp, err := getMetricNamesMetoroCall(ctx, request)
