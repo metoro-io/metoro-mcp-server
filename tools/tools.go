@@ -166,7 +166,7 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 	},
 	{
 		Name:        "get_service_summaries",
-		Description: "Get summaries of services/workloads running in your Kubernetes cluster. The summary includes the number of requests errors (5xx and 4xx) P50 p95 p99 latencies. This tool is useful for understanding the performance of your services at a high level for a given relative or abosulute time range.",
+		Description: "Get summaries of services/workloads running in your Kubernetes cluster. The summary includes requestCount (incoming requests **served** by each service), errors (5xx and 4xx), and P50/P95/P99 latencies. This tool is useful for understanding the performance of your services at a high level for a given relative or absolute time range.",
 		Handler:     GetServiceSummariesHandler,
 	},
 	{
