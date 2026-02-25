@@ -18,6 +18,7 @@ import (
 func TestGetMetricNamesHandlerUsesAbsoluteTimeConfig(t *testing.T) {
 	start := "2026-02-19T10:00:00Z"
 	end := "2026-02-19T10:05:00Z"
+	fuzzyMatch := "cpu"
 	expectedStart := mustParseRFC3339Unix(t, start)
 	expectedEnd := mustParseRFC3339Unix(t, end)
 
@@ -55,7 +56,8 @@ func TestGetMetricNamesHandlerUsesAbsoluteTimeConfig(t *testing.T) {
 			StartTime: &start,
 			EndTime:   &end,
 		},
-		Environments: []string{"prod", "staging"},
+		FuzzyStringMatch: fuzzyMatch,
+		Environments:     []string{"prod", "staging"},
 	})
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
@@ -73,12 +75,66 @@ func TestGetMetricNamesHandlerUsesAbsoluteTimeConfig(t *testing.T) {
 	if captured.EndTime != expectedEnd {
 		t.Fatalf("expected endTime %d, got %d", expectedEnd, captured.EndTime)
 	}
-	if captured.MetricFuzzyMatch != "" {
-		t.Fatalf("expected empty metric fuzzy match")
+	if captured.MetricFuzzyMatch != fuzzyMatch {
+		t.Fatalf("expected metric fuzzy match %q, got %q", fuzzyMatch, captured.MetricFuzzyMatch)
 	}
 	expectedEnvironments := []string{"prod", "staging"}
 	if strings.Join(captured.Environments, ",") != strings.Join(expectedEnvironments, ",") {
 		t.Fatalf("expected environments %v, got %v", expectedEnvironments, captured.Environments)
+	}
+}
+
+func TestGetMetricNamesHandlerOmitsFuzzyMatchByDefault(t *testing.T) {
+	start := "2026-02-19T10:00:00Z"
+	end := "2026-02-19T10:05:00Z"
+
+	var mu sync.Mutex
+	var captured *model.FuzzyMetricsRequest
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Fatalf("expected POST method, got %s", r.Method)
+		}
+		if r.URL.Path != "/api/v1/fuzzyMetricsNames" {
+			t.Fatalf("expected path /api/v1/fuzzyMetricsNames, got %s", r.URL.Path)
+		}
+
+		var req model.FuzzyMetricsRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Fatalf("failed to decode request body: %v", err)
+		}
+
+		mu.Lock()
+		copied := req
+		captured = &copied
+		mu.Unlock()
+
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"metrics":["container.cpu.usage"]}`))
+	}))
+	defer server.Close()
+
+	setMetoroAPIEnv(t, server.URL)
+
+	_, err := GetMetricNamesHandler(context.Background(), GetMetricNamesHandlerArgs{
+		TimeConfig: utils.TimeConfig{
+			Type:      utils.AbsoluteTimeRange,
+			StartTime: &start,
+			EndTime:   &end,
+		},
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	if captured == nil {
+		t.Fatalf("expected fuzzyMetricsNames request to be captured")
+	}
+	if captured.MetricFuzzyMatch != "" {
+		t.Fatalf("expected empty metric fuzzy match, got %q", captured.MetricFuzzyMatch)
 	}
 }
 

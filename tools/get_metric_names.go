@@ -12,8 +12,9 @@ import (
 )
 
 type GetMetricNamesHandlerArgs struct {
-	TimeConfig   utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get metric names for. e.g. if you want to get metric names from the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absolute time range by setting start_time and end_time"`
-	Environments []string         `json:"environments" jsonschema:"description=Environments to get metrics names from. If empty all environments will be used."`
+	TimeConfig       utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get metric names for. e.g. if you want to get metric names from the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absolute time range by setting start_time and end_time"`
+	FuzzyStringMatch string           `json:"fuzzy_string_match,omitempty" jsonschema:"description=Optional fuzzy match string to search metric names"`
+	Environments     []string         `json:"environments" jsonschema:"description=Environments to get metrics names from. If empty all environments will be used."`
 }
 
 func GetMetricNamesHandler(ctx context.Context, arguments GetMetricNamesHandlerArgs) (*mcpgolang.ToolResponse, error) {
@@ -25,7 +26,7 @@ func GetMetricNamesHandler(ctx context.Context, arguments GetMetricNamesHandlerA
 	request := model.FuzzyMetricsRequest{
 		StartTime:        startTime,
 		EndTime:          endTime,
-		MetricFuzzyMatch: "", // This will return all the metric names.
+		MetricFuzzyMatch: arguments.FuzzyStringMatch,
 		Environments:     arguments.Environments,
 	}
 	response, err := getMetricNamesMetoroCall(ctx, request)
