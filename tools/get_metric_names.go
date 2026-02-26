@@ -13,7 +13,7 @@ import (
 
 type GetMetricNamesHandlerArgs struct {
 	TimeConfig       utils.TimeConfig `json:"time_config" jsonschema:"required,description=The time period to get metric names for. e.g. if you want to get metric names from the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absolute time range by setting start_time and end_time"`
-	FuzzyStringMatch string           `json:"fuzzy_string_match,omitempty" jsonschema:"description=Optional fuzzy match string to search metric names"`
+	FuzzyStringMatch string           `json:"fuzzy_string_match,omitempty" jsonschema:"description=Optional fuzzy match string to search metric names. By default leave empty. Only filter if the response is too large."`
 	Environments     []string         `json:"environments" jsonschema:"description=Environments to get metrics names from. If empty all environments will be used."`
 }
 
