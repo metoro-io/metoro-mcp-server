@@ -34,7 +34,12 @@ func GetProfilesHandler(ctx context.Context, arguments GetProfileHandlerArgs) (*
 		return nil, fmt.Errorf("error getting profiles: %v", err)
 	}
 
-	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(body)))), nil
+	trimmedBody, err := trimProfilesResponse(body)
+	if err != nil {
+		return nil, fmt.Errorf("error trimming profiles: %v", err)
+	}
+
+	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(trimmedBody)))), nil
 }
 
 func getProfilesMetoroCall(ctx context.Context, request model.GetProfileRequest) ([]byte, error) {
