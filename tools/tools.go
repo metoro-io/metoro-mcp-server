@@ -230,7 +230,7 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 	},
 	{
 		Name:        "create_ai_issue",
-		Description: "Create a new AI issue record with a title and markdown description. Use this to capture issues that investigations can reference via issue UUID.",
+		Description: "Create a new AI issue record with required title/description/summary and optional environments, services, priority, and category metadata.",
 		Handler:     CreateAIIssueHandler,
 	},
 	{

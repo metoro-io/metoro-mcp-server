@@ -627,9 +627,13 @@ type UpdateInvestigationRequest struct {
 }
 
 type CreateAIIssueRequest struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Summary     string `json:"summary"`
+	Title        string   `json:"title"`
+	Description  string   `json:"description"`
+	Summary      string   `json:"summary"`
+	Environments []string `json:"environments,omitempty"`
+	Services     []string `json:"services,omitempty"`
+	Priority     *string  `json:"priority,omitempty"`
+	Category     *string  `json:"category,omitempty"`
 }
 
 type UpdateAIIssueRequest struct {
@@ -645,6 +649,10 @@ type AIIssue struct {
 	Title            string    `json:"title"`
 	Description      string    `json:"description"`
 	Summary          string    `json:"summary"`
+	Environments     []string  `json:"environments,omitempty"`
+	Services         []string  `json:"services,omitempty"`
+	Priority         *string   `json:"priority,omitempty"`
+	Category         *string   `json:"category,omitempty"`
 	Open             bool      `json:"open"`
 	CreatedAt        time.Time `json:"createdAt"`
 	UpdatedAt        time.Time `json:"updatedAt"`
