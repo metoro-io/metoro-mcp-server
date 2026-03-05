@@ -15,8 +15,7 @@ import (
 type UpdateInvestigationHandlerArgs struct {
 	InvestigationUUID       string           `json:"investigationUuid" jsonschema:"required,description=UUID of the investigation to update"`
 	Title                   string           `json:"title" jsonschema:"required,description=Title of the investigation"`
-	Category                *string          `json:"category,omitempty" jsonschema:"enum=deployment_verification,enum=anomaly_investigation,enum=alert_investigation,description=Optional category of investigation"`
-	Verdict                 *string          `json:"verdict,omitempty" jsonschema:"description=Optional verdict for the investigation. Required when category is deployment_verification."`
+	Verdict                 *string          `json:"verdict,omitempty" jsonschema:"enum=pending,enum=healthy,enum=degraded,enum=failed,description=Optional verdict for the investigation."`
 	Summary                 string           `json:"summary" jsonschema:"description=Summary of the investigation - should be at most 3 sentences"`
 	RecommendedActions      *[]string        `json:"recommendedActions,omitempty" jsonschema:"description=Optional recommended actions to take to remedy the issue. Should be concise - each item should be a single sentence."`
 	ServiceName             *string          `json:"serviceName,omitempty" jsonschema:"description=Optional root cause service name to associate with this investigation."`
@@ -31,17 +30,64 @@ type UpdateInvestigationHandlerArgs struct {
 	PotentialIssueEventUUID *string          `json:"potentialIssueEventUuid,omitempty" jsonschema:"description=Optional potential issue event UUID to associate with this investigation for notification threading"`
 }
 
-func UpdateInvestigationHandler(ctx context.Context, arguments UpdateInvestigationHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	var trimmedVerdict *string
-	if arguments.Category != nil || arguments.Verdict != nil {
-		if arguments.Category == nil {
-			return nil, fmt.Errorf("category must be provided when verdict is provided")
-		}
+type getInvestigationResponse struct {
+	Category      string            `json:"category"`
+	Tags          map[string]string `json:"tags"`
+	Investigation *struct {
+		Category string            `json:"category"`
+		Tags     map[string]string `json:"tags"`
+	} `json:"investigation"`
+}
 
-		var err error
-		trimmedVerdict, err = validateInvestigationCategoryAndVerdict(*arguments.Category, arguments.Verdict)
-		if err != nil {
-			return nil, err
+func fetchInvestigationCategory(ctx context.Context, investigationUUID string) (string, error) {
+	endpoint := fmt.Sprintf("investigation?uuid=%s", investigationUUID)
+	responseBody, err := utils.MakeMetoroAPIRequest("GET", endpoint, nil, utils.GetAPIRequirementsFromRequest(ctx))
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch investigation for category validation: %w", err)
+	}
+
+	var response getInvestigationResponse
+	if err := json.Unmarshal(responseBody, &response); err != nil {
+		return "", fmt.Errorf("failed to decode investigation response: %w", err)
+	}
+
+	if response.Category != "" {
+		return response.Category, nil
+	}
+	if response.Investigation != nil && response.Investigation.Category != "" {
+		return response.Investigation.Category, nil
+	}
+	if response.Tags != nil {
+		if category := response.Tags["category"]; category != "" {
+			return category, nil
+		}
+	}
+	if response.Investigation != nil && response.Investigation.Tags != nil {
+		if category := response.Investigation.Tags["category"]; category != "" {
+			return category, nil
+		}
+	}
+
+	return "", nil
+}
+
+func UpdateInvestigationHandler(ctx context.Context, arguments UpdateInvestigationHandlerArgs) (*mcpgolang.ToolResponse, error) {
+	trimmedVerdict, err := normalizeAndValidateInvestigationVerdict(arguments.Verdict)
+	if err != nil {
+		return nil, err
+	}
+
+	currentCategory, err := fetchInvestigationCategory(ctx, arguments.InvestigationUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	if arguments.InProgress != nil && !*arguments.InProgress && currentCategory == investigationCategoryDeploymentVerification {
+		if trimmedVerdict == nil {
+			return nil, fmt.Errorf("verdict is required when closing a deployment_verification investigation")
+		}
+		if *trimmedVerdict == investigationVerdictPending {
+			return nil, fmt.Errorf("pending verdict is not allowed when closing a deployment_verification investigation; use healthy, degraded, or failed")
 		}
 	}
 
@@ -60,10 +106,6 @@ func UpdateInvestigationHandler(ctx context.Context, arguments UpdateInvestigati
 	shouldSetTags := false
 	if arguments.ServiceName != nil {
 		tags["service"] = *arguments.ServiceName
-		shouldSetTags = true
-	}
-	if arguments.Category != nil && *arguments.Category == investigationCategoryDeploymentVerification {
-		tags["verdict"] = *trimmedVerdict
 		shouldSetTags = true
 	}
 
@@ -89,10 +131,7 @@ func UpdateInvestigationHandler(ctx context.Context, arguments UpdateInvestigati
 		Namespace:               arguments.Namespace,
 		ServiceName:             arguments.ServiceName,
 	}
-	if arguments.Category != nil {
-		request.Category = arguments.Category
-	}
-	if arguments.Verdict != nil && trimmedVerdict != nil {
+	if trimmedVerdict != nil {
 		request.Verdict = trimmedVerdict
 	}
 	if shouldSetTags {

@@ -609,7 +609,6 @@ type CreateInvestigationRequest struct {
 
 type UpdateInvestigationRequest struct {
 	Title                   *string            `json:"title,omitempty"`
-	Category                *string            `json:"category,omitempty"`
 	Verdict                 *string            `json:"verdict,omitempty"`
 	Summary                 *string            `json:"summary,omitempty"`
 	Markdown                *string            `json:"markdown,omitempty"`
