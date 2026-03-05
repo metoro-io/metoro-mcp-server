@@ -585,7 +585,6 @@ type GetMetricNamesResponse struct {
 type CreateInvestigationRequest struct {
 	Title              string            `json:"title" binding:"required"`
 	Category           string            `json:"category"`
-	Verdict            *string           `json:"verdict,omitempty"`
 	Summary            string            `json:"summary" binding:"required"`
 	RecommendedActions *[]string         `json:"recommendedActions,omitempty"`
 	Markdown           string            `json:"markdown" binding:"required"`

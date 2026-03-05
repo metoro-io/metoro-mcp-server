@@ -100,7 +100,6 @@ func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigati
 	request := model.CreateInvestigationRequest{
 		Title:                   arguments.Title,
 		Category:                arguments.Category,
-		Verdict:                 trimmedVerdict,
 		Summary:                 arguments.Summary,
 		RecommendedActions:      arguments.RecommendedActions,
 		Markdown:                arguments.Markdown,

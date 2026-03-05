@@ -3,6 +3,7 @@ package tools
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -32,6 +33,7 @@ func TestCreateInvestigationHandlerRequiresCategory(t *testing.T) {
 func TestCreateInvestigationHandlerAllowsDeploymentWithoutVerdict(t *testing.T) {
 	var mu sync.Mutex
 	var captured *model.CreateInvestigationRequest
+	capturedHasVerdict := false
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -41,14 +43,23 @@ func TestCreateInvestigationHandlerAllowsDeploymentWithoutVerdict(t *testing.T) 
 			t.Fatalf("expected path /api/v1/investigation, got %s", r.URL.Path)
 		}
 
+		bodyBytes, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Fatalf("failed to read request body: %v", err)
+		}
 		var req model.CreateInvestigationRequest
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		if err := json.Unmarshal(bodyBytes, &req); err != nil {
 			t.Fatalf("failed to decode request body: %v", err)
+		}
+		var raw map[string]json.RawMessage
+		if err := json.Unmarshal(bodyBytes, &raw); err != nil {
+			t.Fatalf("failed to unmarshal request into raw map: %v", err)
 		}
 
 		mu.Lock()
 		capturedReq := req
 		captured = &capturedReq
+		_, capturedHasVerdict = raw["verdict"]
 		mu.Unlock()
 
 		w.Header().Set("Content-Type", "application/json")
@@ -78,8 +89,8 @@ func TestCreateInvestigationHandlerAllowsDeploymentWithoutVerdict(t *testing.T) 
 	if captured.Category != investigationCategoryDeploymentVerification {
 		t.Fatalf("expected category %q, got %q", investigationCategoryDeploymentVerification, captured.Category)
 	}
-	if captured.Verdict != nil {
-		t.Fatalf("expected verdict to be omitted, got %v", captured.Verdict)
+	if capturedHasVerdict {
+		t.Fatalf("expected verdict field to be omitted from create payload")
 	}
 	if _, ok := captured.Tags["verdict"]; ok {
 		t.Fatalf("expected tags.verdict to be omitted when verdict is not provided")
@@ -91,6 +102,7 @@ func TestCreateInvestigationHandlerAcceptsDeploymentWithVerdict(t *testing.T) {
 
 	var mu sync.Mutex
 	var captured *model.CreateInvestigationRequest
+	capturedHasVerdict := false
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -100,14 +112,23 @@ func TestCreateInvestigationHandlerAcceptsDeploymentWithVerdict(t *testing.T) {
 			t.Fatalf("expected path /api/v1/investigation, got %s", r.URL.Path)
 		}
 
+		bodyBytes, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Fatalf("failed to read request body: %v", err)
+		}
 		var req model.CreateInvestigationRequest
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		if err := json.Unmarshal(bodyBytes, &req); err != nil {
 			t.Fatalf("failed to decode request body: %v", err)
+		}
+		var raw map[string]json.RawMessage
+		if err := json.Unmarshal(bodyBytes, &raw); err != nil {
+			t.Fatalf("failed to unmarshal request into raw map: %v", err)
 		}
 
 		mu.Lock()
 		capturedReq := req
 		captured = &capturedReq
+		_, capturedHasVerdict = raw["verdict"]
 		mu.Unlock()
 
 		w.Header().Set("Content-Type", "application/json")
@@ -138,8 +159,8 @@ func TestCreateInvestigationHandlerAcceptsDeploymentWithVerdict(t *testing.T) {
 	if captured.Category != investigationCategoryDeploymentVerification {
 		t.Fatalf("expected category %q, got %q", investigationCategoryDeploymentVerification, captured.Category)
 	}
-	if captured.Verdict == nil || *captured.Verdict != "healthy" {
-		t.Fatalf("expected trimmed verdict %q, got %v", "healthy", captured.Verdict)
+	if capturedHasVerdict {
+		t.Fatalf("expected verdict field to be omitted from create payload")
 	}
 	if captured.Tags["verdict"] != "healthy" {
 		t.Fatalf("expected tags.verdict to be %q, got %q", "healthy", captured.Tags["verdict"])
