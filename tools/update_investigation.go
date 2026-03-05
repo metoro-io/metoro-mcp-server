@@ -15,6 +15,8 @@ import (
 type UpdateInvestigationHandlerArgs struct {
 	InvestigationUUID       string           `json:"investigationUuid" jsonschema:"required,description=UUID of the investigation to update"`
 	Title                   string           `json:"title" jsonschema:"required,description=Title of the investigation"`
+	Category                *string          `json:"category,omitempty" jsonschema:"enum=deployment_verification,enum=anomaly_investigation,enum=alert_investigation,description=Optional category of investigation"`
+	Verdict                 *string          `json:"verdict,omitempty" jsonschema:"description=Optional verdict for the investigation. Required when category is deployment_verification."`
 	Summary                 string           `json:"summary" jsonschema:"description=Summary of the investigation - should be at most 3 sentences"`
 	RecommendedActions      *[]string        `json:"recommendedActions,omitempty" jsonschema:"description=Optional recommended actions to take to remedy the issue. Should be concise - each item should be a single sentence."`
 	ServiceName             *string          `json:"serviceName,omitempty" jsonschema:"description=Optional root cause service name to associate with this investigation."`
@@ -30,6 +32,19 @@ type UpdateInvestigationHandlerArgs struct {
 }
 
 func UpdateInvestigationHandler(ctx context.Context, arguments UpdateInvestigationHandlerArgs) (*mcpgolang.ToolResponse, error) {
+	var trimmedVerdict *string
+	if arguments.Category != nil || arguments.Verdict != nil {
+		if arguments.Category == nil {
+			return nil, fmt.Errorf("category must be provided when verdict is provided")
+		}
+
+		var err error
+		trimmedVerdict, err = validateInvestigationCategoryAndVerdict(*arguments.Category, arguments.Verdict)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	// Create the request body
 	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
 	if err != nil {
@@ -42,20 +57,24 @@ func UpdateInvestigationHandler(ctx context.Context, arguments UpdateInvestigati
 	end := time.Unix(endTime, 0)
 
 	tags := make(map[string]string)
+	shouldSetTags := false
 	if arguments.ServiceName != nil {
 		tags["service"] = *arguments.ServiceName
+		shouldSetTags = true
+	}
+	if arguments.Category != nil && *arguments.Category == investigationCategoryDeploymentVerification {
+		tags["verdict"] = *trimmedVerdict
+		shouldSetTags = true
 	}
 
 	title := arguments.Title
 	summary := arguments.Summary
 	markdown := arguments.Markdown
-	tagsPtr := tags
 
 	request := model.UpdateInvestigationRequest{
 		Title:                   &title,
 		Summary:                 &summary,
 		Markdown:                &markdown,
-		Tags:                    &tagsPtr,
 		IssueStartTime:          &start,
 		IssueEndTime:            &end,
 		ChatHistoryUUID:         arguments.ChatHistoryUUID,
@@ -69,6 +88,15 @@ func UpdateInvestigationHandler(ctx context.Context, arguments UpdateInvestigati
 		Environment:             arguments.Environment,
 		Namespace:               arguments.Namespace,
 		ServiceName:             arguments.ServiceName,
+	}
+	if arguments.Category != nil {
+		request.Category = arguments.Category
+	}
+	if arguments.Verdict != nil && trimmedVerdict != nil {
+		request.Verdict = trimmedVerdict
+	}
+	if shouldSetTags {
+		request.Tags = &tags
 	}
 
 	requestBody, err := json.Marshal(request)

@@ -215,12 +215,12 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 	},
 	{
 		Name:        "create_investigation",
-		Description: "Create a new investigation to document and track an issue or incident. Investigations include a title, markdown content, optional tags, and optional issue time range.",
+		Description: "Create a new investigation to document and track an issue or incident. Category is required and must be one of deployment_verification, anomaly_investigation, or alert_investigation. If category is deployment_verification, verdict is required.",
 		Handler:     CreateInvestigationHandler,
 	},
 	{
 		Name:        "update_investigation",
-		Description: "Update an existing investigation by its UUID. Allows updating the title, markdown content, time range, and other properties of an investigation.",
+		Description: "Update an existing investigation by its UUID. Allows updating the title, markdown content, time range, and other properties of an investigation. If updating category/verdict, deployment_verification requires a verdict.",
 		Handler:     UpdateInvestigationHandler,
 	},
 	{
