@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	mcpgolang "github.com/metoro-io/mcp-golang"
@@ -12,8 +13,20 @@ import (
 	"github.com/metoro-io/metoro-mcp-server/utils"
 )
 
+const (
+	investigationCategoryDeploymentVerification = "deployment_verification"
+	investigationCategoryAnomalyInvestigation   = "anomaly_investigation"
+	investigationCategoryAlertInvestigation     = "alert_investigation"
+	investigationVerdictPending                 = "pending"
+	investigationVerdictHealthy                 = "healthy"
+	investigationVerdictDegraded                = "degraded"
+	investigationVerdictFailed                  = "failed"
+)
+
 type CreateInvestigationHandlerArgs struct {
 	Title                   string           `json:"title" jsonschema:"required,description=Title of the investigation"`
+	Category                string           `json:"category" jsonschema:"required,enum=deployment_verification,enum=anomaly_investigation,enum=alert_investigation,description=Category of investigation"`
+	Verdict                 *string          `json:"verdict,omitempty" jsonschema:"enum=pending,enum=healthy,enum=degraded,enum=failed,description=Optional verdict for the investigation."`
 	Summary                 string           `json:"summary" jsonschema:"description=Summary of the investigation - should be at most 3 sentences"`
 	RecommendedActions      *[]string        `json:"recommendedActions,omitempty" jsonschema:"description=Optional recommended actions to take to remedy the issue. Should be concise - each item should be a single sentence."`
 	ServiceName             *string          `json:"serviceName,omitempty" jsonschema:"description=Optional root cause service name to associate with this investigation."`
@@ -30,7 +43,43 @@ type CreateInvestigationHandlerArgs struct {
 	PotentialIssueEventUUID *string          `json:"potentialIssueEventUuid,omitempty" jsonschema:"description=Optional potential issue event UUID to associate with this investigation for notification threading"`
 }
 
+func validateInvestigationCategory(category string) error {
+	switch category {
+	case investigationCategoryDeploymentVerification, investigationCategoryAnomalyInvestigation, investigationCategoryAlertInvestigation:
+		return nil
+	}
+
+	return fmt.Errorf("invalid category: must be one of deployment_verification, anomaly_investigation, or alert_investigation")
+}
+
+func normalizeAndValidateInvestigationVerdict(verdict *string) (*string, error) {
+	if verdict == nil {
+		return nil, nil
+	}
+
+	trimmedVerdict := strings.TrimSpace(*verdict)
+	if trimmedVerdict == "" {
+		return nil, fmt.Errorf("invalid verdict: must be one of pending, healthy, degraded, or failed")
+	}
+
+	switch trimmedVerdict {
+	case investigationVerdictPending, investigationVerdictHealthy, investigationVerdictDegraded, investigationVerdictFailed:
+		return &trimmedVerdict, nil
+	}
+
+	return nil, fmt.Errorf("invalid verdict: must be one of pending, healthy, degraded, or failed")
+}
+
 func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigationHandlerArgs) (*mcpgolang.ToolResponse, error) {
+	if err := validateInvestigationCategory(arguments.Category); err != nil {
+		return nil, err
+	}
+
+	trimmedVerdict, err := normalizeAndValidateInvestigationVerdict(arguments.Verdict)
+	if err != nil {
+		return nil, err
+	}
+
 	// Create the request body
 	startTime, endTime, err := utils.CalculateTimeRange(arguments.TimeConfig)
 	if err != nil {
@@ -45,8 +94,12 @@ func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigati
 	if arguments.ServiceName != nil {
 		tags["service"] = *arguments.ServiceName
 	}
+	if arguments.Category == investigationCategoryDeploymentVerification && trimmedVerdict != nil {
+		tags["verdict"] = *trimmedVerdict
+	}
 	request := model.CreateInvestigationRequest{
 		Title:                   arguments.Title,
+		Category:                arguments.Category,
 		Summary:                 arguments.Summary,
 		RecommendedActions:      arguments.RecommendedActions,
 		Markdown:                arguments.Markdown,
