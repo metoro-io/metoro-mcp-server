@@ -1,7 +1,5 @@
 package tools
 
-import "strings"
-
 func buildInvestigationTags(serviceName, environment, namespace *string) map[string]string {
 	tags := make(map[string]string)
 	addInvestigationTag(tags, "service", serviceName)
@@ -15,10 +13,5 @@ func addInvestigationTag(tags map[string]string, key string, value *string) {
 		return
 	}
 
-	trimmedValue := strings.TrimSpace(*value)
-	if trimmedValue == "" {
-		return
-	}
-
-	tags[key] = trimmedValue
+	tags[key] = *value
 }

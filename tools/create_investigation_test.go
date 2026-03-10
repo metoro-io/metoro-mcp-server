@@ -168,8 +168,8 @@ func TestCreateInvestigationHandlerAcceptsDeploymentWithVerdict(t *testing.T) {
 }
 
 func TestCreateInvestigationHandlerAddsEnvironmentAndNamespaceTags(t *testing.T) {
-	environment := " production "
-	namespace := " payments "
+	environment := "production"
+	namespace := "payments"
 
 	var mu sync.Mutex
 	var captured *model.CreateInvestigationRequest
