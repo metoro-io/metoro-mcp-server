@@ -102,12 +102,7 @@ func UpdateInvestigationHandler(ctx context.Context, arguments UpdateInvestigati
 	start := time.Unix(startTime, 0)
 	end := time.Unix(endTime, 0)
 
-	tags := make(map[string]string)
-	shouldSetTags := false
-	if arguments.ServiceName != nil {
-		tags["service"] = *arguments.ServiceName
-		shouldSetTags = true
-	}
+	tags := buildInvestigationTags(arguments.ServiceName, arguments.Environment, arguments.Namespace)
 
 	title := arguments.Title
 	summary := arguments.Summary
@@ -134,7 +129,7 @@ func UpdateInvestigationHandler(ctx context.Context, arguments UpdateInvestigati
 	if trimmedVerdict != nil {
 		request.Verdict = trimmedVerdict
 	}
-	if shouldSetTags {
+	if len(tags) > 0 {
 		request.Tags = &tags
 	}
 

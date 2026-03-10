@@ -90,10 +90,7 @@ func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigati
 	reviewRequiredPtr := "ReviewRequired"
 	start := time.Unix(startTime, 0)
 	end := time.Unix(endTime, 0)
-	tags := make(map[string]string)
-	if arguments.ServiceName != nil {
-		tags["service"] = *arguments.ServiceName
-	}
+	tags := buildInvestigationTags(arguments.ServiceName, arguments.Environment, arguments.Namespace)
 	if arguments.Category == investigationCategoryDeploymentVerification && trimmedVerdict != nil {
 		tags["verdict"] = *trimmedVerdict
 	}
