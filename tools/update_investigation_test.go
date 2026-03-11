@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"sync"
 	"testing"
@@ -153,6 +154,182 @@ func TestUpdateInvestigationHandlerClosingDeploymentWithFinalVerdictSucceeds(t *
 				t.Fatalf("expected update payload verdict %q, got %v", verdictValue, captured)
 			}
 		})
+	}
+}
+
+func TestUpdateInvestigationHandlerForwardsDeploymentVerificationStructuredOutput(t *testing.T) {
+	var mu sync.Mutex
+	putCalled := false
+	var captured *model.UpdateInvestigationRequest
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/api/v1/investigation" {
+			t.Fatalf("expected path /api/v1/investigation, got %s", r.URL.Path)
+		}
+
+		switch r.Method {
+		case http.MethodGet:
+			if r.URL.Query().Get("uuid") != "inv-uuid" {
+				t.Fatalf("expected uuid query param inv-uuid, got %s", r.URL.Query().Get("uuid"))
+			}
+			_, _ = w.Write([]byte(`{"category":"deployment_verification"}`))
+		case http.MethodPut:
+			var req model.UpdateInvestigationRequest
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				t.Fatalf("failed to decode request body: %v", err)
+			}
+			mu.Lock()
+			putCalled = true
+			capturedReq := req
+			captured = &capturedReq
+			mu.Unlock()
+			_, _ = w.Write([]byte(`{"uuid":"inv-uuid"}`))
+		default:
+			t.Fatalf("unexpected method %s", r.Method)
+		}
+	}))
+	defer server.Close()
+
+	setMetoroAPIEnv(t, server.URL)
+
+	structuredOutput := investigationStructuredOutputFixture()
+
+	_, err := UpdateInvestigationHandler(context.Background(), validUpdateInvestigationArgs(func(args *UpdateInvestigationHandlerArgs) {
+		args.DeploymentVerificationStructuredOutput = structuredOutput
+	}))
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	if !putCalled {
+		t.Fatalf("expected PUT request to be sent")
+	}
+	if captured == nil {
+		t.Fatalf("expected update payload to be captured")
+	}
+	if !reflect.DeepEqual(captured.DeploymentVerificationStructuredOutput, structuredOutput) {
+		t.Fatalf("expected structured output to be forwarded unchanged, got %#v", captured.DeploymentVerificationStructuredOutput)
+	}
+}
+
+func TestUpdateInvestigationHandlerAddsEnvironmentAndNamespaceTags(t *testing.T) {
+	environment := "production"
+	namespace := "payments"
+
+	var mu sync.Mutex
+	putCalled := false
+	var captured *model.UpdateInvestigationRequest
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/api/v1/investigation" {
+			t.Fatalf("expected path /api/v1/investigation, got %s", r.URL.Path)
+		}
+
+		switch r.Method {
+		case http.MethodGet:
+			if r.URL.Query().Get("uuid") != "inv-uuid" {
+				t.Fatalf("expected uuid query param inv-uuid, got %s", r.URL.Query().Get("uuid"))
+			}
+			_, _ = w.Write([]byte(`{"category":"anomaly_investigation"}`))
+		case http.MethodPut:
+			var req model.UpdateInvestigationRequest
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				t.Fatalf("failed to decode request body: %v", err)
+			}
+			mu.Lock()
+			putCalled = true
+			capturedReq := req
+			captured = &capturedReq
+			mu.Unlock()
+			_, _ = w.Write([]byte(`{"uuid":"inv-uuid"}`))
+		default:
+			t.Fatalf("unexpected method %s", r.Method)
+		}
+	}))
+	defer server.Close()
+
+	setMetoroAPIEnv(t, server.URL)
+
+	_, err := UpdateInvestigationHandler(context.Background(), validUpdateInvestigationArgs(func(args *UpdateInvestigationHandlerArgs) {
+		args.Environment = &environment
+		args.Namespace = &namespace
+	}))
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	if !putCalled {
+		t.Fatalf("expected PUT request to be sent")
+	}
+	if captured == nil || captured.Tags == nil {
+		t.Fatalf("expected update payload tags to be sent, got %v", captured)
+	}
+	if (*captured.Tags)["environment"] != "production" {
+		t.Fatalf("expected tags.environment to be %q, got %q", "production", (*captured.Tags)["environment"])
+	}
+	if (*captured.Tags)["namespace"] != "payments" {
+		t.Fatalf("expected tags.namespace to be %q, got %q", "payments", (*captured.Tags)["namespace"])
+	}
+}
+
+func TestUpdateInvestigationHandlerPreservesExplicitEmptyTagValues(t *testing.T) {
+	environment := ""
+	namespace := ""
+
+	var mu sync.Mutex
+	var captured *model.UpdateInvestigationRequest
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/api/v1/investigation" {
+			t.Fatalf("expected path /api/v1/investigation, got %s", r.URL.Path)
+		}
+
+		switch r.Method {
+		case http.MethodGet:
+			_, _ = w.Write([]byte(`{"category":"anomaly_investigation"}`))
+		case http.MethodPut:
+			var req model.UpdateInvestigationRequest
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				t.Fatalf("failed to decode request body: %v", err)
+			}
+			mu.Lock()
+			capturedReq := req
+			captured = &capturedReq
+			mu.Unlock()
+			_, _ = w.Write([]byte(`{"uuid":"inv-uuid"}`))
+		default:
+			t.Fatalf("unexpected method %s", r.Method)
+		}
+	}))
+	defer server.Close()
+
+	setMetoroAPIEnv(t, server.URL)
+
+	_, err := UpdateInvestigationHandler(context.Background(), validUpdateInvestigationArgs(func(args *UpdateInvestigationHandlerArgs) {
+		args.Environment = &environment
+		args.Namespace = &namespace
+	}))
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	if captured == nil || captured.Tags == nil {
+		t.Fatalf("expected update payload tags to be sent, got %v", captured)
+	}
+	if value, ok := (*captured.Tags)["environment"]; !ok || value != "" {
+		t.Fatalf("expected tags.environment to be present and empty, got %#v", captured.Tags)
+	}
+	if value, ok := (*captured.Tags)["namespace"]; !ok || value != "" {
+		t.Fatalf("expected tags.namespace to be present and empty, got %#v", captured.Tags)
 	}
 }
 

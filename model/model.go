@@ -582,16 +582,43 @@ type GetMetricNamesResponse struct {
 }
 
 // Investigation related types
+type DeploymentVerificationCheckEvidence struct {
+	ToolCallID string `json:"toolCallId,omitempty" jsonschema:"description=Tool call ID supporting this check result"`
+	Reasoning  string `json:"reasoning,omitempty" jsonschema:"description=Reasoning from the tool output supporting this check result"`
+}
+
+type DeploymentVerificationCheckValue struct {
+	Value *float64 `json:"value,omitempty" jsonschema:"description=Numeric value observed for the check"`
+	Unit  string   `json:"unit,omitempty" jsonschema:"description=Unit for the numeric value"`
+}
+
+type DeploymentVerificationCheck struct {
+	ID            string                                `json:"id,omitempty" jsonschema:"description=Stable identifier for the deployment verification check"`
+	Baseline      *DeploymentVerificationCheckValue     `json:"baseline,omitempty" jsonschema:"description=Baseline value for comparison"`
+	Evaluation    *DeploymentVerificationCheckValue     `json:"evaluation,omitempty" jsonschema:"description=Observed evaluation value"`
+	Verdict       string                                `json:"verdict,omitempty" jsonschema:"description=Verdict for this individual check"`
+	VerdictReason string                                `json:"verdictReason,omitempty" jsonschema:"description=Why this check received its verdict"`
+	Evidence      []DeploymentVerificationCheckEvidence `json:"evidence,omitempty" jsonschema:"description=Evidence entries supporting this check"`
+	Summary       string                                `json:"summary,omitempty" jsonschema:"description=Brief human-readable summary for this check"`
+}
+
+type DeploymentVerificationStructuredOutput struct {
+	ChangeType    string                        `json:"changeType,omitempty" jsonschema:"description=Type of change being evaluated"`
+	ChangeSummary string                        `json:"changeSummary,omitempty" jsonschema:"description=Brief summary of the deployment change"`
+	Checks        []DeploymentVerificationCheck `json:"checks,omitempty" jsonschema:"description=Structured checks used to evaluate deployment health"`
+}
+
 type CreateInvestigationRequest struct {
-	Title              string            `json:"title" binding:"required"`
-	Category           string            `json:"category"`
-	Summary            string            `json:"summary" binding:"required"`
-	RecommendedActions *[]string         `json:"recommendedActions,omitempty"`
-	Markdown           string            `json:"markdown" binding:"required"`
-	Tags               map[string]string `json:"tags,omitempty"`
-	IssueStartTime     *time.Time        `json:"issueStartTime,omitempty"`
-	IssueEndTime       *time.Time        `json:"issueEndTime,omitempty"`
-	ChatHistoryUUID    *string           `json:"chatHistoryUuid,omitempty"`
+	Title                                  string                                  `json:"title" binding:"required"`
+	Category                               string                                  `json:"category"`
+	Summary                                string                                  `json:"summary" binding:"required"`
+	RecommendedActions                     *[]string                               `json:"recommendedActions,omitempty"`
+	Markdown                               string                                  `json:"markdown" binding:"required"`
+	DeploymentVerificationStructuredOutput *DeploymentVerificationStructuredOutput `json:"deploymentVerificationStructuredOutput,omitempty"`
+	Tags                                   map[string]string                       `json:"tags,omitempty"`
+	IssueStartTime                         *time.Time                              `json:"issueStartTime,omitempty"`
+	IssueEndTime                           *time.Time                              `json:"issueEndTime,omitempty"`
+	ChatHistoryUUID                        *string                                 `json:"chatHistoryUuid,omitempty"`
 	// Optional, these ideally should only set by the AI.
 	IsVisible               *bool   `json:"isVisible,omitempty"`
 	MetoroApprovalStatus    *string `json:"metoroApprovalStatus,omitempty"`
@@ -607,25 +634,26 @@ type CreateInvestigationRequest struct {
 }
 
 type UpdateInvestigationRequest struct {
-	Title                   *string            `json:"title,omitempty"`
-	Verdict                 *string            `json:"verdict,omitempty"`
-	Summary                 *string            `json:"summary,omitempty"`
-	Markdown                *string            `json:"markdown,omitempty"`
-	Tags                    *map[string]string `json:"tags,omitempty"`
-	IssueStartTime          *time.Time         `json:"issueStartTime,omitempty"`
-	IssueEndTime            *time.Time         `json:"issueEndTime,omitempty"`
-	IssueUUID               *string            `json:"issueUuid,omitempty"`
-	ParentInvestigationUUID *string            `json:"parentInvestigationUuid,omitempty"`
-	IsVisible               *bool              `json:"isVisible,omitempty"`
-	MetoroApprovalStatus    *string            `json:"metoroApprovalStatus,omitempty"`
-	ChatHistoryUUID         *string            `json:"chatHistoryUuid,omitempty"`
-	RecommendedActions      *[]string          `json:"recommendedActions,omitempty"`
-	InProgress              *bool              `json:"inProgress,omitempty"`
-	DeploymentEventUUID     *string            `json:"deploymentEventUuid,omitempty"`
-	PotentialIssueEventUUID *string            `json:"potentialIssueEventUuid,omitempty"`
-	Environment             *string            `json:"environment,omitempty"`
-	Namespace               *string            `json:"namespace,omitempty"`
-	ServiceName             *string            `json:"serviceName,omitempty"`
+	Title                                  *string                                 `json:"title,omitempty"`
+	Verdict                                *string                                 `json:"verdict,omitempty"`
+	Summary                                *string                                 `json:"summary,omitempty"`
+	Markdown                               *string                                 `json:"markdown,omitempty"`
+	DeploymentVerificationStructuredOutput *DeploymentVerificationStructuredOutput `json:"deploymentVerificationStructuredOutput,omitempty"`
+	Tags                                   *map[string]string                      `json:"tags,omitempty"`
+	IssueStartTime                         *time.Time                              `json:"issueStartTime,omitempty"`
+	IssueEndTime                           *time.Time                              `json:"issueEndTime,omitempty"`
+	IssueUUID                              *string                                 `json:"issueUuid,omitempty"`
+	ParentInvestigationUUID                *string                                 `json:"parentInvestigationUuid,omitempty"`
+	IsVisible                              *bool                                   `json:"isVisible,omitempty"`
+	MetoroApprovalStatus                   *string                                 `json:"metoroApprovalStatus,omitempty"`
+	ChatHistoryUUID                        *string                                 `json:"chatHistoryUuid,omitempty"`
+	RecommendedActions                     *[]string                               `json:"recommendedActions,omitempty"`
+	InProgress                             *bool                                   `json:"inProgress,omitempty"`
+	DeploymentEventUUID                    *string                                 `json:"deploymentEventUuid,omitempty"`
+	PotentialIssueEventUUID                *string                                 `json:"potentialIssueEventUuid,omitempty"`
+	Environment                            *string                                 `json:"environment,omitempty"`
+	Namespace                              *string                                 `json:"namespace,omitempty"`
+	ServiceName                            *string                                 `json:"serviceName,omitempty"`
 }
 
 type CreateAIIssueRequest struct {

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"sync"
 	"testing"
@@ -167,6 +168,123 @@ func TestCreateInvestigationHandlerAcceptsDeploymentWithVerdict(t *testing.T) {
 	}
 }
 
+func TestCreateInvestigationHandlerForwardsDeploymentVerificationStructuredOutput(t *testing.T) {
+	var mu sync.Mutex
+	var captured *model.CreateInvestigationRequest
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Fatalf("expected POST method, got %s", r.Method)
+		}
+		if r.URL.Path != "/api/v1/investigation" {
+			t.Fatalf("expected path /api/v1/investigation, got %s", r.URL.Path)
+		}
+
+		var req model.CreateInvestigationRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Fatalf("failed to decode request body: %v", err)
+		}
+
+		mu.Lock()
+		capturedReq := req
+		captured = &capturedReq
+		mu.Unlock()
+
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"uuid":"new-investigation"}`))
+	}))
+	defer server.Close()
+
+	setMetoroAPIEnv(t, server.URL)
+
+	structuredOutput := investigationStructuredOutputFixture()
+
+	_, err := CreateInvestigationHandler(context.Background(), CreateInvestigationHandlerArgs{
+		Title:                                  "title",
+		Category:                               investigationCategoryDeploymentVerification,
+		Summary:                                "summary",
+		Markdown:                               "markdown",
+		DeploymentVerificationStructuredOutput: structuredOutput,
+		TimeConfig:                             investigationAbsoluteTimeConfig(),
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	if captured == nil {
+		t.Fatalf("expected request to be captured")
+	}
+	if !reflect.DeepEqual(captured.DeploymentVerificationStructuredOutput, structuredOutput) {
+		t.Fatalf("expected structured output to be forwarded unchanged, got %#v", captured.DeploymentVerificationStructuredOutput)
+	}
+}
+
+func TestCreateInvestigationHandlerAddsEnvironmentAndNamespaceTags(t *testing.T) {
+	environment := "production"
+	namespace := "payments"
+
+	var mu sync.Mutex
+	var captured *model.CreateInvestigationRequest
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Fatalf("expected POST method, got %s", r.Method)
+		}
+		if r.URL.Path != "/api/v1/investigation" {
+			t.Fatalf("expected path /api/v1/investigation, got %s", r.URL.Path)
+		}
+
+		bodyBytes, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Fatalf("failed to read request body: %v", err)
+		}
+		var req model.CreateInvestigationRequest
+		if err := json.Unmarshal(bodyBytes, &req); err != nil {
+			t.Fatalf("failed to decode request body: %v", err)
+		}
+
+		mu.Lock()
+		capturedReq := req
+		captured = &capturedReq
+		mu.Unlock()
+
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"uuid":"new-investigation"}`))
+	}))
+	defer server.Close()
+
+	setMetoroAPIEnv(t, server.URL)
+
+	_, err := CreateInvestigationHandler(context.Background(), CreateInvestigationHandlerArgs{
+		Title:       "title",
+		Category:    investigationCategoryAnomalyInvestigation,
+		Summary:     "summary",
+		Markdown:    "markdown",
+		Environment: &environment,
+		Namespace:   &namespace,
+		TimeConfig:  investigationAbsoluteTimeConfig(),
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	if captured == nil {
+		t.Fatalf("expected request to be captured")
+	}
+	if captured.Tags["environment"] != "production" {
+		t.Fatalf("expected tags.environment to be %q, got %q", "production", captured.Tags["environment"])
+	}
+	if captured.Tags["namespace"] != "payments" {
+		t.Fatalf("expected tags.namespace to be %q, got %q", "payments", captured.Tags["namespace"])
+	}
+}
+
 func investigationAbsoluteTimeConfig() utils.TimeConfig {
 	start := "2026-02-19T10:00:00Z"
 	end := "2026-02-19T10:05:00Z"
@@ -174,5 +292,35 @@ func investigationAbsoluteTimeConfig() utils.TimeConfig {
 		Type:      utils.AbsoluteTimeRange,
 		StartTime: &start,
 		EndTime:   &end,
+	}
+}
+
+func investigationStructuredOutputFixture() *model.DeploymentVerificationStructuredOutput {
+	baselineValue := 0.2
+	evaluationValue := 1.7
+
+	return &model.DeploymentVerificationStructuredOutput{
+		ChangeType:    "deployment",
+		ChangeSummary: "Rolled out checkout version v2",
+		Checks: []model.DeploymentVerificationCheck{
+			{
+				ID:            "http_5xx_rate",
+				Baseline:      &model.DeploymentVerificationCheckValue{Value: &baselineValue, Unit: "percent"},
+				Evaluation:    &model.DeploymentVerificationCheckValue{Value: &evaluationValue, Unit: "percent"},
+				Verdict:       "degraded",
+				VerdictReason: "5xx rate increased after the rollout",
+				Evidence: []model.DeploymentVerificationCheckEvidence{
+					{
+						ToolCallID: "tool-call-1",
+						Reasoning:  "Error rate increased in production after the deployment",
+					},
+					{
+						ToolCallID: "tool-call-2",
+						Reasoning:  "Regression is limited to the new version",
+					},
+				},
+				Summary: "Error rate regressed after deployment",
+			},
+		},
 	}
 }
