@@ -215,12 +215,12 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 	},
 	{
 		Name:        "create_investigation",
-		Description: "Create a new investigation to document and track an issue or incident. Category is required and must be one of deployment_verification, anomaly_investigation, or alert_investigation. Verdict is optional on create (pending, healthy, degraded, or failed). Put structured deployment verification data in deploymentVerificationStructuredOutput directly rather than encoding structured output inside markdown.",
+		Description: "Create a new investigation to document and track an issue or incident. Category is required and must be one of deployment_verification, anomaly_investigation, or alert_investigation. Verdict is optional on create (pending, healthy, degraded, or failed). Put structured deployment verification data in deploymentVerificationStructuredOutput and structured anomaly page data in anomalyInvestigationStructuredOutput directly rather than encoding structured output inside markdown.",
 		Handler:     CreateInvestigationHandler,
 	},
 	{
 		Name:        "update_investigation",
-		Description: "Update an existing investigation by its UUID. Allows updating the title, markdown content, time range, verdict, and other properties. Put structured deployment verification data in deploymentVerificationStructuredOutput directly rather than encoding structured output inside markdown. When closing a deployment_verification investigation (inProgress=false), a final verdict is required and must be healthy, degraded, or failed.",
+		Description: "Update an existing investigation by its UUID. Allows updating the title, markdown content, time range, verdict, and other properties. Put structured deployment verification data in deploymentVerificationStructuredOutput and structured anomaly page data in anomalyInvestigationStructuredOutput directly rather than encoding structured output inside markdown. When closing a deployment_verification investigation (inProgress=false), a final verdict is required and must be healthy, degraded, or failed.",
 		Handler:     UpdateInvestigationHandler,
 	},
 	{
