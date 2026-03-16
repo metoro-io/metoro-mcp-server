@@ -300,7 +300,7 @@ func investigationStructuredOutputFixture() *model.DeploymentVerificationStructu
 	evaluationValue := 1.7
 
 	return &model.DeploymentVerificationStructuredOutput{
-		ChangeType:    "deployment",
+		ChangeType:    model.DeploymentVerificationChangeTypeCode,
 		ChangeSummary: "Rolled out checkout version v2",
 		Checks: []model.DeploymentVerificationCheck{
 			{

@@ -602,10 +602,18 @@ type DeploymentVerificationCheck struct {
 	Summary       string                                `json:"summary,omitempty" jsonschema:"description=Brief human-readable summary for this check"`
 }
 
+type DeploymentVerificationChangeType string
+
+const (
+	DeploymentVerificationChangeTypeCode   DeploymentVerificationChangeType = "code"
+	DeploymentVerificationChangeTypeConfig DeploymentVerificationChangeType = "config"
+	DeploymentVerificationChangeTypeBoth   DeploymentVerificationChangeType = "both"
+)
+
 type DeploymentVerificationStructuredOutput struct {
-	ChangeType    string                        `json:"changeType,omitempty" jsonschema:"description=Type of change being evaluated"`
-	ChangeSummary string                        `json:"changeSummary,omitempty" jsonschema:"description=Brief summary of the deployment change"`
-	Checks        []DeploymentVerificationCheck `json:"checks,omitempty" jsonschema:"description=Structured checks used to evaluate deployment health"`
+	ChangeType    DeploymentVerificationChangeType `json:"changeType,omitempty" jsonschema:"enum=code,enum=config,enum=both,description=Type of change being evaluated"`
+	ChangeSummary string                           `json:"changeSummary,omitempty" jsonschema:"description=Brief summary of the deployment change"`
+	Checks        []DeploymentVerificationCheck    `json:"checks,omitempty" jsonschema:"description=Structured checks used to evaluate deployment health"`
 }
 
 type CreateInvestigationRequest struct {
