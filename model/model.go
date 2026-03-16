@@ -618,6 +618,41 @@ type DeploymentVerificationStructuredOutput struct {
 	Checks        []DeploymentVerificationCheck    `json:"checks,omitempty" jsonschema:"description=Structured checks used to evaluate deployment health"`
 }
 
+type AnomalyInvestigationEvidence struct {
+	ToolCallID string `json:"toolCallId,omitempty" jsonschema:"description=Tool call ID supporting this anomaly investigation evidence"`
+	Reasoning  string `json:"reasoning,omitempty" jsonschema:"description=Reasoning from the tool output supporting this anomaly investigation evidence"`
+}
+
+type AnomalyInvestigationSignalDetail struct {
+	ID            string   `json:"id,omitempty" jsonschema:"description=Stable identifier for the observed anomaly signal"`
+	Summary       string   `json:"summary,omitempty" jsonschema:"description=Brief summary of the signal and why it matters"`
+	CurrentValue  *float64 `json:"currentValue,omitempty" jsonschema:"description=Current observed value for the signal"`
+	BaselineValue *float64 `json:"baselineValue,omitempty" jsonschema:"description=Baseline or expected value for comparison"`
+	Unit          string   `json:"unit,omitempty" jsonschema:"description=Unit for the observed numeric values"`
+	Count         *int64   `json:"count,omitempty" jsonschema:"description=Optional count associated with the anomaly signal"`
+}
+
+type AnomalyInvestigationRootCauseLink struct {
+	Title       string                         `json:"title,omitempty" jsonschema:"description=Short title for a root cause link in the causal chain"`
+	Summary     string                         `json:"summary,omitempty" jsonschema:"description=Brief explanation of how this root cause link contributes to the anomaly"`
+	ServiceName string                         `json:"serviceName,omitempty" jsonschema:"description=Service associated with this root cause link"`
+	Evidence    []AnomalyInvestigationEvidence `json:"evidence,omitempty" jsonschema:"description=Evidence supporting this root cause link"`
+}
+
+type AnomalyInvestigationEvidenceSection struct {
+	Title    string                         `json:"title,omitempty" jsonschema:"description=Title for a supporting evidence section"`
+	Summary  string                         `json:"summary,omitempty" jsonschema:"description=Brief explanation of the supporting evidence"`
+	Evidence []AnomalyInvestigationEvidence `json:"evidence,omitempty" jsonschema:"description=Evidence entries included in this section"`
+}
+
+type AnomalyInvestigationStructuredOutput struct {
+	SignalSummary      string                                `json:"signalSummary,omitempty" jsonschema:"description=Summary of the primary anomaly signal that triggered the investigation"`
+	SignalDetails      []AnomalyInvestigationSignalDetail    `json:"signalDetails,omitempty" jsonschema:"description=Structured details about the observed anomaly signals"`
+	RootCauseChain     []AnomalyInvestigationRootCauseLink   `json:"rootCauseChain,omitempty" jsonschema:"description=Ordered chain describing the likely root causes of the anomaly"`
+	SupportingEvidence []AnomalyInvestigationEvidenceSection `json:"supportingEvidence,omitempty" jsonschema:"description=Additional evidence sections that support the investigation findings"`
+	ImpactSummary      string                                `json:"impactSummary,omitempty" jsonschema:"description=Brief summary of the customer or system impact caused by the anomaly"`
+}
+
 type CreateInvestigationRequest struct {
 	Title                                  string                                  `json:"title" binding:"required"`
 	Category                               string                                  `json:"category"`
@@ -625,6 +660,7 @@ type CreateInvestigationRequest struct {
 	RecommendedActions                     *[]string                               `json:"recommendedActions,omitempty"`
 	Markdown                               string                                  `json:"markdown" binding:"required"`
 	DeploymentVerificationStructuredOutput *DeploymentVerificationStructuredOutput `json:"deploymentVerificationStructuredOutput,omitempty"`
+	AnomalyInvestigationStructuredOutput   *AnomalyInvestigationStructuredOutput   `json:"anomalyInvestigationStructuredOutput,omitempty"`
 	Tags                                   map[string]string                       `json:"tags,omitempty"`
 	IssueStartTime                         *time.Time                              `json:"issueStartTime,omitempty"`
 	IssueEndTime                           *time.Time                              `json:"issueEndTime,omitempty"`
@@ -649,6 +685,7 @@ type UpdateInvestigationRequest struct {
 	Summary                                *string                                 `json:"summary,omitempty"`
 	Markdown                               *string                                 `json:"markdown,omitempty"`
 	DeploymentVerificationStructuredOutput *DeploymentVerificationStructuredOutput `json:"deploymentVerificationStructuredOutput,omitempty"`
+	AnomalyInvestigationStructuredOutput   *AnomalyInvestigationStructuredOutput   `json:"anomalyInvestigationStructuredOutput,omitempty"`
 	Tags                                   *map[string]string                      `json:"tags,omitempty"`
 	IssueStartTime                         *time.Time                              `json:"issueStartTime,omitempty"`
 	IssueEndTime                           *time.Time                              `json:"issueEndTime,omitempty"`

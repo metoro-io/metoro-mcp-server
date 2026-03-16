@@ -32,8 +32,9 @@ type CreateInvestigationHandlerArgs struct {
 	ServiceName                            *string                                       `json:"serviceName,omitempty" jsonschema:"description=Optional root cause service name to associate with this investigation."`
 	Environment                            *string                                       `json:"environment,omitempty" jsonschema:"description=Optional environment to associate with this investigation (e.g. production or staging)."`
 	Namespace                              *string                                       `json:"namespace,omitempty" jsonschema:"description=Optional Kubernetes namespace to associate with this investigation."`
-	Markdown                               string                                        `json:"markdown" jsonschema:"required,description=Markdown content for the human-readable investigation narrative. Put structured deployment verification results in deploymentVerificationStructuredOutput instead of encoding them in markdown."`
+	Markdown                               string                                        `json:"markdown" jsonschema:"required,description=Markdown content for the human-readable investigation narrative. Put structured deployment verification results in deploymentVerificationStructuredOutput and structured anomaly page data in anomalyInvestigationStructuredOutput instead of encoding them in markdown."`
 	DeploymentVerificationStructuredOutput *model.DeploymentVerificationStructuredOutput `json:"deploymentVerificationStructuredOutput,omitempty" jsonschema:"description=Optional structured deployment verification output. Populate this field directly for machine-readable deployment checks instead of encoding structured output inside markdown."`
+	AnomalyInvestigationStructuredOutput   *model.AnomalyInvestigationStructuredOutput   `json:"anomalyInvestigationStructuredOutput,omitempty" jsonschema:"description=Optional structured anomaly investigation output. Populate this field directly for machine-readable anomaly page data instead of encoding structured output inside markdown."`
 	InProgress                             *bool                                         `json:"inProgress" jsonschema:"description=Whether the investigation is in progress or not. Defaults to false"`
 	TimeConfig                             utils.TimeConfig                              `json:"time_config" jsonschema:"required,description=The time period to get the pods for. e.g. if you want the get the pods for the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absolute time range by setting start_time and end_time"`
 	ChatHistoryUUID                        *string                                       `json:"chatHistoryUuid,omitempty" jsonschema:"description=Optional chat history UUID to associate with this investigation"`
@@ -102,6 +103,7 @@ func CreateInvestigationHandler(ctx context.Context, arguments CreateInvestigati
 		RecommendedActions:                     arguments.RecommendedActions,
 		Markdown:                               arguments.Markdown,
 		DeploymentVerificationStructuredOutput: arguments.DeploymentVerificationStructuredOutput,
+		AnomalyInvestigationStructuredOutput:   arguments.AnomalyInvestigationStructuredOutput,
 		Tags:                                   tags,
 		IssueStartTime:                         &start,
 		IssueEndTime:                           &end,

@@ -222,6 +222,60 @@ func TestCreateInvestigationHandlerForwardsDeploymentVerificationStructuredOutpu
 	}
 }
 
+func TestCreateInvestigationHandlerForwardsAnomalyInvestigationStructuredOutput(t *testing.T) {
+	var mu sync.Mutex
+	var captured *model.CreateInvestigationRequest
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			t.Fatalf("expected POST method, got %s", r.Method)
+		}
+		if r.URL.Path != "/api/v1/investigation" {
+			t.Fatalf("expected path /api/v1/investigation, got %s", r.URL.Path)
+		}
+
+		var req model.CreateInvestigationRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			t.Fatalf("failed to decode request body: %v", err)
+		}
+
+		mu.Lock()
+		capturedReq := req
+		captured = &capturedReq
+		mu.Unlock()
+
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"uuid":"new-investigation"}`))
+	}))
+	defer server.Close()
+
+	setMetoroAPIEnv(t, server.URL)
+
+	structuredOutput := anomalyInvestigationStructuredOutputFixture()
+
+	_, err := CreateInvestigationHandler(context.Background(), CreateInvestigationHandlerArgs{
+		Title:                                "title",
+		Category:                             investigationCategoryAnomalyInvestigation,
+		Summary:                              "summary",
+		Markdown:                             "markdown",
+		AnomalyInvestigationStructuredOutput: structuredOutput,
+		TimeConfig:                           investigationAbsoluteTimeConfig(),
+	})
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	if captured == nil {
+		t.Fatalf("expected request to be captured")
+	}
+	if !reflect.DeepEqual(captured.AnomalyInvestigationStructuredOutput, structuredOutput) {
+		t.Fatalf("expected structured output to be forwarded unchanged, got %#v", captured.AnomalyInvestigationStructuredOutput)
+	}
+}
+
 func TestCreateInvestigationHandlerAddsEnvironmentAndNamespaceTags(t *testing.T) {
 	environment := "production"
 	namespace := "payments"
@@ -322,5 +376,51 @@ func investigationStructuredOutputFixture() *model.DeploymentVerificationStructu
 				Summary: "Error rate regressed after deployment",
 			},
 		},
+	}
+}
+
+func anomalyInvestigationStructuredOutputFixture() *model.AnomalyInvestigationStructuredOutput {
+	currentValue := 0.18
+	baselineValue := 0.02
+	count := int64(42)
+
+	return &model.AnomalyInvestigationStructuredOutput{
+		SignalSummary: "Elevated checkout 5XX rate after deploy",
+		SignalDetails: []model.AnomalyInvestigationSignalDetail{
+			{
+				ID:            "trace_5xx",
+				Summary:       "Checkout 5XX rate spiked above baseline",
+				CurrentValue:  &currentValue,
+				BaselineValue: &baselineValue,
+				Unit:          "percent",
+				Count:         &count,
+			},
+		},
+		RootCauseChain: []model.AnomalyInvestigationRootCauseLink{
+			{
+				Title:       "Checkout API timed out on payment dependency",
+				Summary:     "Timeouts in the payment dependency propagated into checkout failures",
+				ServiceName: "checkout-api",
+				Evidence: []model.AnomalyInvestigationEvidence{
+					{
+						ToolCallID: "call_trace_1",
+						Reasoning:  "Trace waterfall shows payment dependency timeouts before request failures",
+					},
+				},
+			},
+		},
+		SupportingEvidence: []model.AnomalyInvestigationEvidenceSection{
+			{
+				Title:   "Logs",
+				Summary: "Error logs increased during the anomaly window",
+				Evidence: []model.AnomalyInvestigationEvidence{
+					{
+						ToolCallID: "call_logs_1",
+						Reasoning:  "Production logs show payment timeout errors clustered with the spike",
+					},
+				},
+			},
+		},
+		ImpactSummary: "Checkout requests failed for 14 minutes.",
 	}
 }
