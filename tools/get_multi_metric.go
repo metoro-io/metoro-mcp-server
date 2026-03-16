@@ -36,7 +36,7 @@ func GetMultiMetricHandler(ctx context.Context, arguments GetMultiMetricHandlerA
 		StartTime: startTime,
 		EndTime:   endTime,
 		Metrics:   convertTimeseriesToAPITimeseries(arguments.Timeseries, startTime, endTime),
-		Formulas:  arguments.Formulas,
+		Formulas:  sanitizeFormulas(arguments.Formulas),
 	}
 
 	if len(arguments.Timeseries) == 0 {
@@ -56,6 +56,21 @@ func getMultiMetricMetoroCall(ctx context.Context, request model.GetMultiMetricR
 		return nil, fmt.Errorf("error marshaling metric request: %v", err)
 	}
 	return utils.MakeMetoroAPIRequest("POST", "metrics", bytes.NewBuffer(requestBody), utils.GetAPIRequirementsFromRequest(ctx))
+}
+
+func sanitizeFormulas(formulas []model.Formula) []model.Formula {
+	if len(formulas) == 0 {
+		return nil
+	}
+
+	sanitized := make([]model.Formula, len(formulas))
+	for i, formula := range formulas {
+		sanitized[i] = model.Formula{
+			Formula: formula.Formula,
+		}
+	}
+
+	return sanitized
 }
 
 func convertTimeseriesToAPITimeseries(timeseries []model.SingleTimeseriesRequest, startTime int64, endTime int64) []model.SingleMetricRequest {
