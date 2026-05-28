@@ -21,9 +21,11 @@ var _ MappedNullable = &Alert{}
 
 // Alert struct for Alert
 type Alert struct {
-	Metadata   MetadataObject   `json:"metadata"`
-	Type       *AlertType       `json:"type,omitempty"`
-	Timeseries TimeseriesConfig `json:"timeseries"`
+	Metadata MetadataObject `json:"metadata"`
+	Type     *AlertType     `json:"type,omitempty"`
+	// Whether Metoro should automatically start an AI investigation when this alert fires.
+	InvestigateOnFire *bool            `json:"investigateOnFire,omitempty"`
+	Timeseries        TimeseriesConfig `json:"timeseries"`
 }
 
 type _Alert Alert
@@ -103,6 +105,38 @@ func (o *Alert) SetType(v AlertType) {
 	o.Type = &v
 }
 
+// GetInvestigateOnFire returns the InvestigateOnFire field value if set, zero value otherwise.
+func (o *Alert) GetInvestigateOnFire() bool {
+	if o == nil || IsNil(o.InvestigateOnFire) {
+		var ret bool
+		return ret
+	}
+	return *o.InvestigateOnFire
+}
+
+// GetInvestigateOnFireOk returns a tuple with the InvestigateOnFire field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Alert) GetInvestigateOnFireOk() (*bool, bool) {
+	if o == nil || IsNil(o.InvestigateOnFire) {
+		return nil, false
+	}
+	return o.InvestigateOnFire, true
+}
+
+// HasInvestigateOnFire returns a boolean if a field has been set.
+func (o *Alert) HasInvestigateOnFire() bool {
+	if o != nil && !IsNil(o.InvestigateOnFire) {
+		return true
+	}
+
+	return false
+}
+
+// SetInvestigateOnFire gets a reference to the given bool and assigns it to the InvestigateOnFire field.
+func (o *Alert) SetInvestigateOnFire(v bool) {
+	o.InvestigateOnFire = &v
+}
+
 // GetTimeseries returns the Timeseries field value
 func (o *Alert) GetTimeseries() TimeseriesConfig {
 	if o == nil {
@@ -140,6 +174,9 @@ func (o Alert) ToMap() (map[string]interface{}, error) {
 	toSerialize["metadata"] = o.Metadata
 	if !IsNil(o.Type) {
 		toSerialize["type"] = o.Type
+	}
+	if !IsNil(o.InvestigateOnFire) {
+		toSerialize["investigateOnFire"] = o.InvestigateOnFire
 	}
 	toSerialize["timeseries"] = o.Timeseries
 	return toSerialize, nil
