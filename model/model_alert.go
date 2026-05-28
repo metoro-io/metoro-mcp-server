@@ -24,6 +24,8 @@ type Alert struct {
 	Metadata   MetadataObject   `json:"metadata"`
 	Type       *AlertType       `json:"type,omitempty"`
 	Timeseries TimeseriesConfig `json:"timeseries"`
+	// Whether the alert should be kept in training mode
+	IsTraining *bool `json:"isTraining,omitempty"`
 }
 
 type _Alert Alert
@@ -127,6 +129,38 @@ func (o *Alert) SetTimeseries(v TimeseriesConfig) {
 	o.Timeseries = v
 }
 
+// GetIsTraining returns the IsTraining field value if set, zero value otherwise.
+func (o *Alert) GetIsTraining() bool {
+	if o == nil || IsNil(o.IsTraining) {
+		var ret bool
+		return ret
+	}
+	return *o.IsTraining
+}
+
+// GetIsTrainingOk returns a tuple with the IsTraining field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Alert) GetIsTrainingOk() (*bool, bool) {
+	if o == nil || IsNil(o.IsTraining) {
+		return nil, false
+	}
+	return o.IsTraining, true
+}
+
+// HasIsTraining returns a boolean if a field has been set.
+func (o *Alert) HasIsTraining() bool {
+	if o != nil && !IsNil(o.IsTraining) {
+		return true
+	}
+
+	return false
+}
+
+// SetIsTraining gets a reference to the given bool and assigns it to the IsTraining field.
+func (o *Alert) SetIsTraining(v bool) {
+	o.IsTraining = &v
+}
+
 func (o Alert) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -142,6 +176,9 @@ func (o Alert) ToMap() (map[string]interface{}, error) {
 		toSerialize["type"] = o.Type
 	}
 	toSerialize["timeseries"] = o.Timeseries
+	if !IsNil(o.IsTraining) {
+		toSerialize["isTraining"] = o.IsTraining
+	}
 	return toSerialize, nil
 }
 
