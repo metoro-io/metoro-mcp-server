@@ -22,11 +22,10 @@ type CreateAlertHandlerArgs struct {
 	Threshold         float64                 `json:"threshold" jsonschema:"required,description=The threshold value for the alert. This is the value that will be used together with the the arithmetic condition to see whether the alert should be triggered or not. For example if you set the condition to GreaterThan and the threshold to 100 then the alert will fire if the value of the timeseries is greater than 100."`
 	DatapointsToAlarm int64                   `json:"datapoints_to_alarm" jsonschema:"required,description=The number of datapoints that need to breach the threshold for the alert to be triggered"`
 	EvaluationWindow  int64                   `json:"evaluation_window" jsonschema:"required,description=The evaluation window in number of datapoints. This is the number of datapoints that will be considered for evaluating the alert condition. For example if you set this to then the last 5 datapoints will be considered for evaluating the alert condition. This is useful for smoothing out spikes in the data and preventing false positives."`
-	IsTraining        bool                    `json:"is_training,omitempty" jsonschema:"description=Whether to create the alert in training mode. Training alerts are visible as training and suppress normal alert notifications while in training."`
 }
 
 func CreateAlertHandler(ctx context.Context, arguments CreateAlertHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	alert, err := createAlertFromTimeseries(ctx, arguments.AlertName, arguments.AlertDescription, arguments.Timeseries, arguments.Formula, arguments.Condition, arguments.Threshold, arguments.DatapointsToAlarm, arguments.EvaluationWindow, arguments.IsTraining)
+	alert, err := createAlertFromTimeseries(ctx, arguments.AlertName, arguments.AlertDescription, arguments.Timeseries, arguments.Formula, arguments.Condition, arguments.Threshold, arguments.DatapointsToAlarm, arguments.EvaluationWindow)
 	if err != nil {
 		return nil, fmt.Errorf("error creating alert properties: %v", err)
 	}
@@ -43,7 +42,7 @@ func CreateAlertHandler(ctx context.Context, arguments CreateAlertHandlerArgs) (
 }
 
 // TODO: Implement the conversion logic.
-func createAlertFromTimeseries(ctx context.Context, alertName, alertDescription string, timeseries []model.MetricSpecifier, formula model.Formula, condition string, threshold float64, datapointsToAlarm int64, evaluationWindow int64, isTraining bool) (model.Alert, error) {
+func createAlertFromTimeseries(ctx context.Context, alertName, alertDescription string, timeseries []model.MetricSpecifier, formula model.Formula, condition string, threshold float64, datapointsToAlarm int64, evaluationWindow int64) (model.Alert, error) {
 	// Create dummy time range for the last 10 minutes to validate the timeseries
 	endTime := time.Now().Unix()
 	startTime := endTime - 600 // 10 minutes ago
@@ -128,9 +127,6 @@ func createAlertFromTimeseries(ctx context.Context, alertName, alertDescription 
 				},
 			},
 		},
-	}
-	if isTraining {
-		alert.IsTraining = model.PtrBool(true)
 	}
 
 	return alert, nil
