@@ -126,7 +126,7 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 	},
 	{
 		Name:        "get_metric_names",
-		Description: "Get available metric names to query. These metric names can be used as MetricName argument for get_metric get_metric_metadata and get_timeseries_data and get_attribute_keys tools.",
+		Description: "Get available metric names to query. For broad exploration, leave fuzzy_string_match empty and use discovery=true to return compact metric prefix groups with counts and examples. Then call again with fuzzy_string_match set to a relevant prefix or family to get exact metric names for get_metric, get_metric_metadata, get_timeseries_data, and get_attribute_keys.",
 		Handler:     GetMetricNamesHandler,
 	},
 	{
@@ -181,16 +181,14 @@ And then you can call this tool (get_k8s_events) to get the specific events you 
 	},
 	{
 		Name: "create_dashboard",
-		Description: `Create a dashboard with the described metrics. This tool is useful for creating a dashboard with the metrics you are interested in.
-											  How to use this tool:
-					  First use get_metric_names tool to retrieve the available metric names which can be used as MetricName argument for this tool and then use get_attribute_keys tool to retrieve the available attribute keys and get_attribute_values for getting the values for the attribute key that you are interested in to use in Filter/ExcludeFilter keys or Splits argument for MetricChartWidget argument for this tool.
-					  You can also use Splits argument to group the metric data by the given metric attribute keys. Only use the attribute keys and values that are available for the MetricName that are returned from get_attribute_keys and get_attribute_values tools.`,
+		Description: `Create or update a dashboard using Metoro's public dashboard OpenAPI shape. Provide a top-level dashboard object with metadata.id, optional metadata.title and metadata.folderPath, content as a group widget, and optional settings. Reusing the same metadata.id updates the existing dashboard. Supported widget types are group, markdown, chart, stat, gauge, trace, and log.
+					  For chart/stat/gauge/trace/log widgets, use MetoroQL queries in the expression fields. First use get_metric_names, get_attribute_keys, and get_attribute_values to discover available metric names and attributes before writing metric queries or filters. Dashboard folder paths must start with /dashboards/ and end with /.`,
 		Handler: CreateDashboardHandler,
 	},
 	{
 		Name: "create_alert",
-		Description: `Create an alert with the described metrics. This tool is useful for creating an alert with the timeseries data that you are interested in. How to use this tool:
-					 NEVER GUESS the attribute keys and values that will be used for filtering or splits. Always use trace_querier or log_querier or metric_querier to understand the available attribute keys and values for the type of data/timeseries you are interested in. Ask these tools for the available attribute keys and values and metric names etc before using this tool.`,
+		Description: `Create an alert from a MetoroQL query. The MetoroQL is validated before the alert is created: invalid syntax, unknown metric names, invalid filter keys, invalid exclude filter keys, and invalid split keys are returned as tool errors so you can retry with a corrected query.
+					 NEVER GUESS metric names, attribute keys, or attribute values. Use get_metric_names, get_metric_metadata, get_attribute_keys, get_attribute_values, and get_timeseries_data to discover and validate the MetoroQL query before creating the alert.`,
 		Handler: CreateAlertHandler,
 	},
 	{

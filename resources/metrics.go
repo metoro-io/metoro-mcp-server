@@ -17,7 +17,8 @@ func MetricsResourceHandler() (*mcpgolang.ResourceResponse, error) {
 	request := model.FuzzyMetricsRequest{
 		StartTime:        twoHoursAgo.Unix(),
 		EndTime:          now.Unix(),
-		MetricFuzzyMatch: "",         // This will return all the metric names.
+		MetricFuzzyMatch: "",
+		Discovery:        true,       // Return metric groups so the resource stays compact.
 		Environments:     []string{}, // All environments
 	}
 	jsonData, err := json.Marshal(request)

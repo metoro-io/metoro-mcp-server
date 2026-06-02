@@ -14,19 +14,19 @@ import (
 )
 
 type CreateAlertHandlerArgs struct {
-	AlertName         string                  `json:"alert_name" jsonschema:"required,description=The name of the alert to create"`
-	AlertDescription  string                  `json:"alert_description" jsonschema:"required,description=The description of the alert to create"`
-	Timeseries        []model.MetricSpecifier `json:"timeseries" jsonschema:"required,description=Array of timeseries data to get. Each item in this array corresponds to a single timeseries. You can then use the formulas to combine these timeseries. If you only want to see the combination of timeseries via defining formulas and if you dont want to see the individual timeseries data when setting formulas you can set shouldNotReturn to true. For each timeseries make sure to set the type."`
-	Formula           model.Formula           `json:"formula" jsonschema:"description=Optional formula to combine timeseries. Formula should only consist of formulaIdentifier of the timeseries in the timeseries array. e.g. a + b + c if a b c appears in the formulaIdentifier of the timeseries array. You can ONLY do the following operations: Arithmetic operations:+ (for add) - (for substract) * (for multiply) / (for division) % (for modulus) ^ or ** (for exponent). Comparison: == != < > <= >= . Logical:! (for not) && (for AND) || (for OR). Conditional operations: ?: (ternary) e.g. (a || b) ? 1 : 0. Do not guess the operations. Just use these available ones!"`
-	Condition         string                  `json:"condition" jsonschema:"required,enum=GreaterThan,enum=LessThan,enum=GreaterThanOrEqual,enum=LessThanOrEqual,description=the arithmetic comparison to use to evaluate whether an alert is firing or not. This is used to determine whether the alert should be triggered based on the threshold value."`
-	Threshold         float64                 `json:"threshold" jsonschema:"required,description=The threshold value for the alert. This is the value that will be used together with the the arithmetic condition to see whether the alert should be triggered or not. For example if you set the condition to GreaterThan and the threshold to 100 then the alert will fire if the value of the timeseries is greater than 100."`
-	DatapointsToAlarm int64                   `json:"datapoints_to_alarm" jsonschema:"required,description=The number of datapoints that need to breach the threshold for the alert to be triggered"`
-	EvaluationWindow  int64                   `json:"evaluation_window" jsonschema:"required,description=The evaluation window in number of datapoints. This is the number of datapoints that will be considered for evaluating the alert condition. For example if you set this to then the last 5 datapoints will be considered for evaluating the alert condition. This is useful for smoothing out spikes in the data and preventing false positives."`
-	InvestigateOnFire bool                    `json:"investigate_on_fire" jsonschema:"description=Whether Metoro should automatically start an AI investigation when this alert fires. Defaults to false."`
+	AlertName         string  `json:"alert_name" jsonschema:"required,description=The name of the alert to create"`
+	AlertDescription  string  `json:"alert_description" jsonschema:"required,description=The description of the alert to create"`
+	MetoroQL          string  `json:"metoroql" jsonschema:"required,description=The MetoroQL query to evaluate for this alert. Use get_metric_names, get_attribute_keys, get_attribute_values, and get_timeseries_data to discover and validate query inputs before creating an alert."`
+	BucketSize        int64   `json:"bucket_size" jsonschema:"description=The size of each datapoint bucket in seconds. Defaults to 60 seconds when omitted."`
+	Condition         string  `json:"condition" jsonschema:"required,enum=GreaterThan,enum=LessThan,enum=GreaterThanOrEqual,enum=LessThanOrEqual,description=the arithmetic comparison to use to evaluate whether an alert is firing or not. This is used to determine whether the alert should be triggered based on the threshold value."`
+	Threshold         float64 `json:"threshold" jsonschema:"required,description=The threshold value for the alert. This is the value that will be used together with the the arithmetic condition to see whether the alert should be triggered or not. For example if you set the condition to GreaterThan and the threshold to 100 then the alert will fire if the value of the timeseries is greater than 100."`
+	DatapointsToAlarm int64   `json:"datapoints_to_alarm" jsonschema:"required,description=The number of datapoints that need to breach the threshold for the alert to be triggered"`
+	EvaluationWindow  int64   `json:"evaluation_window" jsonschema:"required,description=The evaluation window in number of datapoints. This is the number of datapoints that will be considered for evaluating the alert condition. For example if you set this to then the last 5 datapoints will be considered for evaluating the alert condition. This is useful for smoothing out spikes in the data and preventing false positives."`
+	InvestigateOnFire bool    `json:"investigate_on_fire" jsonschema:"description=Whether Metoro should automatically start an AI investigation when this alert fires. Defaults to false."`
 }
 
 func CreateAlertHandler(ctx context.Context, arguments CreateAlertHandlerArgs) (*mcpgolang.ToolResponse, error) {
-	alert, err := createAlertFromTimeseries(ctx, arguments.AlertName, arguments.AlertDescription, arguments.Timeseries, arguments.Formula, arguments.Condition, arguments.Threshold, arguments.DatapointsToAlarm, arguments.EvaluationWindow, arguments.InvestigateOnFire)
+	alert, err := createAlertFromMetoroQL(ctx, arguments.AlertName, arguments.AlertDescription, arguments.MetoroQL, arguments.BucketSize, arguments.Condition, arguments.Threshold, arguments.DatapointsToAlarm, arguments.EvaluationWindow, arguments.InvestigateOnFire)
 	if err != nil {
 		return nil, fmt.Errorf("error creating alert properties: %v", err)
 	}
@@ -37,27 +37,24 @@ func CreateAlertHandler(ctx context.Context, arguments CreateAlertHandlerArgs) (
 
 	resp, err := setAlertMetoroCall(ctx, newAlertRequest)
 	if err != nil {
-		return nil, fmt.Errorf("error setting dashboard: %v", err)
+		return nil, fmt.Errorf("error setting alert: %v", err)
 	}
 	return mcpgolang.NewToolResponse(mcpgolang.NewTextContent(fmt.Sprintf("%s", string(resp)))), nil
 }
 
-// TODO: Implement the conversion logic.
-func createAlertFromTimeseries(ctx context.Context, alertName, alertDescription string, timeseries []model.MetricSpecifier, formula model.Formula, condition string, threshold float64, datapointsToAlarm int64, evaluationWindow int64, investigateOnFire bool) (model.Alert, error) {
-	// Create dummy time range for the last 10 minutes to validate the timeseries
-	endTime := time.Now().Unix()
-	startTime := endTime - 600 // 10 minutes ago
-
-	// Convert MetricSpecifier to SingleTimeseriesRequest for validation
-	singleTimeseriesRequests := convertMetricSpecifierToSingleTimeseries(timeseries)
-
-	err := checkTimeseries(ctx, singleTimeseriesRequests, startTime, endTime)
-	if err != nil {
-		return model.Alert{}, err
+func createAlertFromMetoroQL(ctx context.Context, alertName, alertDescription, metoroQL string, bucketSize int64, condition string, threshold float64, datapointsToAlarm int64, evaluationWindow int64, investigateOnFire bool) (model.Alert, error) {
+	if metoroQL == "" {
+		return model.Alert{}, fmt.Errorf("metoroql is required")
 	}
-	metoroQlQueries, err := convertMetricSpecifierToMetoroQL(ctx, timeseries, []model.Formula{formula})
-	if err != nil {
-		return model.Alert{}, fmt.Errorf("error converting metric specifiers to MetoroQL: %v", err)
+	if bucketSize == 0 {
+		bucketSize = 60
+	}
+	if bucketSize < 0 {
+		return model.Alert{}, fmt.Errorf("bucket_size must be positive")
+	}
+
+	if err := validateCreateAlertMetoroQL(ctx, metoroQL, bucketSize); err != nil {
+		return model.Alert{}, err
 	}
 
 	// Convert condition string to OperatorType
@@ -75,23 +72,6 @@ func createAlertFromTimeseries(ctx context.Context, alertName, alertDescription 
 		return model.Alert{}, fmt.Errorf("invalid condition: %s", condition)
 	}
 
-	// Determine bucket size from the timeseries
-	bucketSize := int64(60) // default to 60 seconds
-	if len(timeseries) > 0 && timeseries[0].BucketSize > 0 {
-		bucketSize = timeseries[0].BucketSize
-	}
-
-	// Use the first MetoroQL query (usually the combined formula result)
-	query := ""
-	if len(metoroQlQueries) > 0 {
-		for _, q := range metoroQlQueries {
-			if q != "" {
-				query = q
-				break
-			}
-		}
-	}
-
 	// Create the alert
 	conditionType := model.STATIC
 	timeseriesType := model.TIMESERIES
@@ -105,7 +85,7 @@ func createAlertFromTimeseries(ctx context.Context, alertName, alertDescription 
 		Timeseries: model.TimeseriesConfig{
 			Expression: model.ExpressionConfig{
 				MetoroQLTimeseries: &model.MetoroQlTimeseries{
-					Query:      query,
+					Query:      metoroQL,
 					BucketSize: bucketSize,
 				},
 			},
@@ -134,6 +114,57 @@ func createAlertFromTimeseries(ctx context.Context, alertName, alertDescription 
 	}
 
 	return alert, nil
+}
+
+type metoroQLQueriesRequest struct {
+	Queries []string `json:"queries"`
+}
+
+type metoroQLQueryResponse struct {
+	MetricSpecifiers []model.MetricSpecifier `json:"metricSpecifiers"`
+	Formulas         []model.Formula         `json:"formulas"`
+}
+
+func validateCreateAlertMetoroQL(ctx context.Context, metoroQL string, bucketSize int64) error {
+	metricSpecifiers, err := convertMetoroQLToMetricSpecifiers(ctx, metoroQL)
+	if err != nil {
+		return fmt.Errorf("invalid MetoroQL query: %v", err)
+	}
+
+	endTime := time.Now().Unix()
+	startTime := endTime - 3600
+
+	singleTimeseriesRequests := convertMetricSpecifierToSingleTimeseries(metricSpecifiers)
+	for i := range singleTimeseriesRequests {
+		if singleTimeseriesRequests[i].BucketSize == 0 {
+			singleTimeseriesRequests[i].BucketSize = bucketSize
+		}
+	}
+
+	if err := checkTimeseries(ctx, singleTimeseriesRequests, startTime, endTime); err != nil {
+		return fmt.Errorf("invalid MetoroQL query: %v", err)
+	}
+	return nil
+}
+
+func convertMetoroQLToMetricSpecifiers(ctx context.Context, metoroQL string) ([]model.MetricSpecifier, error) {
+	req := metoroQLQueriesRequest{Queries: []string{metoroQL}}
+	requestBody, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling MetoroQL conversion request: %v", err)
+	}
+	resp, err := utils.MakeMetoroAPIRequest("POST", "metoroql/convert/metoroqlToMetricSpecifier", bytes.NewBuffer(requestBody), utils.GetAPIRequirementsFromRequest(ctx))
+	if err != nil {
+		return nil, fmt.Errorf("error making MetoroQL conversion request: %v", err)
+	}
+	var metoroQLResp metoroQLQueryResponse
+	if err := json.Unmarshal(resp, &metoroQLResp); err != nil {
+		return nil, fmt.Errorf("error unmarshaling MetoroQL conversion response: %v", err)
+	}
+	if len(metoroQLResp.MetricSpecifiers) == 0 {
+		return nil, fmt.Errorf("no metric specifiers returned from MetoroQL conversion")
+	}
+	return metoroQLResp.MetricSpecifiers, nil
 }
 
 func convertMetricSpecifierToMetoroQL(ctx context.Context, metricSpecs []model.MetricSpecifier, formulas []model.Formula) ([]string, error) {
@@ -182,6 +213,7 @@ func convertMetricSpecifierToSingleTimeseries(metricSpecs []model.MetricSpecifie
 			ExcludeRegexes:    spec.ExcludeRegexes,
 			BucketSize:        spec.BucketSize,
 			Functions:         spec.Functions,
+			JsonPath:          spec.JsonPath,
 			ShouldNotReturn:   spec.ShouldNotReturn,
 			FormulaIdentifier: "",
 		}
