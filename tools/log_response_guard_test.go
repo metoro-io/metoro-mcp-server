@@ -119,6 +119,65 @@ func TestTrimLogsPayloadTextLeavesNonLogPayloadUnchanged(t *testing.T) {
 	}
 }
 
+func TestTrimLogsPayloadTextPreservesTopLevelFields(t *testing.T) {
+	rawPayload := map[string]any{
+		"logs": []model.Log{
+			{
+				Message: strings.Repeat("m", logMessageLengthLimit+1),
+			},
+		},
+		"cursor": "next-page",
+		"metadata": map[string]any{
+			"source": "context",
+		},
+	}
+
+	raw, err := json.Marshal(rawPayload)
+	if err != nil {
+		t.Fatalf("failed to marshal test response: %v", err)
+	}
+
+	trimmed, changed, err := trimLogsPayloadText(string(raw))
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if !changed {
+		t.Fatalf("expected payload to be changed")
+	}
+
+	var parsed map[string]json.RawMessage
+	if err := json.Unmarshal([]byte(trimmed), &parsed); err != nil {
+		t.Fatalf("failed to unmarshal trimmed payload: %v", err)
+	}
+
+	var cursor string
+	if err := json.Unmarshal(parsed["cursor"], &cursor); err != nil {
+		t.Fatalf("failed to unmarshal cursor: %v", err)
+	}
+	if cursor != "next-page" {
+		t.Fatalf("expected cursor to be preserved, got %q", cursor)
+	}
+
+	var metadata map[string]string
+	if err := json.Unmarshal(parsed["metadata"], &metadata); err != nil {
+		t.Fatalf("failed to unmarshal metadata: %v", err)
+	}
+	if metadata["source"] != "context" {
+		t.Fatalf("expected metadata source to be preserved, got %q", metadata["source"])
+	}
+
+	var logs []model.Log
+	if err := json.Unmarshal(parsed["logs"], &logs); err != nil {
+		t.Fatalf("failed to unmarshal logs: %v", err)
+	}
+	if len(logs) != 1 {
+		t.Fatalf("expected one log, got %d", len(logs))
+	}
+	if !strings.HasSuffix(logs[0].Message, truncatedValueSuffix) {
+		t.Fatalf("expected log message to include truncation suffix")
+	}
+}
+
 func TestLogsToolResponseGuardFitsOversizedLogsWithDynamicTruncation(t *testing.T) {
 	const maxTokens = 900
 
@@ -142,7 +201,14 @@ func TestLogsToolResponseGuardFitsOversizedLogsWithDynamicTruncation(t *testing.
 		}
 	}
 
-	raw, err := json.Marshal(logsResponse)
+	rawPayload := map[string]any{
+		"logs":   logsResponse.Logs,
+		"cursor": "next-page",
+		"metadata": map[string]any{
+			"source": "context",
+		},
+	}
+	raw, err := json.Marshal(rawPayload)
 	if err != nil {
 		t.Fatalf("failed to marshal test response: %v", err)
 	}
@@ -176,16 +242,37 @@ func TestLogsToolResponseGuardFitsOversizedLogsWithDynamicTruncation(t *testing.
 		t.Fatalf("expected guarded response to fit under %d tokens, got %d", maxTokens, tokenCount)
 	}
 
-	var parsed model.GetLogsResponse
+	var parsed map[string]json.RawMessage
 	if err := json.Unmarshal([]byte(guarded.Content[0].TextContent.Text), &parsed); err != nil {
 		t.Fatalf("failed to unmarshal guarded payload: %v", err)
 	}
-	if len(parsed.Logs) != len(logsResponse.Logs) {
-		t.Fatalf("expected %d logs to be preserved, got %d", len(logsResponse.Logs), len(parsed.Logs))
+
+	var cursor string
+	if err := json.Unmarshal(parsed["cursor"], &cursor); err != nil {
+		t.Fatalf("failed to unmarshal cursor: %v", err)
+	}
+	if cursor != "next-page" {
+		t.Fatalf("expected cursor to be preserved, got %q", cursor)
+	}
+
+	var metadata map[string]string
+	if err := json.Unmarshal(parsed["metadata"], &metadata); err != nil {
+		t.Fatalf("failed to unmarshal metadata: %v", err)
+	}
+	if metadata["source"] != "context" {
+		t.Fatalf("expected metadata source to be preserved, got %q", metadata["source"])
+	}
+
+	var parsedLogs []model.Log
+	if err := json.Unmarshal(parsed["logs"], &parsedLogs); err != nil {
+		t.Fatalf("failed to unmarshal logs: %v", err)
+	}
+	if len(parsedLogs) != len(logsResponse.Logs) {
+		t.Fatalf("expected %d logs to be preserved, got %d", len(logsResponse.Logs), len(parsedLogs))
 	}
 
 	dynamicallyTrimmedMessage := false
-	for _, log := range parsed.Logs {
+	for _, log := range parsedLogs {
 		if !strings.HasSuffix(log.Message, truncatedValueSuffix) {
 			t.Fatalf("expected dynamically fitted log message to include truncation suffix")
 		}

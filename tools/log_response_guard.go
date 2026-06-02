@@ -89,12 +89,12 @@ func trimAndFitLogsToolResponse(response *mcpgolang.ToolResponse, maxTokens int)
 }
 
 func fitLogsContentToToolResponseBudget(content *mcpgolang.Content, response *mcpgolang.ToolResponse, maxTokens int) error {
-	logsResponse, ok := parseLogsPayloadText(content.TextContent.Text)
+	logsPayload, ok := parseLogsPayloadText(content.TextContent.Text)
 	if !ok {
 		return nil
 	}
 
-	if err := setLogsContentText(content, logsResponse); err != nil {
+	if err := setLogsContentText(content, logsPayload); err != nil {
 		return err
 	}
 
@@ -107,7 +107,7 @@ func fitLogsContentToToolResponseBudget(content *mcpgolang.Content, response *mc
 			return nil
 		}
 
-		field := findLongestShrinkableLogField(&logsResponse)
+		field := findLongestShrinkableLogField(&logsPayload.logsResponse)
 		if field == nil {
 			return nil
 		}
@@ -123,14 +123,14 @@ func fitLogsContentToToolResponseBudget(content *mcpgolang.Content, response *mc
 		}
 
 		field.set(truncated)
-		if err := setLogsContentText(content, logsResponse); err != nil {
+		if err := setLogsContentText(content, logsPayload); err != nil {
 			return err
 		}
 	}
 }
 
-func setLogsContentText(content *mcpgolang.Content, logsResponse model.GetLogsResponse) error {
-	serialized, err := json.Marshal(logsResponse)
+func setLogsContentText(content *mcpgolang.Content, logsPayload *logsPayloadText) error {
+	serialized, err := logsPayload.marshal()
 	if err != nil {
 		return fmt.Errorf("failed to marshal trimmed logs response: %w", err)
 	}
@@ -207,17 +207,17 @@ func trimLargeLogFieldsInToolResponse(_ string, response *mcpgolang.ToolResponse
 }
 
 func trimLogsPayloadText(raw string) (string, bool, error) {
-	logsResponse, ok := parseLogsPayloadText(raw)
+	logsPayload, ok := parseLogsPayloadText(raw)
 	if !ok {
 		return raw, false, nil
 	}
 
-	changed := trimLogsModelResponse(&logsResponse)
+	changed := trimLogsModelResponse(&logsPayload.logsResponse)
 	if !changed {
 		return raw, false, nil
 	}
 
-	serialized, err := json.Marshal(logsResponse)
+	serialized, err := logsPayload.marshal()
 	if err != nil {
 		return "", false, fmt.Errorf("failed to marshal trimmed logs response: %w", err)
 	}
@@ -225,21 +225,48 @@ func trimLogsPayloadText(raw string) (string, bool, error) {
 	return string(serialized), true, nil
 }
 
-func parseLogsPayloadText(raw string) (model.GetLogsResponse, bool) {
+type logsPayloadText struct {
+	rawObject    map[string]json.RawMessage
+	logsResponse model.GetLogsResponse
+}
+
+func (payload *logsPayloadText) marshal() (string, error) {
+	logs, err := json.Marshal(payload.logsResponse.Logs)
+	if err != nil {
+		return "", err
+	}
+
+	payload.rawObject["logs"] = logs
+
+	serialized, err := json.Marshal(payload.rawObject)
+	if err != nil {
+		return "", err
+	}
+
+	return string(serialized), nil
+}
+
+func parseLogsPayloadText(raw string) (*logsPayloadText, bool) {
 	var rawObject map[string]json.RawMessage
 	if err := json.Unmarshal([]byte(raw), &rawObject); err != nil {
-		return model.GetLogsResponse{}, false
+		return nil, false
 	}
-	if _, ok := rawObject["logs"]; !ok {
-		return model.GetLogsResponse{}, false
-	}
-
-	var logsResponse model.GetLogsResponse
-	if err := json.Unmarshal([]byte(raw), &logsResponse); err != nil {
-		return model.GetLogsResponse{}, false
+	rawLogs, ok := rawObject["logs"]
+	if !ok {
+		return nil, false
 	}
 
-	return logsResponse, true
+	var logs []model.Log
+	if err := json.Unmarshal(rawLogs, &logs); err != nil {
+		return nil, false
+	}
+
+	return &logsPayloadText{
+		rawObject: rawObject,
+		logsResponse: model.GetLogsResponse{
+			Logs: logs,
+		},
+	}, true
 }
 
 func trimLogsModelResponse(logsResponse *model.GetLogsResponse) bool {
