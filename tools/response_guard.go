@@ -52,15 +52,8 @@ func NewToolResponseGuard(modifier ToolResponseModifier, options ToolResponseGua
 			}
 		}
 
-		maxTokens := options.MaxTokens
-		if maxTokens <= 0 {
-			maxTokens = getGlobalToolResponseMaxTokens()
-		}
-
-		tooLargeMessage := options.TooLargeErrorMessage
-		if tooLargeMessage == "" {
-			tooLargeMessage = toolResponseTooLargeErrorMessage
-		}
+		maxTokens := resolveToolResponseMaxTokens(options)
+		tooLargeMessage := resolveToolResponseTooLargeMessage(options)
 
 		tokenCount, err := estimateToolResponseTokens(guardedResponse)
 		if err != nil {
@@ -73,6 +66,22 @@ func NewToolResponseGuard(modifier ToolResponseModifier, options ToolResponseGua
 
 		return guardedResponse, nil
 	}
+}
+
+func resolveToolResponseMaxTokens(options ToolResponseGuardOptions) int {
+	if options.MaxTokens > 0 {
+		return options.MaxTokens
+	}
+
+	return getGlobalToolResponseMaxTokens()
+}
+
+func resolveToolResponseTooLargeMessage(options ToolResponseGuardOptions) string {
+	if options.TooLargeErrorMessage != "" {
+		return options.TooLargeErrorMessage
+	}
+
+	return toolResponseTooLargeErrorMessage
 }
 
 func getGlobalToolResponseMaxTokens() int {
