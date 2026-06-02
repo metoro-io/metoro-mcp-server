@@ -78,13 +78,16 @@ func TestGetMetricNamesHandlerUsesAbsoluteTimeConfig(t *testing.T) {
 	if captured.MetricFuzzyMatch != fuzzyMatch {
 		t.Fatalf("expected metric fuzzy match %q, got %q", fuzzyMatch, captured.MetricFuzzyMatch)
 	}
+	if captured.Discovery {
+		t.Fatalf("expected fuzzy metric-name lookup to use discovery=false by default")
+	}
 	expectedEnvironments := []string{"prod", "staging"}
 	if strings.Join(captured.Environments, ",") != strings.Join(expectedEnvironments, ",") {
 		t.Fatalf("expected environments %v, got %v", expectedEnvironments, captured.Environments)
 	}
 }
 
-func TestGetMetricNamesHandlerOmitsFuzzyMatchByDefault(t *testing.T) {
+func TestGetMetricNamesHandlerUsesDiscoveryForBroadRequestsByDefault(t *testing.T) {
 	start := "2026-02-19T10:00:00Z"
 	end := "2026-02-19T10:05:00Z"
 
@@ -135,6 +138,30 @@ func TestGetMetricNamesHandlerOmitsFuzzyMatchByDefault(t *testing.T) {
 	}
 	if captured.MetricFuzzyMatch != "" {
 		t.Fatalf("expected empty metric fuzzy match, got %q", captured.MetricFuzzyMatch)
+	}
+	if !captured.Discovery {
+		t.Fatalf("expected broad metric-name lookup to use discovery=true by default")
+	}
+}
+
+func TestGetMetricNamesHandlerRejectsBroadNonDiscoveryRequests(t *testing.T) {
+	start := "2026-02-19T10:00:00Z"
+	end := "2026-02-19T10:05:00Z"
+	discovery := false
+
+	_, err := GetMetricNamesHandler(context.Background(), GetMetricNamesHandlerArgs{
+		TimeConfig: utils.TimeConfig{
+			Type:      utils.AbsoluteTimeRange,
+			StartTime: &start,
+			EndTime:   &end,
+		},
+		Discovery: &discovery,
+	})
+	if err == nil {
+		t.Fatalf("expected error for broad non-discovery request")
+	}
+	if !strings.Contains(err.Error(), "set discovery=true") {
+		t.Fatalf("expected error to mention discovery=true, got %v", err)
 	}
 }
 

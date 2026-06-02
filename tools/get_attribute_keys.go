@@ -13,7 +13,7 @@ import (
 )
 
 type GetAttributeKeysHandlerArgs struct {
-	Type       model.MetricType `json:"type" jsonschema:"required,description=The type of attribute keys to get. Either 'logs' or 'trace' or 'metric' or 'kubernetes_resource'"`
+	Type       model.MetricType `json:"type" jsonschema:"required,description=The type of attribute keys to get. Either 'logs' or 'trace' or 'metric' or 'kubernetes_resource'. The alias 'kubernetes_resources' is also accepted."`
 	TimeConfig utils.TimeConfig `json:"timeConfig" jsonschema:"required,description=The time period to get the possible attribute keys. e.g. if you want to get the possible values for the last 5 minutes you would set time_period=5 and time_window=Minutes. You can also set an absoulute time range by setting start_time and end_time"`
 	MetricName string           `json:"metricName" jsonschema:"description=The name of the metric to get the possible attribute keys for. This is required if type is 'metric'"`
 }
@@ -24,7 +24,9 @@ func GetAttributeKeysHandler(ctx context.Context, arguments GetAttributeKeysHand
 		return nil, fmt.Errorf("error calculating time range: %v", err)
 	}
 
-	if arguments.Type == model.Metric {
+	metricType := normalizeMetricType(arguments.Type)
+
+	if metricType == model.Metric {
 		if arguments.MetricName == "" {
 			return nil, fmt.Errorf("metricName is required when type is 'metric'")
 		}
@@ -44,7 +46,7 @@ func GetAttributeKeysHandler(ctx context.Context, arguments GetAttributeKeysHand
 	}
 
 	request := model.MultiMetricAttributeKeysRequest{
-		Type:   string(arguments.Type),
+		Type:   string(metricType),
 		Metric: &metricAttr,
 	}
 	jsonBody, err := json.Marshal(request)
@@ -62,12 +64,20 @@ func GetAttributeKeysHandler(ctx context.Context, arguments GetAttributeKeysHand
 }
 
 func CheckMetric(ctx context.Context, metricName string, startTime, endTime int64) error {
+	if strings.TrimSpace(metricName) == "" {
+		return fmt.Errorf("metricName is required when type is 'metric'")
+	}
+
 	request := model.FuzzyMetricsRequest{
 		StartTime:        startTime,
 		EndTime:          endTime,
-		MetricFuzzyMatch: "", // This will return all the metric names.
+		MetricFuzzyMatch: metricName,
+		Discovery:        false,
 	}
 	metricNamesResp, err := getMetricNamesMetoroCall(ctx, request)
+	if err != nil {
+		return fmt.Errorf("error getting metric names: %v", err)
+	}
 
 	metricNames := model.GetMetricNamesResponse{}
 	err = json.Unmarshal(metricNamesResp, &metricNames)

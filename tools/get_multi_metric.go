@@ -78,16 +78,23 @@ func convertTimeseriesToAPITimeseries(timeseries []model.SingleTimeseriesRequest
 
 	for i, ts := range timeseries {
 		// Convert Filter slice to map format for internal API
+		metricType := normalizeMetricType(ts.Type)
 		filters := model.FiltersToMap(ts.Filters)
 		excludeFilters := model.FiltersToMap(ts.ExcludeFilters)
+		splits := ts.Splits
+		if metricType == model.KubernetesResource {
+			filters = normalizeKubernetesAttributeMap(filters)
+			excludeFilters = normalizeKubernetesAttributeMap(excludeFilters)
+			splits = normalizeKubernetesAttributeList(splits)
+		}
 
 		apiRequest := model.SingleMetricRequest{
-			Type:              string(ts.Type),
+			Type:              string(metricType),
 			ShouldNotReturn:   ts.ShouldNotReturn,
 			FormulaIdentifier: ts.FormulaIdentifier,
 		}
 
-		switch ts.Type {
+		switch metricType {
 		case model.Metric:
 			apiRequest.Metric = &model.GetMetricRequest{
 				StartTime:      startTime,
@@ -95,7 +102,7 @@ func convertTimeseriesToAPITimeseries(timeseries []model.SingleTimeseriesRequest
 				MetricName:     ts.MetricName,
 				Filters:        filters,
 				ExcludeFilters: excludeFilters,
-				Splits:         ts.Splits,
+				Splits:         splits,
 				Aggregation:    ts.Aggregation,
 				Functions:      ts.Functions,
 				//Functions:      ts.Metric.Functions,
@@ -110,7 +117,7 @@ func convertTimeseriesToAPITimeseries(timeseries []model.SingleTimeseriesRequest
 				EndTime:        endTime,
 				Filters:        filters,
 				ExcludeFilters: excludeFilters,
-				Splits:         ts.Splits,
+				Splits:         splits,
 				Aggregate:      ts.Aggregation,
 				BucketSize:     ts.BucketSize,
 				Functions:      ts.Functions,
@@ -135,7 +142,7 @@ func convertTimeseriesToAPITimeseries(timeseries []model.SingleTimeseriesRequest
 					//Environments:   ts.Environments,
 				},
 				Functions:  ts.Functions,
-				Splits:     ts.Splits,
+				Splits:     splits,
 				BucketSize: ts.BucketSize,
 				//Functions:  ts.Functions,
 			}
@@ -145,7 +152,7 @@ func convertTimeseriesToAPITimeseries(timeseries []model.SingleTimeseriesRequest
 				EndTime:        endTime,
 				Filters:        filters,
 				ExcludeFilters: excludeFilters,
-				Splits:         ts.Splits,
+				Splits:         splits,
 				BucketSize:     ts.BucketSize,
 				Functions:      ts.Functions,
 				JsonPath:       ts.JsonPath,
@@ -159,6 +166,13 @@ func convertTimeseriesToAPITimeseries(timeseries []model.SingleTimeseriesRequest
 }
 
 func CheckAttributes(ctx context.Context, requestType model.MetricType, filters map[string][]string, excludeFilters map[string][]string, splits []string, metricRequest *model.GetMetricAttributesRequest) error {
+	requestType = normalizeMetricType(requestType)
+	if requestType == model.KubernetesResource {
+		filters = normalizeKubernetesAttributeMap(filters)
+		excludeFilters = normalizeKubernetesAttributeMap(excludeFilters)
+		splits = normalizeKubernetesAttributeList(splits)
+	}
+
 	// Check whether the attributes given are valid.
 	request := model.MultiMetricAttributeKeysRequest{
 		Type:   string(requestType),
@@ -184,18 +198,27 @@ func CheckAttributes(ctx context.Context, requestType model.MetricType, filters 
 
 	// Check whether the filters given are valid.
 	for key, _ := range filters {
+		if requestType == model.KubernetesResource && isKubernetesJSONPathFilter(key) {
+			continue
+		}
 		if !slices.Contains(attributeKeys.Attributes, key) {
 			return fmt.Errorf("invalid filter key: %s. Valid filter keys are: %s. Please try again with a valid key", key, attributesAsString)
 		}
 	}
 
 	for key, _ := range excludeFilters {
+		if requestType == model.KubernetesResource && isKubernetesJSONPathFilter(key) {
+			continue
+		}
 		if !slices.Contains(attributeKeys.Attributes, key) {
 			return fmt.Errorf("invalid exclude filter key: %s. Valid keys are: %s. Please try again with a valid key", key, attributesAsString)
 		}
 	}
 
 	for _, split := range splits {
+		if requestType == model.KubernetesResource && isKubernetesJSONPathFilter(split) {
+			continue
+		}
 		if !slices.Contains(attributeKeys.Attributes, split) {
 			return fmt.Errorf("invalid split key: %s. Valid keys are: %s. Please try again with a valid key", split, attributesAsString)
 		}
@@ -206,16 +229,23 @@ func CheckAttributes(ctx context.Context, requestType model.MetricType, filters 
 func checkTimeseries(ctx context.Context, timeseries []model.SingleTimeseriesRequest, startTime, endTime int64) error {
 	for _, ts := range timeseries {
 		// Convert Filter slice to map format for CheckAttributes
+		metricType := normalizeMetricType(ts.Type)
 		filters := model.FiltersToMap(ts.Filters)
 		excludeFilters := model.FiltersToMap(ts.ExcludeFilters)
+		splits := ts.Splits
+		if metricType == model.KubernetesResource {
+			filters = normalizeKubernetesAttributeMap(filters)
+			excludeFilters = normalizeKubernetesAttributeMap(excludeFilters)
+			splits = normalizeKubernetesAttributeList(splits)
+		}
 
-		switch ts.Type {
+		switch metricType {
 		case model.Metric:
 			err := CheckMetric(ctx, ts.MetricName, startTime, endTime)
 			if err != nil {
 				return err
 			}
-			err = CheckAttributes(ctx, ts.Type, filters, excludeFilters, ts.Splits, &model.GetMetricAttributesRequest{
+			err = CheckAttributes(ctx, metricType, filters, excludeFilters, splits, &model.GetMetricAttributesRequest{
 				StartTime:  startTime,
 				EndTime:    endTime,
 				MetricName: ts.MetricName,
@@ -224,12 +254,17 @@ func checkTimeseries(ctx context.Context, timeseries []model.SingleTimeseriesReq
 				return err
 			}
 		case model.Trace:
-			err := CheckAttributes(ctx, ts.Type, filters, excludeFilters, ts.Splits, nil)
+			err := CheckAttributes(ctx, metricType, filters, excludeFilters, splits, nil)
 			if err != nil {
 				return err
 			}
 		case model.Logs:
-			err := CheckAttributes(ctx, ts.Type, filters, excludeFilters, ts.Splits, nil)
+			err := CheckAttributes(ctx, metricType, filters, excludeFilters, splits, nil)
+			if err != nil {
+				return err
+			}
+		case model.KubernetesResource:
+			err := CheckAttributes(ctx, metricType, filters, excludeFilters, splits, nil)
 			if err != nil {
 				return err
 			}
